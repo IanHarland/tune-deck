@@ -1,0 +1,12 @@
+.git/
+.gitignore
+.venv/
+__pycache__/
+*.pyc
+.DS_Store
+tunedeck.db
+frontend/node_modules/
+frontend/dist/
+jazz_standard_picker_handoff.md
+CLAUDE.md
+README.md
