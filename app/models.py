@@ -58,9 +58,12 @@ class Tune(Base):
 
     ireal_style = Column(Text, nullable=True)
     ireal_url = Column(Text, nullable=True)
+    time_signature = Column(Text, nullable=True)
 
     # fake-book chart references: [{"book": "The Real Book, Vol. 1", "page": "36"}]
     charts = Column(JSON, nullable=False, default=list)
+    # mode tags, e.g. ["beginner"], ["hard"]
+    tags = Column(JSON, nullable=False, default=list)
 
     # seed priors (never change after seeding) ...
     obscurity_seed = Column(Float, nullable=False, default=50)
@@ -98,7 +101,9 @@ class Tune(Base):
             "additional_feels": self.additional_feels or [],
             "ireal_style": self.ireal_style,
             "ireal_url": self.ireal_url,
+            "time_signature": self.time_signature,
             "charts": self.charts or [],
+            "tags": self.tags or [],
             "obscurity_score": round(self.obscurity_score, 1),
             "difficulty_score": round(self.difficulty_score, 1),
             "obscurity_votes": self.obscurity_votes,

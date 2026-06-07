@@ -41,6 +41,11 @@ _ADDITIVE_COLUMNS = {
     "last_played_at": "ALTER TABLE tunes ADD COLUMN last_played_at TIMESTAMP",
     # JSON storage is TEXT on SQLite, native JSON on Postgres; TEXT works for both.
     "charts": "ALTER TABLE tunes ADD COLUMN charts TEXT",
+    "tags": {
+        "sqlite": "ALTER TABLE tunes ADD COLUMN tags TEXT",
+        "postgresql": "ALTER TABLE tunes ADD COLUMN tags JSON",
+    },
+    "time_signature": "ALTER TABLE tunes ADD COLUMN time_signature TEXT",
     "deleted": {
         "sqlite": "ALTER TABLE tunes ADD COLUMN deleted BOOLEAN NOT NULL DEFAULT 0",
         "postgresql": "ALTER TABLE tunes ADD COLUMN deleted BOOLEAN NOT NULL DEFAULT false",
@@ -99,7 +104,9 @@ def _seed(session: Session) -> None:
             tune.additional_feels = r.get("additional_feels", [])
             tune.ireal_style = r.get("ireal_style")
             tune.ireal_url = r.get("ireal_url")
+            tune.time_signature = r.get("time_signature")
             tune.charts = r.get("charts", [])
+            tune.tags = r.get("tags", [])
             tune.obscurity_seed = r["obscurity_score"]
             tune.difficulty_seed = r["difficulty_score"]
             if tune.obscurity_votes == 0:
@@ -119,7 +126,9 @@ def _seed(session: Session) -> None:
             additional_feels=r.get("additional_feels", []),
             ireal_style=r.get("ireal_style"),
             ireal_url=r.get("ireal_url"),
+            time_signature=r.get("time_signature"),
             charts=r.get("charts", []),
+            tags=r.get("tags", []),
             obscurity_seed=obs, difficulty_seed=dif,
             obscurity_score=obs, difficulty_score=dif,
         ))

@@ -5,6 +5,8 @@ interface Props {
   rightLabel: string;
   label: string;
   accent?: string;
+  enabled?: boolean; // when an onToggle is provided
+  onToggle?: () => void;
 }
 
 export default function Slider({
@@ -14,18 +16,31 @@ export default function Slider({
   rightLabel,
   label,
   accent = "var(--gold)",
+  enabled = true,
+  onToggle,
 }: Props) {
   return (
-    <div className="slider">
+    <div className={`slider ${enabled ? "" : "slider-off"}`}>
       <div className="slider-head">
         <span className="slider-label">{label}</span>
-        <span className="slider-value">{Math.round(value)}</span>
+        {onToggle ? (
+          <button
+            type="button"
+            className={`slider-toggle ${enabled ? "on" : "off"}`}
+            onClick={onToggle}
+          >
+            {enabled ? Math.round(value) : "off"}
+          </button>
+        ) : (
+          <span className="slider-value">{Math.round(value)}</span>
+        )}
       </div>
       <input
         type="range"
         min={0}
         max={100}
         value={value}
+        disabled={!enabled}
         style={{ accentColor: accent }}
         onChange={(e) => onChange(Number(e.target.value))}
       />

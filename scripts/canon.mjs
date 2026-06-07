@@ -129,3 +129,35 @@ export const VERY_HARD = [ // ~93
   "Central Park West", "Gnid", "Segment", "Tricotism", "Dance Of The Infidels",
   "Trane Changes", "Have You Met Miss Jones", "Passion Dance", "Punjab",
 ];
+
+// --- mode tags ----------------------------------------------------------- //
+// BEGINNER MODE leans hard on these — the 50 most-called jam standards
+// (learnjazzstandards "50 you need to know"). HARD MODE reuses ADVANCED +
+// VERY_HARD above (common but difficult).
+export const BEGINNER = [
+  "All of Me", "All The Things You Are", "Alone Together", "Autumn Leaves",
+  "Billie's Bounce", "Black Orpheus", "Blue Bossa", "Body and Soul",
+  "But Not For Me", "Bye Bye Blackbird", "Cherokee", "Confirmation",
+  "Days of Wine and Roses", "Doxy", "Fly Me To The Moon", "Footprints", "Four",
+  "Have You Met Miss Jones", "How High The Moon", "I Hear a Rhapsody",
+  "I Love You", "I Remember You", "I'll Remember April", "I'm Old Fashioned",
+  "If I Should Lose You", "If I Were A Bell", "In A Mellow Tone",
+  "In A Sentimental Mood", "It Could Happen To You", "Just Friends", "Misty",
+  "My Funny Valentine", "Night and Day", "Oleo", "On Green Dolphin Street",
+  "Recorda Me", "Satin Doll", "Stella By Starlight", "Scrapple From The Apple",
+  "So What", "Solar", "St. Thomas", "Sweet Georgia Brown", "Take The A Train",
+  "The Girl From Ipanema", "There Is No Greater Love",
+  "There Will Never Be Another You", "Up Jumped Spring",
+  "What Is This Thing Called Love", "Yesterdays", "Blue Monk", "All Blues",
+  "Mr. P.C.", "Song for My Father", "Summertime", "Watermelon Man",
+];
+
+// Tunes not in the owner's iReal library that the app still needs (Smalls mode).
+export const MANUAL_TUNES = [
+  {
+    title: "Firm Roots",
+    composer: "Cedar Walton",
+    original_key: "Eb",
+    feel: "medium_swing",
+  },
+];

@@ -74,9 +74,20 @@ stable natural key so re-seeding doesn't wipe crowd ratings).
 The app has 5 feel buckets: `ballad`, `medium_swing`, `up`, `latin`, `waltz`.
 iReal has ~90 style strings; we map jazz-relevant ones and **drop pure
 pop/rock/country/disco/reggae/soul/funk/folk/hiphop**. The original iReal style
-is preserved in `ireal_style` so we can re-bucket later without re-parsing.
-Borderline styles get a primary `feel` + `additional_feels` (e.g. Medium Up
-Swing → up + medium_swing).
+is preserved in `ireal_style`. Borderline styles get a primary `feel` +
+`additional_feels` (e.g. Medium Up Swing → up + medium_swing).
+
+**Waltz is detected systemically from the TIME SIGNATURE**, not the style label:
+`build_seed.mjs` de-obfuscates iReal's scrambled chord blob (50-char-segment
+swap, see `unscramble()`) to read the `T34` token; any 3/x tune is forced to
+`feel: waltz` (and `time_signature` is stored). This fixes tunes iReal labels as
+swing but are actually in 3 (Song for My Lady, Up Jumped Spring, …).
+
+### Mode tags
+Each tune has a `tags` array. `canon.mjs` BEGINNER (the most-called ~55) →
+`beginner`; ADVANCED+VERY_HARD → `hard`. Drives the Beginner/Hard picking modes
+(see `core/tunePicker.ts` `modeWeight`). `canon.MANUAL_TUNES` adds tunes not in
+the iReal library (e.g. Firm Roots, for Smalls mode).
 
 ### Fake-book chart references + covers
 `scripts/build_charts.py` parses `MASTERNX.PDF` (the "Fake Book Master Index" in
@@ -101,9 +112,10 @@ from jam-call-frequency data + must-know lists + domain knowledge):
   (<45); the rest is intentional deep-cut noise you only reach by sliding
   obscurity up. The home slider DEFAULTS to obscurity 10 (surface the canon).
 - **difficulty**: VERY_EASY=10, EASY=26, default 50, ADVANCED=84, VERY_HARD=93.
-- Crowd feedback (`tune_ratings`) refines both via a Bayesian blend with the seed
-  prior (low weight, `PRIOR_WEIGHT=3`) — see `app/scoring.py`. Re-seeding updates
-  the seed and refreshes the displayed score for *unvoted* tunes only.
+- The seed is only a placeholder: the **first** user rating becomes the score
+  outright (no blend with the build-time guess), and ratings average thereafter
+  — see `app/scoring.py`. Re-seeding refreshes the displayed score for *unvoted*
+  tunes only.
 
 ## "Open in iReal Pro"
 Each tune stores its full single-song `irealb://` deep link (reconstructed from

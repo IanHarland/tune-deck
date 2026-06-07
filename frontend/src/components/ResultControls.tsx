@@ -36,12 +36,15 @@ export default function ResultControls({
   const [playedBusy, setPlayedBusy] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
-  // reset the weigh-in sliders when a new tune is drawn
+  // reset transient state when a new tune is drawn
   useEffect(() => {
     setObscurity(tune.obscurity_score);
     setDifficulty(tune.difficulty_score);
     setThanks(false);
     setSubmitted(false);
+    setDeleting(false);
+    setBusyKey(false);
+    setPlayedBusy(false);
   }, [tune.id]);
 
   async function onPlayed() {

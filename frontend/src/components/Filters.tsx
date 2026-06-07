@@ -35,17 +35,25 @@ export default function FiltersPanel({ filters, onChange, matchCount }: Props) {
 
       <Slider
         label="Obscurity"
-        leftLabel="Common"
-        rightLabel="Obscure"
+        leftLabel="Flesh wound"
+        rightLabel="Deep Cut"
+        enabled={filters.obscurityOn}
         value={filters.obscurity}
+        onToggle={() =>
+          onChange({ ...filters, obscurityOn: !filters.obscurityOn })
+        }
         onChange={(v) => onChange({ ...filters, obscurity: v })}
         accent="var(--teal)"
       />
       <Slider
         label="Difficulty"
-        leftLabel="Easy"
-        rightLabel="Hard"
+        leftLabel="Yawn"
+        rightLabel="Yikes"
+        enabled={filters.difficultyOn}
         value={filters.difficulty}
+        onToggle={() =>
+          onChange({ ...filters, difficultyOn: !filters.difficultyOn })
+        }
         onChange={(v) => onChange({ ...filters, difficulty: v })}
         accent="var(--gold)"
       />

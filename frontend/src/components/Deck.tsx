@@ -28,7 +28,6 @@ export default function Deck({
 }: Props) {
   const [dx, setDx] = useState(0);
   const [dragging, setDragging] = useState(false);
-  const [flying, setFlying] = useState(false);
   const start = useRef<{ x: number; t: number } | null>(null);
   const busy = useRef(false);
 
@@ -37,12 +36,10 @@ export default function Deck({
   function triggerDraw(direction: number) {
     if (busy.current) return;
     busy.current = true;
-    setFlying(true);
     setDragging(false);
     setDx(direction * window.innerWidth * 1.2);
     window.setTimeout(() => {
       onDraw();
-      setFlying(false);
       setDx(0);
       busy.current = false;
     }, FLY_MS);
@@ -117,7 +114,6 @@ export default function Deck({
             tune={tune!}
             randomizedKey={randomizedKey}
             instrumentOffset={instrumentOffset}
-            dragging={dragging || flying}
           />
         )}
       </div>
@@ -129,12 +125,10 @@ function TuneFace({
   tune,
   randomizedKey,
   instrumentOffset,
-  dragging,
 }: {
   tune: Tune;
   randomizedKey: string | null;
   instrumentOffset: number;
-  dragging: boolean;
 }) {
   const feels = [tune.feel, ...tune.additional_feels];
   // headline key = the just-randomized key (this view) or the tune's original.
@@ -152,7 +146,9 @@ function TuneFace({
     </>
   );
   return (
-    <div className={`card-face ${dragging ? "" : "deal-in"}`}>
+    // deal-in runs ONCE on mount (the .top-card key changes per tune). It must
+    // NOT depend on drag state, or every tap/scroll-grab replays it (the flash).
+    <div className="card-face deal-in">
       {index && <div className="card-index tl">{index}</div>}
       {index && <div className="card-index br">{index}</div>}
       {lastKey && (
@@ -190,6 +186,14 @@ function TuneFace({
           ) : (
             "original key"
           )}
+        </span>
+      </div>
+      <div className="card-scores">
+        <span className="score-badge">
+          obscurity <b>{Math.round(tune.obscurity_score)}</b>
+        </span>
+        <span className="score-badge">
+          difficulty <b>{Math.round(tune.difficulty_score)}</b>
         </span>
       </div>
       <div className="face-bottom">swipe for another</div>

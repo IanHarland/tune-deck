@@ -8,7 +8,6 @@ interface Props {
 export default function InstrumentSelector({ instrument, onChange }: Props) {
   return (
     <div className="instrument">
-      <span className="instrument-label">Transposition</span>
       <div className="instrument-opts">
         {INSTRUMENTS.map((i) => (
           <button

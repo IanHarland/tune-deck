@@ -1,13 +1,14 @@
-"""Crowd-weighted scoring.
+"""Crowd scoring.
 
-Users don't set an absolute score; they weigh in. The displayed score is a
-Bayesian blend of the seed prior with all user votes:
+The seed value is only a placeholder shown until a real person rates a tune.
+The FIRST user rating becomes the true score outright (the build-time seed gets
+no weight), and every rating after that is averaged in. So:
 
-    score = (PRIOR_WEIGHT * seed + sum(user_votes)) / (PRIOR_WEIGHT + n_votes)
+    score = seed                         (no ratings yet)
+    score = mean(user_ratings)           (one or more ratings)
 
-The seed prior is deliberately light (a few pseudo-votes) so that once real
-people rate a tune, the crowd dominates — "if a lot of users say it's hard,
-it's hard." See CLAUDE.md.
+This is deliberately not a Bayesian blend with the seed — the owner wants real
+ratings to fully own the score, not be diluted by the build-time guess.
 """
 from __future__ import annotations
 
@@ -16,12 +17,9 @@ from sqlalchemy.orm import Session
 
 from .models import Tune, TuneRating
 
-# How many pseudo-votes the seed value is worth. Low on purpose.
-PRIOR_WEIGHT = 3
-
 
 def _blend(seed: float, total: float, n: int) -> float:
-    return (PRIOR_WEIGHT * seed + total) / (PRIOR_WEIGHT + n)
+    return seed if n == 0 else total / n
 
 
 def recompute(session: Session, tune: Tune) -> None:

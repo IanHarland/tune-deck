@@ -29,6 +29,8 @@ export interface Tune {
   ireal_style: string | null;
   ireal_url: string | null;
   charts: ChartRef[];
+  time_signature: string | null;
+  tags: string[];
   obscurity_score: number;
   difficulty_score: number;
   obscurity_votes: number;
@@ -41,9 +43,30 @@ export interface Tune {
 
 // Feel is a hard filter. The slider values are SOFT targets (bullseyes): tunes
 // whose score is near the value are most likely; distance in either direction
-// lowers likelihood but never excludes a tune.
+// lowers likelihood but never excludes a tune. The `*On` flags toggle a slider's
+// bias on/off WITHOUT losing its position (off = the bullseye logic is ignored).
 export interface Filters {
   feels: Feel[];
-  obscurity: number; // 0..100 — aim from common(0) … obscure(100)
-  difficulty: number; // 0..100 — aim from easy(0) … hard(100)
+  obscurity: number; // 0..100 slider position
+  difficulty: number; // 0..100 slider position
+  obscurityOn: boolean; // does obscurity bias the draw?
+  difficultyOn: boolean; // does difficulty bias the draw?
 }
+
+// Picking modes. "normal" honors the filters; the rest are novelty/utility modes.
+export type Mode =
+  | "normal"
+  | "beginner"
+  | "hard"
+  | "spain"
+  | "lame"
+  | "smalls";
+
+export const MODE_LABELS: Record<Mode, string> = {
+  normal: "Normal",
+  beginner: "Beginner",
+  hard: "Hard",
+  spain: "Spain",
+  lame: "Lame",
+  smalls: "Smalls",
+};

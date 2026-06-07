@@ -50,6 +50,10 @@ const EASY_SET = toSet(canon.EASY);
 const ADV_SET = toSet(canon.ADVANCED);
 const VERY_HARD_SET = toSet(canon.VERY_HARD);
 
+// mode tags
+const BEGINNER_SET = toSet(canon.BEGINNER);
+const HARD_SET = toSet([...canon.ADVANCED, ...canon.VERY_HARD]);
+
 // Obscurity: canon membership is the ONLY thing that keeps a tune common.
 // Everything else trends to 100 (likely never called), eased a little if it at
 // least appears in standard fake books / the owner's playlists.
@@ -105,6 +109,35 @@ function flipComposer(raw) {
 
 const dec = (s) => { try { return decodeURIComponent(s); } catch { return s; } };
 
+// iReal Pro scrambles the chord data (50-char-segment character swaps). We don't
+// want the chords, but the time signature (e.g. "T34" = 3/4) lives in there, and
+// a 3/4 tune is a WALTZ regardless of how iReal labelled the style. Algorithm
+// from github.com/pianosnake/ireal-reader.
+function obfusc50(s) {
+  const a = s.split('');
+  for (let i = 0; i < 5; i++) { a[49 - i] = s[i]; a[i] = s[49 - i]; }
+  for (let i = 10; i < 24; i++) { a[49 - i] = s[i]; a[i] = s[49 - i]; }
+  return a.join('');
+}
+function unscramble(s) {
+  let r = '', p;
+  while (s.length > 50) {
+    p = s.substring(0, 50);
+    s = s.substring(50);
+    r += s.length < 2 ? p : obfusc50(p);
+  }
+  return r + s;
+}
+// Returns "3/4", "4/4", … from a raw song segment, or null.
+function timeSignature(rawSeg) {
+  const fields = rawSeg.split('=');
+  let blob;
+  try { blob = decodeURIComponent(fields.slice(6).join('=')); } catch { return null; }
+  if (!blob) return null;
+  const m = unscramble(blob.replace(/^1r34LbKcu7/, '')).match(/T(\d)(\d)/);
+  return m ? `${m[1]}/${m[2]}` : null;
+}
+
 // ---------------------------------------------------------------------------
 // Parse
 // ---------------------------------------------------------------------------
@@ -143,7 +176,8 @@ hrefs.forEach((href) => {
       // single-song deep link: <rawSegment>===<title> (matches iReal's
       // "songs===playlistName" shape with a one-song playlist).
       const irealUrl = `irealb://${rawSeg}===${encodeURIComponent(title)}`;
-      tunes.set(k, { title, composer, irealStyle, key, irealUrl });
+      const time = timeSignature(rawSeg);
+      tunes.set(k, { title, composer, irealStyle, key, irealUrl, time });
     }
   });
 });
@@ -163,17 +197,41 @@ for (const [k, t] of tunes) {
   const obscurity = obscurityFor(k, bookCount, appearances);
   const difficulty = difficultyFor(k);
 
+  // SYSTEMIC waltz detection: a 3/4 tune is a waltz, whatever iReal called it.
+  const inThree = t.time && t.time.startsWith('3/');
+  const feel = inThree ? 'waltz' : cls.feel;
+  const additional = inThree ? [] : cls.add;
+
+  // mode tags (beginner = most-called 50; hard = common-but-difficult)
+  const tags = [];
+  if (BEGINNER_SET.has(k)) tags.push('beginner');
+  if (HARD_SET.has(k)) tags.push('hard');
+
   out.push({
     title: t.title,
     composer: t.composer,
     original_key: t.key || null,
-    feel: cls.feel,
-    additional_feels: cls.add,
+    feel,
+    additional_feels: additional,
     ireal_style: t.irealStyle || null,
     ireal_url: t.irealUrl,
     charts: chartRefs,
+    time_signature: t.time || null,
+    tags,
     obscurity_score: obscurity,
     difficulty_score: difficulty,
+  });
+}
+
+// manual additions not in the iReal library (e.g. for Smalls mode)
+for (const extra of canon.MANUAL_TUNES) {
+  if (out.some((o) => norm(o.title) === norm(extra.title))) continue;
+  out.push({
+    alternate_titles: [],
+    additional_feels: [],
+    ireal_style: null, ireal_url: null, charts: [], time_signature: null,
+    tags: [], obscurity_score: 30, difficulty_score: 50,
+    ...extra,
   });
 }
 
