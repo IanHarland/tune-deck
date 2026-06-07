@@ -118,7 +118,7 @@ export default function App() {
     <div className="app">
       <header className="app-header">
         <h1 className="logo">
-          TUNE<span className="logo-dot">·</span>DECK
+          TUNE<img className="logo-emblem" src="/emblem.png" alt="·" />DECK
         </h1>
         <p className="tagline">draw a tune for the set</p>
       </header>
