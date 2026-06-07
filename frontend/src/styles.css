@@ -232,6 +232,11 @@ body::after {
   flex-wrap: wrap;
   margin: 0 2px 6px;
 }
+.sel-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 .mode {
   display: flex;
   align-items: center;
@@ -263,6 +268,22 @@ body::after {
   align-items: center;
   gap: 10px;
 }
+
+/* "no minor" toggle (italic i in a circle; red prohibition slash when on) */
+.nominor {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: rgba(246, 241, 227, 0.45);
+  transition: color 0.15s ease;
+}
+.nominor.nominor-on {
+  color: var(--card-red);
+}
 .instrument-label {
   font-size: 11px;
   letter-spacing: 1.5px;
@@ -274,13 +295,13 @@ body::after {
   gap: 6px;
 }
 .inst-chip {
-  min-width: 38px;
+  min-width: 32px;
   border: 1.5px solid rgba(255, 255, 255, 0.16);
   background: transparent;
   color: var(--cream);
   border-radius: 8px;
-  padding: 6px 10px;
-  font-size: 14px;
+  padding: 6px 9px;
+  font-size: 13.5px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.15s ease;
@@ -516,6 +537,12 @@ body::after {
 .pip-row {
   display: flex;
   gap: 18px;
+}
+.louie-pip {
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+  vertical-align: middle;
 }
 .key-sub {
   font-size: 11px;

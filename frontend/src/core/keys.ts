@@ -116,3 +116,17 @@ export function transposeKey(
   const root = (minor ? MINOR_KEYS : MAJOR_KEYS)[pc];
   return minor ? `${root}-` : root;
 }
+
+/** Display a minor key as its RELATIVE MAJOR (root up a minor third), e.g.
+ * "A-" → "C", "G-" → "Bb". Major keys pass through unchanged. */
+export function toRelativeMajor(key: string | null | undefined): string | null {
+  if (!key) return key ?? null;
+  if (!isMinor(key)) return key;
+  const m = key.match(/^([A-Ga-g])([b#]?)/);
+  if (!m) return key;
+  let pc = LETTER_PC[m[1].toUpperCase()];
+  if (pc === undefined) return key;
+  if (m[2] === "#") pc += 1;
+  else if (m[2] === "b") pc -= 1;
+  return MAJOR_KEYS[((pc + 3) % 12 + 12) % 12];
+}

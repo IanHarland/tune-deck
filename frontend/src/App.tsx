@@ -6,6 +6,7 @@ import Deck from "./components/Deck";
 import FiltersPanel from "./components/Filters";
 import InstrumentSelector from "./components/InstrumentSelector";
 import ModeSelector from "./components/ModeSelector";
+import NoMinorToggle from "./components/NoMinorToggle";
 import ResultControls from "./components/ResultControls";
 import { useAnonId } from "./useAnonId";
 import { useInstrument } from "./useInstrument";
@@ -25,6 +26,7 @@ export default function App() {
   });
   const [current, setCurrent] = useState<Tune | null>(null);
   const [mode, setMode] = useState<Mode>("normal");
+  const [noMinor, setNoMinor] = useState(false); // show minor keys as rel. major
   // the randomized key for THIS view only (concert pitch). Null = show original.
   // Deliberately session-local so a stale global last_played_key never becomes
   // the headline on a tune the user hasn't randomized.
@@ -54,7 +56,7 @@ export default function App() {
     [tunes, filters.feels, filters.excludeHenny],
   );
 
-  const findTune = (title: string): Tune | null =>
+    const findTune = (title: string): Tune | null =>
     tunes?.find((t) => norm(t.title) === norm(title)) ?? null;
 
   // record a normal pick into the no-repeat set (cycling when exhausted)
@@ -133,7 +135,10 @@ export default function App() {
       />
 
       <div className="selectors">
-        <InstrumentSelector instrument={instrument} onChange={setInstrument} />
+        <div className="sel-group">
+          <InstrumentSelector instrument={instrument} onChange={setInstrument} />
+          <NoMinorToggle on={noMinor} onChange={setNoMinor} />
+        </div>
         <ModeSelector mode={mode} onChange={setMode} />
       </div>
 
@@ -147,6 +152,7 @@ export default function App() {
             tune={current}
             randomizedKey={sessionKey}
             instrumentOffset={instrument.offset}
+            noMinor={noMinor}
             onDraw={draw}
           />
         )}

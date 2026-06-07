@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { keyCard, transposeKey } from "../core/keys";
+import { keyCard, toRelativeMajor, transposeKey } from "../core/keys";
 import { FEEL_LABELS, type Feel, type Tune } from "../core/types";
 import KeyLabel from "./KeyLabel";
 import Suit from "./Suit";
@@ -8,6 +8,7 @@ interface Props {
   tune: Tune | null;
   randomizedKey: string | null; // concert pitch; null = show original key
   instrumentOffset: number;
+  noMinor: boolean; // display minor keys as their relative major
   onDraw: () => void;
 }
 
@@ -24,6 +25,7 @@ export default function Deck({
   tune,
   randomizedKey,
   instrumentOffset,
+  noMinor,
   onDraw,
 }: Props) {
   const [dx, setDx] = useState(0);
@@ -114,6 +116,7 @@ export default function Deck({
             tune={tune!}
             randomizedKey={randomizedKey}
             instrumentOffset={instrumentOffset}
+            noMinor={noMinor}
           />
         )}
       </div>
@@ -125,24 +128,43 @@ function TuneFace({
   tune,
   randomizedKey,
   instrumentOffset,
+  noMinor,
 }: {
   tune: Tune;
   randomizedKey: string | null;
   instrumentOffset: number;
+  noMinor: boolean;
 }) {
   const feels = [tune.feel, ...tune.additional_feels];
   // headline key = the just-randomized key (this view) or the tune's original.
-  // keys are stored in concert pitch; transpose for the chosen instrument.
-  const concertPlayKey = randomizedKey ?? tune.original_key;
-  const playKey = transposeKey(concertPlayKey, instrumentOffset);
-  const originalKey = transposeKey(tune.original_key, instrumentOffset);
-  const lastKey = transposeKey(tune.last_played_key, instrumentOffset);
-  // the key signature as a playing-card rank + suit
+  // keys are stored in concert pitch; transpose for the chosen instrument, then
+  // (if noMinor) show minor keys as their relative major.
+  const show = (k: string | null): string | null => {
+    const t = transposeKey(k, instrumentOffset);
+    return noMinor ? toRelativeMajor(t) : t;
+  };
+  const playKey = show(randomizedKey ?? tune.original_key);
+  const originalKey = show(tune.original_key);
+  const lastKey = show(tune.last_played_key);
+  // the key signature as a playing-card rank + suit. In no-minor mode the suit
+  // glyph is replaced by Electric Louie (one per accidental).
   const card = keyCard(playKey);
+  const glyph = (size: number, key?: number) =>
+    noMinor ? (
+      <img
+        key={key}
+        className="louie-pip"
+        src="/electric-louie.jpg"
+        alt=""
+        style={{ width: size, height: size }}
+      />
+    ) : (
+      <Suit key={key} suit={card.suit!} color={card.color!} size={size} />
+    );
   const index = card.suit && (
     <>
       <span className="idx-rank">{card.count}</span>
-      <Suit suit={card.suit} color={card.color!} size={15} />
+      {glyph(15)}
     </>
   );
   return (
@@ -173,9 +195,7 @@ function TuneFace({
         <div className="card-pips">
           {pipRows(card.count).map((n, r) => (
             <div className="pip-row" key={r}>
-              {Array.from({ length: n }, (_, i) => (
-                <Suit key={i} suit={card.suit!} color={card.color!} size={26} />
-              ))}
+              {Array.from({ length: n }, (_, i) => glyph(26, i))}
             </div>
           ))}
         </div>

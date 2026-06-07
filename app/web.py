@@ -6,12 +6,17 @@ and crowd ratings. See CLAUDE.md.
 """
 from __future__ import annotations
 
+import mimetypes
 import random
 from datetime import datetime, timezone
 from pathlib import Path
 
 from flask import Flask, jsonify, request, send_from_directory
 from sqlalchemy import select
+
+# Python guesses .m4a as the obscure "audio/mp4a-latm"; serve the AAC voice
+# clips as the broadly-supported audio/mp4 so every browser plays them.
+mimetypes.add_type("audio/mp4", ".m4a")
 
 from .db import SessionLocal, init_db
 from .models import FEELS, Tune, TuneRating
