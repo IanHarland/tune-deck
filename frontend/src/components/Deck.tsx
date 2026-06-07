@@ -161,7 +161,13 @@ function TuneFace({
           {feels.map((f) => FEEL_LABELS[f as Feel]).join(" · ")}
         </span>
       </div>
-      <h2 className="face-title">{tune.title}</h2>
+      <h2
+        className={`face-title ${
+          tune.title.length > 30 ? "title-xs" : tune.title.length > 20 ? "title-sm" : ""
+        }`}
+      >
+        {tune.title}
+      </h2>
       {tune.composer && <p className="face-composer">{tune.composer}</p>}
       {card.suit && (
         <div className="card-pips">

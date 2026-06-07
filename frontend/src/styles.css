@@ -449,6 +449,13 @@ body::after {
   font-weight: 700;
   flex: 0 0 auto;
 }
+/* shrink long titles so they don't crowd the pips below */
+.face-title.title-sm {
+  font-size: 23px;
+}
+.face-title.title-xs {
+  font-size: 19px;
+}
 .face-composer {
   margin: 0;
   font-style: italic;
