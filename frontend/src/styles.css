@@ -197,6 +197,25 @@ body::after {
   letter-spacing: 1px;
   color: rgba(246, 241, 227, 0.45);
 }
+.henny-toggle {
+  display: block;
+  margin: 12px auto 2px;
+  padding: 5px 14px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  background: transparent;
+  border: 1.5px solid rgba(255, 255, 255, 0.16);
+  color: rgba(246, 241, 227, 0.5);
+  transition: all 0.15s ease;
+}
+.henny-toggle.henny-on {
+  background: var(--burgundy);
+  border-color: var(--burgundy);
+  color: var(--cream);
+}
 .match-count {
   margin: 6px 0 2px;
   text-align: center;

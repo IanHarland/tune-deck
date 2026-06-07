@@ -51,6 +51,7 @@ export interface Filters {
   difficulty: number; // 0..100 slider position
   obscurityOn: boolean; // does obscurity bias the draw?
   difficultyOn: boolean; // does difficulty bias the draw?
+  excludeHenny: boolean; // hard-exclude all Joe Henderson ("Henny") tunes
 }
 
 // Picking modes. "normal" honors the filters; the rest are novelty/utility modes.

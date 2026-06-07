@@ -32,9 +32,17 @@ export function feelMatches(tune: Tune, feels: Filters["feels"]): boolean {
   );
 }
 
-/** The deck: tunes passing the hard feel filter. Drives the on-screen count. */
+export function isHenny(tune: Tune): boolean {
+  return (tune.composer ?? "").trim().toLowerCase() === "joe henderson";
+}
+
+/** The deck: tunes passing the hard filters (feel + the Henny exclusion).
+ * Drives the on-screen count. */
 export function deckTunes(tunes: Tune[], filters: Filters): Tune[] {
-  return tunes.filter((t) => feelMatches(t, filters.feels));
+  return tunes.filter(
+    (t) =>
+      feelMatches(t, filters.feels) && !(filters.excludeHenny && isHenny(t)),
+  );
 }
 
 /** Target weight in (0, 1]: 1 at the slider value, tapering with distance.

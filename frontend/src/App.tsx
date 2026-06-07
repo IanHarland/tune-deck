@@ -21,6 +21,7 @@ export default function App() {
     difficulty: 50,
     obscurityOn: true,
     difficultyOn: true,
+    excludeHenny: false,
   });
   const [current, setCurrent] = useState<Tune | null>(null);
   const [mode, setMode] = useState<Mode>("normal");
@@ -50,7 +51,7 @@ export default function App() {
   // deck size depends only on the HARD feel filter, not the soft sliders
   const matchCount = useMemo(
     () => (tunes ? deckTunes(tunes, filters).length : 0),
-    [tunes, filters.feels],
+    [tunes, filters.feels, filters.excludeHenny],
   );
 
   const findTune = (title: string): Tune | null =>

@@ -58,6 +58,17 @@ export default function FiltersPanel({ filters, onChange, matchCount }: Props) {
         accent="var(--gold)"
       />
 
+      <button
+        type="button"
+        className={`henny-toggle ${filters.excludeHenny ? "henny-on" : ""}`}
+        onClick={() =>
+          onChange({ ...filters, excludeHenny: !filters.excludeHenny })
+        }
+        title="Exclude every Joe Henderson tune"
+      >
+        {filters.excludeHenny ? "🚫 No Henny" : "Henny allowed"}
+      </button>
+
       <p className="match-count">
         {matchCount} tune{matchCount === 1 ? "" : "s"} in the deck
       </p>
