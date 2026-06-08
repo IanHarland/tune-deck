@@ -55,12 +55,23 @@ function targetWeight(score: number, target: number | null): number {
   return Math.exp(-(d * d) / (2 * SPREAD * SPREAD));
 }
 
+// An UNRATED tune's like-rate is unknown. Near the neutral midpoint we let it
+// pass (you're not asking for a vibe), but the further the slider is pushed
+// either way, the harder we suppress unknowns — otherwise the huge un-swiped
+// majority drowns out the few rated hits the user actually asked for. Floored
+// (not zero) so a handful still slip through for discovery.
+const UNRATED_HIP_FLOOR = 0.006;
+
 /** Hipness bullseye: bias by the crowd like-rate (rating_score is already 0–100).
- * An unrated tune is treated as a middling 50 so the slider still biases the
- * (currently large) un-swiped majority. */
+ * Rated tunes use the bell curve; unrated tunes are suppressed in proportion to
+ * how extreme the slider is. */
 function hipnessWeight(tune: Tune, target: number | null): number {
   if (target == null) return 1;
-  return targetWeight(tune.rating_score ?? 50, target);
+  if (tune.rating_score == null) {
+    const extremity = Math.abs(target - 50) / 50; // 0 at neutral → 1 at 0/100
+    return UNRATED_HIP_FLOOR ** extremity;
+  }
+  return targetWeight(tune.rating_score, target);
 }
 
 // Beginner mode draws ONLY from the beginner canon and never anything obscure.
