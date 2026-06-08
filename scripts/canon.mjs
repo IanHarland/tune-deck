@@ -152,12 +152,63 @@ export const BEGINNER = [
   "Mr. P.C.", "Song for My Father", "Summertime", "Watermelon Man",
 ];
 
-// Tunes not in the owner's iReal library that the app still needs (Smalls mode).
+// Tunes not in the iReal backup, added as playable/rateable cards (no iReal
+// deep link → no "Open in iReal Pro" button). Real Book + page refs are merged
+// in automatically by build_seed.mjs when the title is in charts.json. Keys are
+// given only where confident (null = no key card). obscurity/difficulty are
+// rough seeds (fame-scaled) that crowd ratings refine over time.
+const M = (title, composer, original_key, feel, obscurity_score, difficulty_score, extra = {}) =>
+  ({ title, composer, original_key, feel, obscurity_score, difficulty_score, ...extra });
+
 export const MANUAL_TUNES = [
-  {
-    title: "Firm Roots",
-    composer: "Cedar Walton",
-    original_key: "Eb",
-    feel: "medium_swing",
-  },
+  M("Firm Roots", "Cedar Walton", "Eb", "medium_swing", 45, 60),
+
+  // bebop heads
+  M("Ah-Leu-Cha", "Charlie Parker", "C", "up", 60, 75),
+  M("Klactoveedsedstene", "Charlie Parker", null, "up", 72, 75),
+  M("Relaxin' with Lee", "Charlie Parker", null, "up", 75, 70),
+
+  // hard bop / Blue Note cookers
+  M("A Shade of Jade", "Joe Henderson", null, "up", 75, 75),
+  M("Blues on the Corner", "McCoy Tyner", "F", "medium_swing", 60, 60),
+  M("Cape Verdean Blues", "Horace Silver", null, "medium_swing", 58, 55),
+  M("Effendi", "McCoy Tyner", null, "medium_swing", 70, 65),
+  M("Gingerbread Boy", "Jimmy Heath", null, "medium_swing", 60, 60),
+  M("Mayreh", "Horace Silver", null, "up", 70, 65),
+  M("Minor's Holiday", "Kenny Dorham", null, "up", 65, 70),
+  M("Mr. Clean", "Weldon Irvine", null, "medium_swing", 70, 65),
+  M("Quicksilver", "Horace Silver", null, "up", 62, 70),
+  M("Red Clay", "Freddie Hubbard", "F-", "medium_swing", 35, 55),
+  M("Search for Peace", "McCoy Tyner", null, "ballad", 60, 55),
+  M("Split Kick", "Horace Silver", null, "up", 70, 65),
+  M("The Intrepid Fox", "Freddie Hubbard", null, "up", 70, 80),
+  M("The Sidewinder", "Lee Morgan", null, "medium_swing", 30, 40),
+  M("Unit 7", "Sam Jones", null, "medium_swing", 55, 55),
+
+  // Wayne Shorter / Miles 60s post-bop
+  M("Agitation", "Miles Davis", null, "up", 80, 75),
+  M("Circle", "Miles Davis", null, "ballad", 70, 70),
+  M("Fifth House", "John Coltrane", null, "up", 70, 80),
+  M("Jean Pierre", "Miles Davis", null, "medium_swing", 65, 40),
+  M("Mr. Syms", "John Coltrane", null, "medium_swing", 70, 55),
+  M("Orbits", "Wayne Shorter", null, "up", 75, 75),
+  M("Prince of Darkness", "Wayne Shorter", null, "up", 70, 75),
+
+  // groove / funk / fusion
+  M("Actual Proof", "Herbie Hancock", null, "medium_swing", 70, 85),
+  M("Black Orpheus", "Luiz Bonfá", "A-", "latin", 25, 45,
+    { alternate_titles: ["Manha de Carnaval"] }),
+  M("Butterfly", "Herbie Hancock", null, "latin", 65, 70),
+  M("Cantaloupe Island", "Herbie Hancock", "F-", "medium_swing", 30, 35),
+  M("Chameleon", "Herbie Hancock", "Bb-", "medium_swing", 35, 40),
+  M("Cold Duck Time", "Eddie Harris", null, "medium_swing", 58, 50),
+  M("Freedom Jazz Dance", "Eddie Harris", "Bb", "medium_swing", 40, 65),
+  M("Hang Up Your Hang Ups", "Herbie Hancock", null, "medium_swing", 70, 70),
+  M("Mercy, Mercy, Mercy", "Joe Zawinul", null, "medium_swing", 35, 35),
+  M("The Chicken", "Pee Wee Ellis", "Bb", "medium_swing", 40, 40),
+
+  // modern jam calls (composer unknown to me → left null for the owner)
+  M("Strasbourg / St. Denis", "Roy Hargrove", null, "medium_swing", 45, 50),
+  M("Liquid Streets", null, null, "medium_swing", 85, 70),
+  M("Roy Allan", null, null, "medium_swing", 85, 65),
 ];

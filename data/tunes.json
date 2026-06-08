@@ -101,10 +101,23 @@
     "additional_feels": [],
     "ireal_style": "Slow Swing",
     "ireal_url": "irealb://A%20Ballad=Mulligan%20Gerry==Slow%20Swing=C==1r34LbKcu7%2C7As%204D%2D7%20yX7%5EBZL9%237%23F%207%23%2DC%7CQyX7%5ECZL9b7GQ%7CE%2D74TA%2A%7B%23FZL6F%23%2D7%20EZL9b7B%207%2D%23FZLb97A%207%2DE1NZL9b7B%2D7%20G%2Dl%7C%2ChG%2DEZL77LZE%2D%2DDZL9b7A%207%2DEZLG7%207%2DD2N%7D%209b7A%2077%20F%2D%5EoF%207%2D%207%2DFZ7LZD%2D%207%2DGZL7bB%207%2DFB%5D%2AQyX7%5ECZL9b7G%207Gbo7LobE%207%5EbDZLLZEb%5E%207%2DbEZL7%2DE%207%5EbZDL7bA%207%2DbE%7CQyX7Ab7b99b7bB%7CQyX77%2CA7%2C%237%23F%207%2D%23C%7CQyX7C%5EZL9b7G%207%2DDlA%2A%5B9LZB%5E%2DEs%207G%207%2DEA7%2CGhB%207%2D%23FZL9b7A%207E%2DZL9b7B%207%2D%23Fl%7C%2C7b9LZs%207%2DEdnE%20%20%23%2D7%20F%2A%3CQ%5B%20QyX%5D%20Q%20%207D%5EZL9b7A%207%2DEZL7o69XyQFZL6%2DCl%7C%2Co%2D7%20G7%2CoA%2CobAsZL7bA%207%2CDlZL9%237A%207%2DEZLBbo%2CBD%3Egni%2CDb%5E7%20C%5E9%20%20Z%20==0=0===A%20Ballad",
-    "charts": [],
+    "charts": [
+      {
+        "book": "Jazz Fakebook",
+        "page": "52"
+      },
+      {
+        "book": "Jazz LTD",
+        "page": "44"
+      },
+      {
+        "book": "Library of Musicians' Jazz",
+        "page": "19"
+      }
+    ],
     "time_signature": "4/4",
     "tags": [],
-    "obscurity_score": 97,
+    "obscurity_score": 70,
     "difficulty_score": 50
   },
   {
@@ -115,10 +128,19 @@
     "additional_feels": [],
     "ireal_style": "Medium Swing",
     "ireal_url": "irealb://A%20Beautiful%20Friendship=Kahn%20Donald==Medium%20Swing=C==1r34LbKcu7X7D%7CQ4C%5E7XZL9b7A%207hE%7CQyX%5E7F%7CQyX11%237bG%7CQyA%2D7Xy4TA%2A%7BX7%2DE%7C7XyQ%7CB%7CQyX7%5EF%7CQyX7CQ%7CyX7%2DGB%2A%5B%7DQyX7Gb7XyQ%2DD%7CQy%7CQyX7XyQ%7CDX11%237bG%7CQyX7%5EC%2AA%5B%5DQyX5%237G%7CQyX7yQ%7CF%5E7A%7CQyEh7%20A7b9LZD%2D7XyQ%7CG7XyQ%7CC6%20A7LZD7%20G7%20Z%20==0=0===A%20Beautiful%20Friendship",
-    "charts": [],
+    "charts": [
+      {
+        "book": "Jazz Fakebook",
+        "page": "53"
+      },
+      {
+        "book": "The Real Book, Vol. 3",
+        "page": "17"
+      }
+    ],
     "time_signature": "4/4",
     "tags": [],
-    "obscurity_score": 97,
+    "obscurity_score": 79,
     "difficulty_score": 50
   },
   {
@@ -143,10 +165,15 @@
     "additional_feels": [],
     "ireal_style": "Medium Swing",
     "ireal_url": "irealb://A%20Certain%20Smile=Fain%2DWebster==Medium%20Swing=F==1r34LbKcu7F%7CQyX4G%2D7%2CyX%2C7%2DGZL%20lcKQy%2CX7%5EF%7CQyX%2C7C%7CQyXQ%7CC7%2C4TA%2A%7B%5EC%7CQyQKcl%20QyX%2C7%2DD%7CQyX%2C7AQ%7CyX%2C7%2DE1NB%2A%5BY%5D%20%7CG7%2CXyX%2C7%5E%2C7%5EbB%7CD%2D7%2C2NC%2A%5BY%7DQyX7Cl%7C%2CF7Cs%20%2C7%2DGZL%2C7G%20A%5E7%2C%20QyX%2C7FZL7CXyQ%7CGZL%2C7%2DD%20%2C7%5EFZL57%23A%20%2C6%2DbB%7CQyX%2C7%2DG%2D7%2C%20%2C7DZL%5E7%2CXyQKcl%20%20Z%20==0=0===A%20Certain%20Smile",
-    "charts": [],
+    "charts": [
+      {
+        "book": "The Real Book, Vol. 3",
+        "page": "48"
+      }
+    ],
     "time_signature": "4/4",
     "tags": [],
-    "obscurity_score": 97,
+    "obscurity_score": 88,
     "difficulty_score": 50
   },
   {
@@ -157,7 +184,16 @@
     "additional_feels": [],
     "ireal_style": "Waltz",
     "ireal_url": "irealb://A%20Child%20Is%20Born=Jones%20Thad==Waltz=Bb==1r34LbKcu7%7CQyX74Bb%5E7yXbB%2F%2DbE%7CQyX7%5EBb%7CQyXbB%2F%2DbE%7CQyXQ%7CBb%5E3TA%2A%5B%237D%7CQbXyQ%7C%7CQyX5%237D%7CQyX7%2D%7CGQyX9%237D%7CQyX7hAG%2D7XyB%2F%2DbEbB%2F%2DbG%2D7Xy7%5EbBB%2A%5B%5DQyX7F%7CyQXsus7F%7CQyX7C%7CQXyQ%7CE%7CQyX57bA%7CQb%5E7XyE%7CQyXtla7D%7CQyX%5E7bB%7CQyXbB%2F%2DbE%7CQb%5E7XyB%7CQyXXyQ%7CBb%2FFXyQ%7CGb6XyQ%7CG%2D7XyQ%7CC7XyQ%7CF7susXyQ%7CF7XyQZ%20==0=0===A%20Child%20Is%20Born",
-    "charts": [],
+    "charts": [
+      {
+        "book": "The New Real Book, Vol. 2",
+        "page": "48"
+      },
+      {
+        "book": "The Real Book, Vol. 1",
+        "page": "2"
+      }
+    ],
     "time_signature": "3/4",
     "tags": [],
     "obscurity_score": 16,
@@ -171,10 +207,15 @@
     "additional_feels": [],
     "ireal_style": "Bossa Nova",
     "ireal_url": "irealb://A%20Felicidade=Jobim%20Antonio%2DCarlos==Bossa%20Nova=A%2D==1r34LbKcu7%7CQyX94A%2D7%28yX7%2DEZL%20lcKQyX%5E7CZL%20lcKQyX%297%5ECQ%7CB7b4T%7BA%2AZL%20lc%28Repe%5ECB%2A%5B%7D%207G%207%2DDZ7LA%3E%29lanoitpO%20ta7XyQK%3C%207%2DEX7%5EF%7CQ%7CE7b%7CQyX7%2DGZL%297%2DbA%20%28lcKQyX7%2DA%7CQyX9C7XyQyX7hBX7G%7CQ7XyQ%7CZL9b7E%207hB%7CQyX%2D7A%7CQyX7D%7CQyX7%2DAA%2D7Xy%2DD%7CQyCZL7G%5BC%5E7LZLxZL7%5EFZL7CZL%2D7GZLxZL7%5ECZL7FZD%2D7LZC%2A%5DQy7%2DA%7CQLZF%23hl%5BD%2A%5D%2C7G%2C7%2DD%7C%2CA7%2C7%2DEsZL9b7BZL7A%2D7XyxZL7%5ElcKQy%7CD7%2FFL9b7E%207hB%7CQyX7A%2D%7CQyXF%2F7%2DD%7CQyX%23ZA%2D7XQyXG%2F%20%20Z%20==0=0===A%20Felicidade",
-    "charts": [],
+    "charts": [
+      {
+        "book": "Jazz Fakebook",
+        "page": "31"
+      }
+    ],
     "time_signature": "4/4",
     "tags": [],
-    "obscurity_score": 88,
+    "obscurity_score": 79,
     "difficulty_score": 50
   },
   {
@@ -185,10 +226,19 @@
     "additional_feels": [],
     "ireal_style": "Medium Swing",
     "ireal_url": "irealb://A%20Fine%20Romance=Kern%20Jerome==Medium%20Swing=C==1r34LbKcu7D%7CQyX4C6XyyX7%2DE%7CQyX7o%23D%7CyQX6%2DD%7CQyX7o%23C%7CQQ%7CA%2D74TA%2A%5BA%7CQyX%7CG7XyyX7G%7CQyX7%2DD%7CQy7XobE%7CQyX6CB%2A%5B%5DQQ%7CE%2D7QyX7%2DE%7CQyXD7XyQQyX6%2DD%7CQyX7o%23CQ%7CyX6CA%2A%5B%5DQyX7G%7C%7CD%23o7%7CQyX7%23F%7CQy%7CA%2D7XQyX7C%7CQyX6CC%2A%5BQ%5DyX7G%7CQyX7%2DD%7CQy%7CF%5E7XQyX7%2Dh7%20B7LZE%2D7%20A7LZD%2D7%20G7LZC6XyQ%7CD%2D7%20G7%20Z%20==0=0===A%20Fine%20Romance",
-    "charts": [],
+    "charts": [
+      {
+        "book": "Jazz Fakebook",
+        "page": "117"
+      },
+      {
+        "book": "The Real Book, Vol. 1",
+        "page": "3"
+      }
+    ],
     "time_signature": "4/4",
     "tags": [],
-    "obscurity_score": 97,
+    "obscurity_score": 79,
     "difficulty_score": 50
   },
   {
@@ -213,7 +263,16 @@
     "additional_feels": [],
     "ireal_style": "Medium Swing",
     "ireal_url": "irealb://A%20Foggy%20Day=Gershwin%20George==Medium%20Swing=F==1r34LbKcu77G%7CQy4F%5E7XQyX7%5EF%7CQyX7C%7CQXy7%2DG%7CQyX7o%23F%7CQy%7CDh7X4TA%2A%5B%7CQyX77XyQ%5DX7bE%7CQyX7%5EbBZLF7%207%2DC%7CQyX7%5EFB%2A%5ByQ%7CA%2DC%7CQyXF%7CQyX%7CG7XyX7%2DG%7CQyX7o%23F%7CQXy7%5EFA%2A%5B%5DQyX7C%7CQyQ%7CC7QyX7DE%7CQyX%7CDh7XQyX7F%7CQyX7%2DCC%2A%5D%5BQyX7C%7CQyX7G%7CQy%7CBb%5E7QyX7%5E%207%2DG%7C%7CF6%20GZL7C%207%2DGZL7D%207A%2DZL6%2DbB%207%2DAZL7%2DF6XyQQyX7bC7%20Z%20==0=0===A%20Foggy%20Day",
-    "charts": [],
+    "charts": [
+      {
+        "book": "Jazz Fakebook",
+        "page": "120"
+      },
+      {
+        "book": "The Real Book, Vol. 1",
+        "page": "6"
+      }
+    ],
     "time_signature": "4/4",
     "tags": [],
     "obscurity_score": 34,
@@ -227,10 +286,23 @@
     "additional_feels": [],
     "ireal_style": "Ballad",
     "ireal_url": "irealb://A%20Ghost%20Of%20A%20Chance=Young%20Victor==Ballad=C==1r34LbKcu7ZL7ob4C%5E7XZL7bB%207%2DFZL7C%20%2D7G%7CQyX11%237bD%7CQyE%2D7%20E4TA%2A%7Bb7A%2077LZN1X7%5EC2NZL%20QyXQy%7DX%207G%207%2DDZL7A%207EyQ%7CEhG%207%2DD9b7B%7CBD%2D7X%23FZL7%2DA%207%5ECZL7%20G7%5EC%7CQyX5%237G%7CQyh7XyQ%2A%5B%5D%209ZL7C%20%2D7%20A7yX11%237bD%7CQyX7%5EAC%2A%5B%5D%205%237G%207%2DDZLQ%7CG%2D7E%7CQyXF%2D7%20Bb7LZE%2D7%20Ebo7LZD%2D7%20G7LZC%5E7%20A%2D7LZD%2D7%20G7%20Z%20==0=0===A%20Ghost%20Of%20A%20Chance",
-    "charts": [],
+    "charts": [
+      {
+        "book": "Jazz Fakebook",
+        "page": "129"
+      },
+      {
+        "book": "The New Real Book, Vol. 3",
+        "page": "132"
+      },
+      {
+        "book": "The Real Book, Vol. 2",
+        "page": "121"
+      }
+    ],
     "time_signature": "4/4",
     "tags": [],
-    "obscurity_score": 97,
+    "obscurity_score": 70,
     "difficulty_score": 50
   },
   {
@@ -255,10 +327,15 @@
     "additional_feels": [],
     "ireal_style": "Bossa Nova",
     "ireal_url": "irealb://A%20Little%20Tear=Deodato%2DValle==Bossa%20Nova=Db==1r34LbKcu7L%20lcK4Eb9%2C%2DbEZL%20lcKQyX%2C7b%5ED%7CQyX%2C7%2DbE%7CQyX7%2CXyQ4TA%2A%5BlcKQy%2CXyQ%7CD%7CQyX%2C7%2DbE%7CQyX9%2CbE%7CQyX%2C5b9b7bBb%5E7%2CX7%5EbDZ%5EbEZL%2D7%2CXyyX9%2DFB%2A%5BY%5D%20%20lcQKyX%2C7%5EbDZL%20lcKQQKcl%20bEZL%20%20%2CsusKcl%20LyX%2C7%5EF%7CQyX%2CsusB7ZL%20lcKQyX%2C9%2DFZQ%7CEb9QyX%2C7%2DbEZLZAb9sbB%20%2Csus9b7bB%7CQXy%2C7hFZL%2C9bA%20%2Csu7b9%235L%2C9bE7%2CXyQ%7CAb9sus%20Ab9%2CLZDb%5E7%2CXyQ%7CAb9susXyQZ%20==0=0===A%20Little%20Tear",
-    "charts": [],
+    "charts": [
+      {
+        "book": "The New Real Book, Vol. 1",
+        "page": "190"
+      }
+    ],
     "time_signature": "4/4",
     "tags": [],
-    "obscurity_score": 97,
+    "obscurity_score": 88,
     "difficulty_score": 50
   },
   {
@@ -283,7 +360,20 @@
     "additional_feels": [],
     "ireal_style": "Latin",
     "ireal_url": "irealb://A%20Night%20In%20Tunisia=Gillespie%20Dizzy==Latin=D%2D==1r34LbKcu7A%207hE4Eb7XD%7CQyX7bE%7CQyX%2DDQ%7CyX7bE%7CQyX%2DD%7CQy%2DXyQ%7C4TA%2A%7B7C%7CQyD%2DXyQL%20lcKQyX7%2DG%7CQy9Xb7D%7CQyX7hAB%2A%5B%7DZGh7XZL9b7yX%2DD%7C%7CF%5E7XE%7CQyX%2DD%7CQyX7bE%2AA%5B%5D%209b7A%207hE%7CQyb7XyQQyX9b7bEZLXyQ%7CDyX7hEQ%5BYZ%20Q%20%20%2DZDL9b7A%207hE%7CQyX%2DQKcl%207bE%7CQX7%2DG%7CQKcl%20%2DGZL%20lcKQyX11%23G7ZL%20lcKQyX7%2DDZL%5E7XyQyX11%23yQ%7CGb7%239XyQKcl%20LZF%5E7XyQKcl%20LZEh7XyQ%7CA7b9XyQZ%20==0=0===A%20Night%20In%20Tunisia",
-    "charts": [],
+    "charts": [
+      {
+        "book": "Jazz Fakebook",
+        "page": "275"
+      },
+      {
+        "book": "The Colorado Cookbook",
+        "page": "9"
+      },
+      {
+        "book": "The Real Book, Vol. 1",
+        "page": "7"
+      }
+    ],
     "time_signature": "4/4",
     "tags": [],
     "obscurity_score": 4,
@@ -297,10 +387,23 @@
     "additional_feels": [],
     "ireal_style": "Ballad",
     "ireal_url": "irealb://A%20Nightingale%20Sang%20In%20Berkeley%20Square=Sherwin%20Manning==Ballad=Eb==1r34LbKcu7A%20%2DCl4Eb%5E7hDs%207%5EbAl%7C%2C7bE7%2C%2DbBs%207%2DGZL7%2DC%20%2CG7%2C%7C4TA%2A%7B7%2DFZLEb%5E7%2F%5EbEl%7C%2C7bD%2C7%2DbA%20sG%2F7%5EbEZL7%2DF%20bB7%20C%2D7ZL6%2DbB%2A%5B%5D%20ZY%7CN1A%7CQyX7%5EbE2N%7D%207Bb%207%2DFZL7%2DC%207%5EbEh7%20D7L7bB%207D%207%2D%2D7LZAE%207%5EGZL7D%207%2DAZ7LobB%207%2DBZL7D%207%2D%2D7LZAE%207%5EGAl%7C%2C7%20E%2D7LbBs%207%2DGZL7%2DC%207b%5EEA%2A%5B%5D%207bB%207%2DFZ%2D7%2CEb7%2DBZLbD%2C7%2DDh%2CG7%2F7%5EbEZL7%2DF%20bB%2F%5E7bEZL6%2DbA%20%2DCl%7C%2CG%20sAbs%207%5Eb7%2C%7ClEb%5E7%20C%2D7LZF%2D7%20Bb7LZEb%5E7%20C%2D7LZF%2D7%20Bb7%20Z%20==0=0===A%20Nightingale%20Sang%20In%20Berkeley%20Square",
-    "charts": [],
+    "charts": [
+      {
+        "book": "Jazz Fakebook",
+        "page": "274"
+      },
+      {
+        "book": "The New Real Book, Vol. 2",
+        "page": "261"
+      },
+      {
+        "book": "The Real Book, Vol. 3",
+        "page": "213"
+      }
+    ],
     "time_signature": "4/4",
     "tags": [],
-    "obscurity_score": 97,
+    "obscurity_score": 70,
     "difficulty_score": 50
   },
   {
@@ -311,11 +414,31 @@
     "additional_feels": [],
     "ireal_style": "Medium Swing",
     "ireal_url": "irealb://A%20Pretty%20Girl%20Is%20Like%20A%20Melody=Berlin%20Irving==Medium%20Swing=G==1r34LbKcu79%5EGZL4A7%20BG%20G%2F%23F%7CQyX7D%7CQXy9%2DA%7CQyX7AZL31bLZ%20x%204TA%2A%5BX9DZLl%20LZDyX7A%7CQyX7%5EG%7CQy9XF%7CQyX6CZL7G%207%2DQKcl%20cKQyX%2F%23F%7CQC9%2CB7QyX9%2DA%7CQyX7AZL13bB%207AlB%2A%5B%5D7bB%2C%7CD7Xysp%7CQy%207%2DB%7CD%2D7%20GZL7%23F%207%2D%23C%7CQyX%2D7AZLB%2F7E%207%5ECZL7B7XyQZLG%20GE7LZA%2D7XyQ%7CA%2D7%20Eb13LZD7XyQ%7CG6XyQ%7CA%2D7%20D7%20Z%20==0=0===A%20Pretty%20Girl%20Is%20Like%20A%20Melody",
-    "charts": [],
+    "charts": [
+      {
+        "book": "The Real Book, Vol. 3",
+        "page": "243"
+      }
+    ],
     "time_signature": "4/4",
     "tags": [],
-    "obscurity_score": 97,
+    "obscurity_score": 88,
     "difficulty_score": 50
+  },
+  {
+    "alternate_titles": [],
+    "additional_feels": [],
+    "ireal_style": null,
+    "ireal_url": "irealb://A%20Shade%20Of%20Jade=Henderson%20Joe==Up%20Tempo%20Swing=C%2D==1r34LbKcu71%237%5Eb4C%2D7XcKQyX11%237%5EbDZLx%20%20ZL%20x%20ZL%20lcKQyl%20LZE4TA%2A%7BGB%2A%5B%7D%2311LZL%20x%20ZL%20lcKQyX1%2317%5EbD%7CQyX11%237%5EDZ%20x%20%207%5EE%201%237C%7CQQKcl%20ZL%20lcKQyX7%5E%2DbBLZ%20lcKQyX9b31FZLGh7XyyX7%5EbD%2011%23%7CF%5E7%20QyX7%5EbEZL7%5EbE%20%2D7bB%7CQyX7%2DDZL7%2DD%7CGb%5E7%7CQyX9QyX7%2D1LZDb%20%2C9b7G%207%5EbAZL7b%5EA%207hD%7CQyX11%237%5E%5D%5B%2AAC1%237%5Eb%5EDZL1Z%20x%20L%2011%237%5EbEZL%20lcKyQX11%237%5EbDZL%20x%20ZE%5E7%231L%20lcK7%2311XyQ%7CDb%5E7%2311XyQKcl%20LZ%20x%20LZ%20x%20%20Z%20==0=0===A%20Shade%20Of%20Jade",
+    "time_signature": null,
+    "tags": [],
+    "obscurity_score": 75,
+    "difficulty_score": 75,
+    "title": "A Shade of Jade",
+    "composer": "Joe Henderson",
+    "original_key": "C-",
+    "feel": "up",
+    "charts": []
   },
   {
     "title": "A Sleepin' Bee",
@@ -325,10 +448,19 @@
     "additional_feels": [],
     "ireal_style": "Medium Swing",
     "ireal_url": "irealb://A%20Sleepin%27%20Bee=Arlen%20Harold==Medium%20Swing=Ab==1r34LbKcu7s7bG%204Ab%5E7L7D%207%5EbAZLsus7Eb%207%5EbAZLsus7bE%20ZDb%5E74TA%2A%5BL9b7Cb%5E7%20D%5B%5D%207bD%207bEZL7E7%20%2DbBZL7F%207CZL7b%2ABC9%20AZLsuDZL31F7b1331bAZL9b7bE%209bZEL31b7bB%2031bBZL%20Ab7b%2031FZus7bE%7CsBb%2DA%2A%5B%5D%207bE%20sus7blE%7C%2CoD%2C6bD%2C7%2DC%2C7Ab%5E7%20QyX7b7CZL7%5E7%20EbbAZLsus7bG%207%5EbZDL7D%207%5EbAZLsus7%5E7%20DbbAZLs31bBZBb%2D7%20F%2031FZL9b7C%209C%2AC%5B%5D%207bD%207bEZL7E7b13LZL7F%20%207CZL13LZEbBZL7F%207CZL7%5Eb%20D7%5EbAZL9b7bE%209b7%20Eb7b7bB%20F7LZBb7XyQ%7CEb7sus%20Eb7LZUAb6%20B%5E7LZE%5E7%20A%5E7%20Z%20==0=0===A%20Sleepin'%20Bee",
-    "charts": [],
+    "charts": [
+      {
+        "book": "The New Real Book, Vol. 1",
+        "page": "322"
+      },
+      {
+        "book": "The Real Book, Vol. 3",
+        "page": "268"
+      }
+    ],
     "time_signature": "4/4",
     "tags": [],
-    "obscurity_score": 97,
+    "obscurity_score": 79,
     "difficulty_score": 50
   },
   {
@@ -341,10 +473,15 @@
     ],
     "ireal_style": "Medium Up Swing",
     "ireal_url": "irealb://A%20Smooth%20One=Goodman%20Benny==Medium%20Up%20Swing=F==1r34LbKcu7L6bB%204Bo7%206F%20A%2F6FZL6bB%207BoZL6F%20A%2F6FZL6bBLZBo74TA%2A%7BB%2A%5B%5D%20%20F6LZ2N%7CQyXQyXQyXQy%7DXQyX6F1NZL7C%207GF6%20F7A%2F6FZL9b7DQ%7CBo7yX7oB%7CQyX6bBZLF7%207%2DC%7CQyX6F%7CQyXQ%7CF6%20yX6bBoBZL6C7%20%5D%5BFZL6bB%207oBZL6FA%20%2F6FZL6bB%207oBA%2A6%2FA%20F%207hGZ7%20Bb6LZF6%2FA%20F6LZG7%20C7LZF6XyQZ%20==0=0===A%20Smooth%20One",
-    "charts": [],
+    "charts": [
+      {
+        "book": "Jazz Fakebook",
+        "page": "344"
+      }
+    ],
     "time_signature": "4/4",
     "tags": [],
-    "obscurity_score": 97,
+    "obscurity_score": 88,
     "difficulty_score": 50
   },
   {
@@ -355,10 +492,15 @@
     "additional_feels": [],
     "ireal_style": "Even 8ths",
     "ireal_url": "irealb://A%20Sound%20For%20Sore%20Ears=Heath%20Jimmy==Even%208ths=Eb==1r34LbKcu7L%20x%20Z4Bb7sQyXsus7bBZL%20x%20LZ%20x%20ZL%20lcKQyXsuKcl%20L4TA%2A%5B%20x%20ZL%5D%5B%2ABGyXsus7GZL%20x%20ZLx%20%20ZL%20lcKQyXsus7QKcl%20%20%20x%20ZQyX7%5E%20%5D%5B%2ACX7%5EbAZL7bE%207%2Db%7CBQyX7%5EAZL7E%207%2DByQ%7CAb%20x%20ZL%7CF%5E7XyQ%7CD%5E7XyQ%7CB%5E7XyQZ%20==0=0===A%20Sound%20For%20Sore%20Ears",
-    "charts": [],
+    "charts": [
+      {
+        "book": "The Colorado Cookbook",
+        "page": "12"
+      }
+    ],
     "time_signature": "4/4",
     "tags": [],
-    "obscurity_score": 97,
+    "obscurity_score": 88,
     "difficulty_score": 50
   },
   {
@@ -369,10 +511,19 @@
     "additional_feels": [],
     "ireal_style": "Ballad",
     "ireal_url": "irealb://A%20Sunday%20Kind%20Of%20Love=Belle%2DPrima%2DLeonard%2DRhodes==Ballad=F==1r34LbKcu7bB%20%2C74F%5E7%2C%2C9b7D%20%2C7%2DAZL%2C97bC%20%2C7%2DGZL%2C7o%23F%20LZBb%5E4TA%2A%7B%2C7bDsA%2D7%2C%20ZL%2C7hD%20%2C7%5EF1NZ%2CL5%237C%20%2C7%2DGZL%2C7DG%2D7%2C%20ZL%2C7%2Db7F%20%2CQXyQ%20%2C7F%20%2C7%2DCB%2A%5BY%5D%20l%20cKQyX%2C7%5EFl2NZLLZC%2D7yX%7D7CL%2C7o%23b%5E7%20F%7CQyX%2C7GZL%2C7%2DD%207%2CG%7CQyX%2C7%5EbBZL%2C7C7%2C%20FBZL%2C9%5EbBZLyQ%5DY%5B%20%2C7%2DAZL%2C9b7C%20%2C%2D7GZL7o%23F%20%2C7%5EFA%2AD7b9%2CX7%2DGZ7%5EFl%7C%2D7%2CLZ%2DGs%20%2C7%5EFZL%2C5%237%20C%2C7%2DGZL%2C7D%20%2C7%2DA7%2CBb%2DbB%20%2C7%2CXyQZ%20==0=0===A%20Sunday%20Kind%20Of%20Love",
-    "charts": [],
+    "charts": [
+      {
+        "book": "Jazz Fakebook",
+        "page": "369"
+      },
+      {
+        "book": "Jazz LTD",
+        "page": "322"
+      }
+    ],
     "time_signature": "4/4",
     "tags": [],
-    "obscurity_score": 97,
+    "obscurity_score": 79,
     "difficulty_score": 50
   },
   {
@@ -383,10 +534,15 @@
     "additional_feels": [],
     "ireal_style": "Waltz",
     "ireal_url": "irealb://A%20Taste%20Of%20Honey=Marlow%2DScott==Waltz=D%2D==1r34LbKcu77%2DD%7CQ4D%2DXyD%7CQyX%2DD%7CQyX7G%7CyQX7%2DD%7CQyX7%5E%2DD%7CQ%2D%5E7Xy3TA%2A%5BDB%2A%5D%207XyQ%7CyX%2DD%7CQyX7%2DA%7CQy7X%5EbBZL%20lcKQyX%2DDQKcl%20G%7CQyX%207hE%7C%7CG7Xy%7CQyX7%2DA%7CQyX7%5Eb%7CBQyX7G%7CQyX7%2DD%7CQD%2DXyQQyX7%2DA7b9%20Z%20==0=0===A%20Taste%20Of%20Honey",
-    "charts": [],
+    "charts": [
+      {
+        "book": "Jazz Fakebook",
+        "page": "379"
+      }
+    ],
     "time_signature": "3/4",
     "tags": [],
-    "obscurity_score": 97,
+    "obscurity_score": 88,
     "difficulty_score": 50
   },
   {
@@ -397,10 +553,15 @@
     "additional_feels": [],
     "ireal_style": "Ballad",
     "ireal_url": "irealb://A%20Time%20For%20Love=Mandel%20Johnny==Ballad=F==1r34LbKcu7%7CQyXF4F%5E7XQyX7%2DG%7CQyX7G%7CQXy6F%7CQyXF%2F7bE%7CQy%7CG%2D7%2F4TA%2A%5B7G%7CQy7LZEh%7CQyXbD%2F7bE%7CQyX%2D7DB%2A%5B%5D%209b7A%20A%2F7F7%2FCXA%207%2DE7A%207%2D%2D7XyQ%2031b7A%20A%2F7hEZLA7%207%2DE%7CQyXF%2F7%2DG%7C%5D%5B%2ACDG%7CQyX%23CZL7%20G7LZZL6%2DC%207%2DDZL31bA7%207%2DAZL31b7E%206CBh7%20E7%2DDZL%7CQyX7%2D7LZG7%2DDZL9b7A%207hE%7CyQX7%5EFD%2A%5B%5D%207C%207%2DXyQ%7CG%23F%207%2D7%2DG%7CQQ%7CG%2D7QyX7%2DDZL9b7A%207EhZL7A%207%2DE%7CQyXF%2F%7CG7XyyX7%2DGXyQ%7CC7XyQ%7CF6XyQ%7CC7susXyQZ%20==0=0===A%20Time%20For%20Love",
-    "charts": [],
+    "charts": [
+      {
+        "book": "The Real Book, Vol. 3",
+        "page": "315"
+      }
+    ],
     "time_signature": "4/4",
     "tags": [],
-    "obscurity_score": 97,
+    "obscurity_score": 88,
     "difficulty_score": 50
   },
   {
@@ -425,10 +586,19 @@
     "additional_feels": [],
     "ireal_style": "Medium Swing",
     "ireal_url": "irealb://A%20Weaver%20Of%20Dreams=Young%20Victor==Medium%20Swing=C==1r34LbKcu7yX7%2DG4C%5E7XKQyX7%2DA%7CQyX9b7%7CEQyX7hBZL%20lcKQycl%20LZ4TA%2A%5B%20lcKQyQ%5D%5B%2AQyX7A%7CQyX7%2DE%7CQXy11%237bB%7CQyX7%5EFB%7CD7XyX7C%7CQyX7%2DAXyQ%7CGb7E%7CQyX7hBZL%20lKcQyX7%5ECA%2A%5B%5DQyX79XyQ%7C7%2DDZL%2DbE%7CQLZG%2D7%7CQyX11%237bB%7CQyX%5E7FC%2A%5B%5DQyX7C%7CQyXE%2D7Xy%20lcKQ7%20Ab7LZD%2D7XyQ%7CG7XyQ%7CC%5E7XyQ%7CD%2D7%20G7%20Z%20==0=0===A%20Weaver%20Of%20Dreams",
-    "charts": [],
+    "charts": [
+      {
+        "book": "The Colorado Cookbook",
+        "page": "262"
+      },
+      {
+        "book": "The New Real Book, Vol. 1",
+        "page": "398"
+      }
+    ],
     "time_signature": "4/4",
     "tags": [],
-    "obscurity_score": 97,
+    "obscurity_score": 79,
     "difficulty_score": 50
   },
   {
@@ -524,6 +694,26 @@
     "tags": [],
     "obscurity_score": 88,
     "difficulty_score": 50
+  },
+  {
+    "alternate_titles": [],
+    "additional_feels": [],
+    "ireal_style": null,
+    "ireal_url": null,
+    "time_signature": null,
+    "tags": [],
+    "obscurity_score": 70,
+    "difficulty_score": 85,
+    "title": "Actual Proof",
+    "composer": "Herbie Hancock",
+    "original_key": null,
+    "feel": "medium_swing",
+    "charts": [
+      {
+        "book": "The New Real Book, Vol. 3",
+        "page": "1"
+      }
+    ]
   },
   {
     "title": "Adam's Apple",
@@ -712,6 +902,21 @@
     "difficulty_score": 50
   },
   {
+    "alternate_titles": [],
+    "additional_feels": [],
+    "ireal_style": null,
+    "ireal_url": null,
+    "time_signature": null,
+    "tags": [],
+    "obscurity_score": 80,
+    "difficulty_score": 75,
+    "title": "Agitation",
+    "composer": "Miles Davis",
+    "original_key": null,
+    "feel": "up",
+    "charts": []
+  },
+  {
     "title": "Agua De Beber",
     "composer": "Antonio-Carlos Jobim",
     "original_key": "D-",
@@ -752,6 +957,30 @@
     "tags": [],
     "obscurity_score": 94,
     "difficulty_score": 50
+  },
+  {
+    "alternate_titles": [],
+    "additional_feels": [],
+    "ireal_style": null,
+    "ireal_url": null,
+    "time_signature": null,
+    "tags": [],
+    "obscurity_score": 60,
+    "difficulty_score": 75,
+    "title": "Ah-Leu-Cha",
+    "composer": "Charlie Parker",
+    "original_key": "C",
+    "feel": "up",
+    "charts": [
+      {
+        "book": "Jazz Fakebook",
+        "page": "36"
+      },
+      {
+        "book": "Jazz LTD",
+        "page": "10"
+      }
+    ]
   },
   {
     "title": "Ahmid-6",
@@ -2901,10 +3130,15 @@
     "additional_feels": [],
     "ireal_style": "Medium Swing",
     "ireal_url": "irealb://Best%20Thing%20For%20You%20Is%20Me%2C%20The=Berlin%20Irving==Medium%20Swing=C==1r34LbKcu7G%207%2DD4B7b1%207%5ECZL7G%207%2DDZLA7%207%2DEZL%20lcKQyX3A%2D7LZ4TA%2A%7BQyX7%5EE%2D7Xy%5D%20%20lcKQyX6C2NZ%20LQyXQyX%7DQyX7A%7CQ%5B%2ABAb1NZL7yX7G%7CZBb%2D7D%7CQyX%2CbE%2F7%2DF%7CQXy7%2DF%7CQyX7bE%7CQyX%2D7XyQL%20lcK%2F7%2DA%20B7b13yX7%5ECZL7G%207%2DDZ7LA%207%2DEZL%20lcKQyXQ%7CA%2D7C%2A%5B%5DQGLZF%23h7XyQ%7CF%2D6XyQ%7CC%2FE%20A7LZD%2D7%20G7LZC6XyQKcl%20%20Z%20==0=0===Best%20Thing%20For%20You%20Is%20Me%2C%20The",
-    "charts": [],
+    "charts": [
+      {
+        "book": "The Real Book, Vol. 3",
+        "page": "25"
+      }
+    ],
     "time_signature": "4/4",
     "tags": [],
-    "obscurity_score": 97,
+    "obscurity_score": 88,
     "difficulty_score": 50
   },
   {
@@ -3186,10 +3420,15 @@
     "additional_feels": [],
     "ireal_style": "Slow Swing",
     "ireal_url": "irealb://Birth%20Of%20The%20Blues%2C%20The=Henderson%20Ray==Slow%20Swing=C==1r34LbKcu7%2DD%7CQy4C%5E7%207o%23F%207%5EFZL7E%207C%5EZL7G%207%2DDZL7o%23CLZG7X4T%7BA%2A%5DQyX6ZN1C6%206C2NZL%20QyXQyX%20%7D7bD%207%2DDZL7obE%20F7LZCL7G%207%5D%207bDXyQKcQyX7DZL%20lcKQyXA7ZL%20x%20ZL%20x%20ZL%20l%7CD%2D7%207E%5BB%2AG%207%2DD7%20C%23oGZL7o%23F%207%5EFZL7%20E7%5ECZL7G%207%2DDZL77XyQ%7C%5EC%5BA%2A7LZC6%20Ebo7LZD%2D7%20G7%20%5D==0=0===Birth%20Of%20The%20Blues%2C%20The",
-    "charts": [],
+    "charts": [
+      {
+        "book": "The Real Book, Vol. 2",
+        "page": "25"
+      }
+    ],
     "time_signature": "4/4",
     "tags": [],
-    "obscurity_score": 97,
+    "obscurity_score": 88,
     "difficulty_score": 50
   },
   {
@@ -3296,6 +3535,28 @@
     ],
     "obscurity_score": 79,
     "difficulty_score": 84
+  },
+  {
+    "alternate_titles": [
+      "Manha de Carnaval"
+    ],
+    "additional_feels": [],
+    "ireal_style": null,
+    "ireal_url": null,
+    "time_signature": null,
+    "tags": [],
+    "obscurity_score": 25,
+    "difficulty_score": 45,
+    "title": "Black Orpheus",
+    "composer": "Luiz Bonfá",
+    "original_key": "A-",
+    "feel": "latin",
+    "charts": [
+      {
+        "book": "The Real Book, Vol. 1",
+        "page": "49"
+      }
+    ]
   },
   {
     "title": "Blackberry Winter",
@@ -3590,10 +3851,15 @@
     "additional_feels": [],
     "ireal_style": "Medium Swing",
     "ireal_url": "irealb://Blue%20Room%2C%20The=Rodgers%20Richard==Medium%20Swing=F==1r34LbKcu7%5EbBZL4F6%20DCZL7C%207%2DGZL7%2DD7%20%2DAZL7C%207%2DGZL7%2D%2D7%20F74T%7BA%2A%2C7%2DG%2CLZN1D%2F6Fs2NZL%20QyXQy%7DX%207C%207%2DGZL7G%207%2DA%2CAbo7bE%207%2DGZL7F6XyQ%2DAZL11%237bB%206F%7CyQX7C%7CQyX7%2DG%5BB%2A%5D7%20Abol%7C%2C7CL7C%207ZEb7%20%2DD%206F%5BC%2A%5D%207C%207G%2DZL7G%207%2DDZL9b7D7LZG%2DL7C%207%2C7%2DG%2CD%2D7LZ%2F6FsZL7bE%207%5EbBLZ7F%207%2DCZL7C%207%2DGA%2CAbo%207%2DAZC7%2C%7ClF6%20C7%20Z==0=0===Blue%20Room%2C%20The",
-    "charts": [],
+    "charts": [
+      {
+        "book": "The Real Book, Vol. 1",
+        "page": "55"
+      }
+    ],
     "time_signature": "4/4",
     "tags": [],
-    "obscurity_score": 97,
+    "obscurity_score": 88,
     "difficulty_score": 50
   },
   {
@@ -3980,6 +4246,26 @@
     "difficulty_score": 50
   },
   {
+    "alternate_titles": [],
+    "additional_feels": [],
+    "ireal_style": null,
+    "ireal_url": null,
+    "time_signature": null,
+    "tags": [],
+    "obscurity_score": 60,
+    "difficulty_score": 60,
+    "title": "Blues on the Corner",
+    "composer": "McCoy Tyner",
+    "original_key": "F",
+    "feel": "medium_swing",
+    "charts": [
+      {
+        "book": "The New Real Book, Vol. 1",
+        "page": "28"
+      }
+    ]
+  },
+  {
     "title": "Bluesette",
     "composer": "Toots Thielemans",
     "original_key": "Bb",
@@ -4157,6 +4443,10 @@
     "ireal_url": "irealb://Boplicity=Henry%20Cleo==Medium%20Swing=F==1r34LbKcu7G%7CQyX4G%2D7%20L%2C5%237F%207%2DC%7CQyX%5E7FZL7C%207%2DGZL7%5EFZBb%5E74TA%2A%7B%2DCZL%2CXyQ%7CG7%2DCB%2A%5B%7DQyX11%237F%5EZL%2Csus7C%20%2CC%2F7%2D%20F7%235%2CC%2F7%2D7%2DbA%20ZBb%5E7L7A%207%2DbBZL%2C5%237Eb%207%2DbBZL%20lcKQyXZAb%5E7L7B%207bBZL%2C%20C7%20%5D7%2DC%7CQyX7%5EFZL7C7%20%2DGZL7%5EF%207%2DGA%2A%5B%20F7%2357%2DGZL%5E7XyQ%7CG%2D7%2FC%2CXyQ%7CG%2D7%2FC%2C%20C7sus%2CLZF%5E7%2311XyQZ%20==0=0===Boplicity",
     "charts": [
       {
+        "book": "Jazz Fakebook",
+        "page": "70"
+      },
+      {
         "book": "Library of Musicians' Jazz",
         "page": "13"
       },
@@ -4306,10 +4596,19 @@
     "additional_feels": [],
     "ireal_style": "Waltz",
     "ireal_url": "irealb://Boy%20Next%20Door%2C%20The=Martin%2DBlane==Waltz=C==1r34LbKcu7%2C7%2DG%7C4Bb%5E7%5EbB%7CQyX%2C7F%7CQyX7%2C%2DC%7CQyX%2C7G%7CQyX%2C7%2CXyQ3TA%2A%5BhE%7CQy7%2CXyQQyX%2C7%5EbB%7CQyX%2C7%7CFQyX%2C7%2DC%7CQyX7C%7C%7CG%2D7XC%7CQyX7G%7CQy%7CA7b9BB%2A%5BY%5D%207F%20%2C7%2DCLZ%2C7bD%20%2C7%2DD%7CQyX%2Cb%5E7%2CXQyX%2C7yX5%237C%2D7%2CXX%2C7C%7CQyX%2C7%2DG%7CQXy%2C7%5EbB%7CQyX7F%7CQyyQ%7CF%23%7CQyX%2C7%5EbB%7C7%2CXyQF%7CQyX%2C7bG%7CQyX%2CC7%7CQyX%2C7hEZL%20lcK7%2CXyQ%5EbB%7CQ%2CXyQKcl%20%20Z%20==0=0===Boy%20Next%20Door%2C%20The",
-    "charts": [],
+    "charts": [
+      {
+        "book": "The New Real Book, Vol. 2",
+        "page": "34"
+      },
+      {
+        "book": "The Real Book, Vol. 3",
+        "page": "37"
+      }
+    ],
     "time_signature": "3/4",
     "tags": [],
-    "obscurity_score": 97,
+    "obscurity_score": 79,
     "difficulty_score": 50
   },
   {
@@ -4658,6 +4957,30 @@
     "difficulty_score": 50
   },
   {
+    "alternate_titles": [],
+    "additional_feels": [],
+    "ireal_style": null,
+    "ireal_url": "irealb://Butterfly=Hancock%20Herbie==Funk=F%2D==1r34LbKcu7sx4%28%3C4F%2D7%3C%2DAp%7CQyX%3Etuohguroht%20leef%20x%20flah7%2C%20LZ4Ti%2A%7B%2011%2DDXyQ%7Cp11%2DFZL%2011%2DAp%7CQXy11%2DFA%2AS%7B%7D%20%207%2DAXyQ%7Cp7%2DF%3E%29%237%5EbAn%20Bb7B%2F7%5EbAZL%205%239%237lAnsZL%20n%20ZL%20n%20ZLbXyQ%7CB%2A%5B%7D%205%239%237yQ%7CAblcKQyXsus31bE%7CyQX31bB%7CQyXbB%2F7%5E%20LZEbXbB%2F5F%20nl%7Cl%20LZA%3EeniFQyXQyX%3CQ%2C%2FCWspp%7CQyXsus31bC7%2FE%2CcKQyX%7D%20%3EadA%2D7%20L%20%2ES%2EDQyXQyX%3C%20%3E3x%3C7%2DAp%7CQyX7%2DF%7BZal%20CopZL7%2Do86%2A%3CQ%20%20Y%7B%20ZL%20x%20ZL%20x%20ZL%20n%3Eepo66%2A%3C%20%2C11%2DFQx%20%20%7D%7ByXQyXpen%3EBb13%20LZx%20LZx%20LZx%20%20%7Df%3CD%2EC%2E%20al%20Fine%3EA%5E7%2311XyQZ%20==0=0===Butterfly",
+    "time_signature": null,
+    "tags": [],
+    "obscurity_score": 65,
+    "difficulty_score": 70,
+    "title": "Butterfly",
+    "composer": "Herbie Hancock",
+    "original_key": "F-",
+    "feel": "latin",
+    "charts": [
+      {
+        "book": "The New Real Book, Vol. 3",
+        "page": "65"
+      },
+      {
+        "book": "The Real Book, Vol. 1",
+        "page": "68"
+      }
+    ]
+  },
+  {
     "title": "Butterfly Dreams",
     "composer": "Stanley Clarke",
     "original_key": "C",
@@ -5002,6 +5325,26 @@
     "difficulty_score": 50
   },
   {
+    "alternate_titles": [],
+    "additional_feels": [],
+    "ireal_style": null,
+    "ireal_url": "irealb://Cantaloupe%20Island=Hancock%20Herbie==Rock%20Pop=F%2D==1r34LbKcu7%20x%20ZL%2D11Xy%20lcKQyX11%237bDZ%20Lx%20ZL%20x%20ZL%20lcKQLZ%20x%20F44T%5BLZD%2D11XyQKcl%20LZ%20x%20LZ%20x%20LZF%2D11XyQKcl%20LZ%20x%20LZ%20x%20%20Z==0=0===Cantaloupe%20Island",
+    "time_signature": null,
+    "tags": [],
+    "obscurity_score": 30,
+    "difficulty_score": 35,
+    "title": "Cantaloupe Island",
+    "composer": "Herbie Hancock",
+    "original_key": "F-",
+    "feel": "medium_swing",
+    "charts": [
+      {
+        "book": "The Colorado Cookbook",
+        "page": "47"
+      }
+    ]
+  },
+  {
     "title": "Canto de Ossanha",
     "composer": "Powell Vinicius de Moraes-Baden",
     "original_key": "D-",
@@ -5014,6 +5357,26 @@
     "tags": [],
     "obscurity_score": 97,
     "difficulty_score": 50
+  },
+  {
+    "alternate_titles": [],
+    "additional_feels": [],
+    "ireal_style": null,
+    "ireal_url": null,
+    "time_signature": null,
+    "tags": [],
+    "obscurity_score": 58,
+    "difficulty_score": 55,
+    "title": "Cape Verdean Blues",
+    "composer": "Horace Silver",
+    "original_key": null,
+    "feel": "medium_swing",
+    "charts": [
+      {
+        "book": "Jazz Fakebook",
+        "page": "78"
+      }
+    ]
   },
   {
     "title": "Capim",
@@ -5220,6 +5583,26 @@
     "difficulty_score": 50
   },
   {
+    "alternate_titles": [],
+    "additional_feels": [],
+    "ireal_style": null,
+    "ireal_url": "irealb://Chameleon=Hancock%20Herbie==Funk=Bb%2D==1r34LbKcu7yX7bE4%3C%2A66%2DbB%7CQyX7bE%7CQyX%2D7bB%3EortnI%20ssaB%207XyQ%7C4Ti%2A%5BX7%2DbBBb%2D7X%3Ex426%2A%3C%20%207bE%7CQXy7%2DbB%7CQyX7bE%7CQy%20%7D%7B%2ABA%2A%7B%5DQyQ%7CEb7XyQ%7CBb%2D7XyQ%7CEb7%20%20%3C%2A624x%3E%20%7D%20==0=0===Chameleon",
+    "time_signature": null,
+    "tags": [],
+    "obscurity_score": 35,
+    "difficulty_score": 40,
+    "title": "Chameleon",
+    "composer": "Herbie Hancock",
+    "original_key": "Bb-",
+    "feel": "medium_swing",
+    "charts": [
+      {
+        "book": "The Real Book, Vol. 2",
+        "page": "58"
+      }
+    ]
+  },
+  {
     "title": "Chan Chan",
     "composer": "Compay Segundo",
     "original_key": "D-",
@@ -5396,6 +5779,10 @@
     "ireal_url": "irealb://Chega%20De%20Saudade%20%28No%20More%20Blues%29=Jobim%20Antonio%2DCarlos==Bossa%20Nova=D%2D==1r34LbKcu7%2A%5B%5D%2074G%2D9LDl%7C%2C7A%2C%2DEsZL7oZBL7%5EbBZL9%5EFZLCZ%2D7LZA4Ti%2A%5B7A%2ChE%2DLZD%2DZL9b7AZLbB%2F7hELZxZLB%2F9b7EZLC%2F7D%2DLZsD44TAZL%2DDBLZsBhb7AZL7hEZLxZL7b%5EBZLxZL%2DAl%7C%2C7E%2C9%20%5D%5B%2A%2DDl%7C%2C9b7AZLZE7b9b7DZL%2DDZL9b7ALZbB%2F7hEZLxZLB%2F9LZG%2DLC%2F7%2DDBZL7%5EZD%2D7%2F%5D%2C7A%2C7%2DEsZL%2DDZ9Lb7AZLB%2F9b7EZLC%5B%2AClDL%2DDZLL7%2DEZZE%2D7LL7%2D%23FZL7%5EDZL7oZDL7AZLsus7AZLxZZFo7LL%23D%2F7BsZLx7LZxLZLxZL7EZL7%2DBZL%5E7DD%2A%5B%5D%207AZL7hEZF%237LZEZLxZ7%2D%23FZ%2D7%2C%7CA7EZL7BZL7%2D%23FZL%2D7GZL7%5EGl%7C%2C7D%2C7%2DLZA7LbB%2C7%2DLZB7LZE7LZA7LZD6LZA7%20Z%20==0=0===Chega%20De%20Saudade%20(No%20More%20Blues)",
     "charts": [
       {
+        "book": "Jazz Fakebook",
+        "page": "82"
+      },
+      {
         "book": "The New Real Book, Vol. 1",
         "page": "49"
       },
@@ -5445,6 +5832,10 @@
     "ireal_style": "Up Tempo Swing",
     "ireal_url": "irealb://Cherokee=Noble%20Ray==Up%20Tempo%20Swing=Bb==1r34LbKcu7yX7bA4Bb6XKQyX7%5EbE%7CQyX7b%7CBQyX7%2DFZL%20lcKQycl%20LZ4T%7BA%2A7%2DC%7CQLZBb6G%7CQyX7%2DC1NZL%20lKcQyX7CZL%20lcKQyX7b9Xy%20lcKQ%5BB%2AY%5D7%235XyiF%3ClcKQyX6bB%7CQXy7F%7CQyX7%2DC2N%7C%7DQne%3E%20%20F%7CQyX%20lcKQyQ%7CF%23%7CQyX7E%7CQyX7%2DBZ%20LlcKQyX7%5EB%7CQyX7A%5E7XyX7%2D%23C%20%2EC%2EDXyQ%7CD%7CQyX7C%7CQyX7%2DGZ%20LlcKQyX7%5EG%7CQyX7C%2D7%20%3C7%2DAZLal%202nd%20ending%3E%20LZF7%235%20%20%20%5D==0=0===Cherokee",
     "charts": [
+      {
+        "book": "Jazz Fakebook",
+        "page": "83"
+      },
       {
         "book": "The Colorado Cookbook",
         "page": "52"
@@ -5520,6 +5911,26 @@
     "tags": [],
     "obscurity_score": 97,
     "difficulty_score": 50
+  },
+  {
+    "alternate_titles": [],
+    "additional_feels": [],
+    "ireal_style": null,
+    "ireal_url": null,
+    "time_signature": null,
+    "tags": [],
+    "obscurity_score": 70,
+    "difficulty_score": 70,
+    "title": "Circle",
+    "composer": "Miles Davis",
+    "original_key": null,
+    "feel": "ballad",
+    "charts": [
+      {
+        "book": "The Real Book, Vol. 2",
+        "page": "61"
+      }
+    ]
   },
   {
     "title": "Circle Game",
@@ -5614,6 +6025,26 @@
     "tags": [],
     "obscurity_score": 97,
     "difficulty_score": 50
+  },
+  {
+    "alternate_titles": [],
+    "additional_feels": [],
+    "ireal_style": null,
+    "ireal_url": "irealb://Cold%20Duck%20Time=Harris%20Eddie==Rock%20Pop=F==1r34LbKcu7ZLQyX7XyQ%7C%7CQyX7bB%7CQyX7FZQLyX%7CrQyX%7CQyX7bBXyQr%7CF44T%7BDb%5E7XyQ%7CEbadd9%20%20U%3CFine%3EsF7%2C%7Cl%20n%20LZ%20n%20%20%7D%20==0=0===Cold%20Duck%20Time",
+    "time_signature": null,
+    "tags": [],
+    "obscurity_score": 58,
+    "difficulty_score": 50,
+    "title": "Cold Duck Time",
+    "composer": "Eddie Harris",
+    "original_key": "F",
+    "feel": "medium_swing",
+    "charts": [
+      {
+        "book": "The New Real Book, Vol. 2",
+        "page": "56"
+      }
+    ]
   },
   {
     "title": "Come Away With Me",
@@ -5888,10 +6319,15 @@
     "additional_feels": [],
     "ireal_style": "Medium Swing",
     "ireal_url": "irealb://Confessin%27%20%28That%20I%20Love%20You%29=Daugherty%2DNeiberg%2DReynolds==Medium%20Swing=G==1r34LbKcu7s7D%7CQ4G%5E7%20L7E%207%2DB%7CQyX7%5EGLZ5%237D%207%5EGZL5%237DZA7Xy4T%7BA%2A%2DD%5BB%2ALZN1GKQyX6G2NZL%20QyXyQX%7D%207D%207%2DA%7CQyX6cl%20%20%5D7D%20subE%2C7EG7XyQ%7CQyX7A%7CQyX7%2DE%7CyQX6CZL5%237G%207%5EC%7CA%2D6%20s%7CQyX7%207%2DB%7C9sus%20GZL5%237D%207%5EGZL57%23D%207%5EG%5BA%2A%5D%209b7D%5E7XyQDl%7C%2C7E7LZA7XyQ%7CD7sus%20D7LZG6XyQ%7CA%2D7%20D7%20Z==0=0===Confessin'%20(That%20I%20Love%20You)",
-    "charts": [],
+    "charts": [
+      {
+        "book": "The Real Book, Vol. 2",
+        "page": "65"
+      }
+    ],
     "time_signature": "4/4",
     "tags": [],
-    "obscurity_score": 97,
+    "obscurity_score": 88,
     "difficulty_score": 50
   },
   {
@@ -7099,6 +7535,10 @@
     "ireal_url": "irealb://Desafinado=Jobim%20Antonio%2DCarlos==Bossa%20Nova=F==1r34LbKcu7AZL7%2D4F%5E7L7DZL7hAZL7CZL7G%2DZLxZL11%237GZLxZb9LZG4T%5BA%2AL11%237D7LZDL7%5EF%5BA%2A%5D%20xZL7%5EGbZLxZL9b7GZL9b7ZxLZGZL9b7L7%5EAZ%2D7LZCZL7%5EFZL6%2DbBZL7G%2DZL9b7DZL7hAZL7E7%239LGZLxZZL7%2D%23LZB%2D7AZL7EZL7%2DBZL7oBbZL7%5EA%5BB%2A%5D%207EZL%5E7LZF7obBZ%5D%209b7E7LZCZL6%2DbEZL7%2DGZL7ZGL7%2DDZL7o%23CZL7%5EG7LZCZL7%2DB6%2DbBZ7LZxLL9b7DZL7hAZL7CLZ7%2DGZLxZL11%237GZZG%2D7L%5EF%5BA%2ALZF%5E7LZD%2D7LZG7LZxLZEb7LZxLZG7LZsG%2D7%2CC7%2C%7ClF6LZC7%20Z==0=0===Desafinado",
     "charts": [
       {
+        "book": "Jazz Fakebook",
+        "page": "97"
+      },
+      {
         "book": "The New Real Book, Vol. 1",
         "page": "65"
       },
@@ -8013,13 +8453,17 @@
         "page": "212"
       },
       {
+        "book": "The New Real Book, Vol. 2",
+        "page": "79"
+      },
+      {
         "book": "The Real Book, Vol. 1",
         "page": "127"
       }
     ],
     "time_signature": "4/4",
     "tags": [],
-    "obscurity_score": 70,
+    "obscurity_score": 61,
     "difficulty_score": 50
   },
   {
@@ -8214,6 +8658,21 @@
     "tags": [],
     "obscurity_score": 88,
     "difficulty_score": 50
+  },
+  {
+    "alternate_titles": [],
+    "additional_feels": [],
+    "ireal_style": null,
+    "ireal_url": null,
+    "time_signature": null,
+    "tags": [],
+    "obscurity_score": 70,
+    "difficulty_score": 65,
+    "title": "Effendi",
+    "composer": "McCoy Tyner",
+    "original_key": null,
+    "feel": "medium_swing",
+    "charts": []
   },
   {
     "title": "Eiderdown",
@@ -8465,11 +8924,15 @@
       {
         "book": "Jazz Fakebook",
         "page": "110"
+      },
+      {
+        "book": "The Real Book, Vol. 3",
+        "page": "75"
       }
     ],
     "time_signature": "4/4",
     "tags": [],
-    "obscurity_score": 88,
+    "obscurity_score": 79,
     "difficulty_score": 50
   },
   {
@@ -9172,6 +9635,21 @@
     "difficulty_score": 50
   },
   {
+    "alternate_titles": [],
+    "additional_feels": [],
+    "ireal_style": null,
+    "ireal_url": null,
+    "time_signature": null,
+    "tags": [],
+    "obscurity_score": 70,
+    "difficulty_score": 80,
+    "title": "Fifth House",
+    "composer": "John Coltrane",
+    "original_key": null,
+    "feel": "up",
+    "charts": []
+  },
+  {
     "title": "Fine And Dandy",
     "composer": "Kay Swift",
     "original_key": "F",
@@ -9214,15 +9692,15 @@
     "additional_feels": [],
     "ireal_style": null,
     "ireal_url": null,
-    "charts": [],
     "time_signature": null,
     "tags": [],
-    "obscurity_score": 30,
-    "difficulty_score": 50,
+    "obscurity_score": 45,
+    "difficulty_score": 60,
     "title": "Firm Roots",
     "composer": "Cedar Walton",
     "original_key": "Eb",
-    "feel": "medium_swing"
+    "feel": "medium_swing",
+    "charts": []
   },
   {
     "title": "First Time Ever I Saw Your Face, The",
@@ -9826,6 +10304,30 @@
     "difficulty_score": 50
   },
   {
+    "alternate_titles": [],
+    "additional_feels": [],
+    "ireal_style": null,
+    "ireal_url": null,
+    "time_signature": null,
+    "tags": [],
+    "obscurity_score": 40,
+    "difficulty_score": 65,
+    "title": "Freedom Jazz Dance",
+    "composer": "Eddie Harris",
+    "original_key": "Bb",
+    "feel": "medium_swing",
+    "charts": [
+      {
+        "book": "The New Real Book, Vol. 2",
+        "page": "110"
+      },
+      {
+        "book": "The Real Book, Vol. 1",
+        "page": "165"
+      }
+    ]
+  },
+  {
     "title": "Freight Train",
     "composer": "Tommy Flanagan",
     "original_key": "Ab",
@@ -10071,13 +10573,25 @@
     "ireal_url": "irealb://Gentle%20Rain%2C%20The=Bonfa%20Luiz==Bossa%20Nova=A%2D==1r34LbKcu7A%286%2DG4A%2D6X9b7E%28%20%7CQyX%297hB%23%28G%2F9b7EZL%20lcKQy%29x%20LZ4T%7BA%2AX9b7B%28D7%29Lh%23FZL%20lcKQyX6FLZ%297C%28%20%20%297%2DG%287CZ7XyQ%7C%20%20%297%2D11%237b7XyQ%7C6%2DA1NZL9b7E%207h%7CBQyX7hD%7CQyX9b7AXyQ%7CBhE%7CQyA%7CQyX%7CN2A%2DyX6F%7CQyX7C%7CQyXF6ZL7C%207%2DGZL7D%207Q%7CE%2D7Y%7DQyX%2D6XyQ%7CBb7%2311%20%20%20Z==0=0===Gentle%20Rain%2C%20The",
     "charts": [
       {
+        "book": "The Colorado Cookbook",
+        "page": "76"
+      },
+      {
         "book": "The New Real Book, Vol. 3",
         "page": "128"
+      },
+      {
+        "book": "The Real Book, Vol. 1",
+        "page": "169"
+      },
+      {
+        "book": "The Real Book, Vol. 2",
+        "page": "122"
       }
     ],
     "time_signature": "4/4",
     "tags": [],
-    "obscurity_score": 85,
+    "obscurity_score": 60,
     "difficulty_score": 50
   },
   {
@@ -10206,6 +10720,21 @@
     "difficulty_score": 93
   },
   {
+    "alternate_titles": [],
+    "additional_feels": [],
+    "ireal_style": null,
+    "ireal_url": null,
+    "time_signature": null,
+    "tags": [],
+    "obscurity_score": 60,
+    "difficulty_score": 60,
+    "title": "Gingerbread Boy",
+    "composer": "Jimmy Heath",
+    "original_key": null,
+    "feel": "medium_swing",
+    "charts": []
+  },
+  {
     "title": "Girl From Ipanema, The",
     "composer": "Antonio-Carlos Jobim",
     "original_key": "F",
@@ -10217,11 +10746,19 @@
       {
         "book": "Jazz Fakebook",
         "page": "132"
+      },
+      {
+        "book": "The Colorado Cookbook",
+        "page": "70"
+      },
+      {
+        "book": "The Real Book, Vol. 1",
+        "page": "171"
       }
     ],
     "time_signature": "4/4",
     "tags": [],
-    "obscurity_score": 85,
+    "obscurity_score": 67,
     "difficulty_score": 50
   },
   {
@@ -10809,6 +11346,21 @@
     "tags": [],
     "obscurity_score": 70,
     "difficulty_score": 50
+  },
+  {
+    "alternate_titles": [],
+    "additional_feels": [],
+    "ireal_style": null,
+    "ireal_url": null,
+    "time_signature": null,
+    "tags": [],
+    "obscurity_score": 70,
+    "difficulty_score": 70,
+    "title": "Hang Up Your Hang Ups",
+    "composer": "Herbie Hancock",
+    "original_key": null,
+    "feel": "medium_swing",
+    "charts": []
   },
   {
     "title": "Happiness Is A Thing Called Joe",
@@ -12791,13 +13343,17 @@
     "ireal_url": "irealb://I%27ll%20Get%20By%20%28As%20Long%20As%20I%20Have%20You%29=Ahlert%2DTurk==Medium%20Swing=C==1r34LbKcu7E%2F7Ap4C6Xy6FZL5%237E%207EZL7B%2D%207%5ECZL9b7Gpp%7CQXyQ%7Cp4TA%2A%5B7%2DEZL%20D9LZpZL9G%20D%2F7GZL7oEbpp%7CQyX7G%7CQyX9DpG7%2357%2DDZL6FZL5ZD%2D7%20EZL7%2DB%207%5ECZL9bG7pp%7CQyX6CB%2A%5B%207G7%20E7%23L7bE%207G%7CQypA7%2FEQyX9AZL9A%207%2DA%7CyQX7EZL7%2DB%207%2DDZL%7CD%2D7Xp%7CQyX%20G13b9LZC6XyQ%7CD%2D7%20G7%20Z%20==0=0===I'll%20Get%20By%20(As%20Long%20As%20I%20Have%20You)",
     "charts": [
       {
+        "book": "Jazz Fakebook",
+        "page": "167"
+      },
+      {
         "book": "The New Real Book, Vol. 2",
         "page": "148"
       }
     ],
     "time_signature": "4/4",
     "tags": [],
-    "obscurity_score": 88,
+    "obscurity_score": 79,
     "difficulty_score": 50
   },
   {
@@ -14213,10 +14769,15 @@
     ],
     "ireal_style": "Medium Up Swing",
     "ireal_url": "irealb://Intrepid%20Fox%20%28solos%29%2C%20The=Hubbard%20Freddie==Medium%20Up%20Swing=C==1r34LbKcu7%2DbAZL11LZxLxZLxZLxZL11%237B%5EZLxZLxZLxZLxZLZxLZx%2DCA%2A%7BxZL9%2DZF%2D9L%7D%20xZLxZLxZLsus13bBZLxZL9%2DAZLxZ%7C%2ABBbLxZL9LZxLZxLZxLZxLZG%2D9LZA%2D9%20%7DXyQ%20%3C%2A57Form%20is%20AABA%3E%20=Jazz%2DUp%20Tempo%20Swing=240=20===Intrepid%20Fox%20(solos)%2C%20The",
-    "charts": [],
+    "charts": [
+      {
+        "book": "The Real Book, Vol. 1",
+        "page": "231"
+      }
+    ],
     "time_signature": null,
     "tags": [],
-    "obscurity_score": 100,
+    "obscurity_score": 91,
     "difficulty_score": 50
   },
   {
@@ -14505,13 +15066,17 @@
     "ireal_url": "irealb://It%20Don%27t%20Mean%20A%20Thing=Ellington%20Duke==Medium%20Up%20Swing=Bb==1r34LbKcu7ZL7D%204G%2D%28G7bEZLE%2F7C%20%297%5E%2D%28GF%2F%2DGZL%23F%2F%2DG%20%29%2D%28G%2D7%294T%7BA%2A7F%7CQy%7CN1C7%7C%7DQyX5b7D%7CQyXD6%2FbB%7CQyX7o%23C%7CQyXN2C7XQyX%2DGyX7%2DGb6XyQKQyX6bE%7CQyX7bBQ%7CyX7%2DF%5BB%2A%5D%20%20lcKcl%20LZB%7CQyX7C%20%297yQ%7CF7%2F%2DGZL%23F%2F%2DG%20%29%2DG%2D%28G%5BA%2A%5DQyX7D%7CQyXF%28G%2D%5EX7C%7CQ%2FELZEb7%28G%2D7%29%20D7LZG%2DXyQ%7CC7XyQ%7CC%23o7XyQ%7CBb6XyQKcl%20%20Z==0=0===It%20Don't%20Mean%20A%20Thing",
     "charts": [
       {
+        "book": "The New Real Book, Vol. 2",
+        "page": "161"
+      },
+      {
         "book": "The Real Book, Vol. 1",
         "page": "241"
       }
     ],
     "time_signature": "4/4",
     "tags": [],
-    "obscurity_score": 88,
+    "obscurity_score": 79,
     "difficulty_score": 50
   },
   {
@@ -15037,6 +15602,21 @@
     "difficulty_score": 50
   },
   {
+    "alternate_titles": [],
+    "additional_feels": [],
+    "ireal_style": null,
+    "ireal_url": null,
+    "time_signature": null,
+    "tags": [],
+    "obscurity_score": 65,
+    "difficulty_score": 40,
+    "title": "Jean Pierre",
+    "composer": "Miles Davis",
+    "original_key": null,
+    "feel": "medium_swing",
+    "charts": []
+  },
+  {
     "title": "Jeannie's Song",
     "composer": "Marchel Ivery",
     "original_key": "F",
@@ -15149,6 +15729,10 @@
     "ireal_url": "irealb://Jitterbug%20Waltz=Waller%20Fats==Waltz=Eb==1r34LbKcu7L%20x%20Z4Eb%5E7L%20lcKQyX7bAZL%20%20xZL%20x%20ZL%20lcKQyXZ%20x%20L3T%7BA%2A%5DQyX7XyQKc7%2DG%7CQyX7C%7CQyX7G%2DZL%20x%20ZL%20x%20ZL%20lXyQ%7CC7%5EbEZ%20lcKQXyQKc7bDZL%20lcKQyX7%2DAbZL%20x%20ZL%20x%20ZL%20l%2311Xy7F%5BB%2A7bB%7CQyQKcl%7CQyX7C%7CQyX7%2DG1ZNL%20lcKQyX7bBZL%20F%2D7XyX7FZLXyQ%7D%7CN2Eb6XyQ%7CAb7XyQ%7CEb6XyQ%7CBb7%20%20%20Z==0=0===Jitterbug%20Waltz",
     "charts": [
       {
+        "book": "The New Real Book, Vol. 3",
+        "page": "191"
+      },
+      {
         "book": "The Real Book, Vol. 2",
         "page": "184"
       },
@@ -15170,10 +15754,15 @@
     "additional_feels": [],
     "ireal_style": "Even 8ths",
     "ireal_url": "irealb://Jody%20Grind%2C%20The=Silver%20Horace==Even%208ths=Bb%2D==1r34LbKcu7%20lcKQb%2D7XyBZL%20lcKQyX7bEZ%20Lx%20ZL%20x%20ZL%20lcKQb%2D7XyB44T%5BLZA13XyQ%7CB13XyQ%7CBb%2D7XyQKcl%20%20Z==0=0===Jody%20Grind%2C%20The",
-    "charts": [],
+    "charts": [
+      {
+        "book": "The Real Book, Vol. 2",
+        "page": "183"
+      }
+    ],
     "time_signature": "4/4",
     "tags": [],
-    "obscurity_score": 97,
+    "obscurity_score": 88,
     "difficulty_score": 50
   },
   {
@@ -15651,6 +16240,21 @@
     "difficulty_score": 50
   },
   {
+    "alternate_titles": [],
+    "additional_feels": [],
+    "ireal_style": null,
+    "ireal_url": "irealb://Klactoveedsedstene=Parker%20Charlie==Up%20Tempo%20Swing=Bb==1r34LbKcu7bB1N%7C4C%2D7X%7CQyX7C%7CQyX7G%7CQXy6bB%7CQyX5%237F%7CQyF7XyQ4TA%2A%7BA%7CQyXC%2D7%20F%2A%5B%5DQyX7bB%7CQyX6Bb2NZL%20QyXQyX%7D%207BEb%5E7%7CQyX67%2DCA%2A%7CBb%5E77F%7CQyX7%2DCZL%20lcQKyX7C%7CQyX7G%7CQyXXyQ%5D%5BQyX7b7F%207%2D7%235Xy6bB%7CQyX7F%7CQyX7%7CCQyX7G%7CQyX6bB%7CQXyQ%7CCF%7CQyX%20Z%20==0=0===Klactoveedsedstene",
+    "time_signature": null,
+    "tags": [],
+    "obscurity_score": 72,
+    "difficulty_score": 75,
+    "title": "Klactoveedsedstene",
+    "composer": "Charlie Parker",
+    "original_key": "Bb",
+    "feel": "up",
+    "charts": []
+  },
+  {
     "title": "Know You Now",
     "composer": "Amy Winehouse",
     "original_key": "Ab",
@@ -15820,11 +16424,15 @@
       {
         "book": "Jazz Fakebook",
         "page": "209"
+      },
+      {
+        "book": "The Real Book, Vol. 3",
+        "page": "166"
       }
     ],
     "time_signature": "4/4",
     "tags": [],
-    "obscurity_score": 88,
+    "obscurity_score": 79,
     "difficulty_score": 50
   },
   {
@@ -15915,10 +16523,15 @@
     "additional_feels": [],
     "ireal_style": "Medium Swing",
     "ireal_url": "irealb://Lamp%20Is%20Low%2C%20The=DeRose%2DShefter==Medium%20Swing=G==1r34LbKcu79C%7CQy4A%2D9%287Dpp%7CQyXsus31DLZ%20lcKQyX%29sus31DLZG6X4TA%2A%5B%7CQyXs%2D7XyQZL%20lcKQyX%29sus3D1%289%2DAA%2A%5B%5DQyX7E%7CD13suB%7CQyX%20sus7ZG6XycKQyX7%2DDB%2A%5B%5D%20%20clKQyX6G%7CQyX9C%7CQl%20LZGL7Dpp%29sus39XyQ%7Cs31AC%2A%5B%5D%20%20lcKQXy7FZL%20lcKQyX7%5ECus%28D1GZL7G9b7D%7Cl%20LZDA%7CQyX7E%7CQyX11%2D%7CBQyX7C%7CQyXsus31h7XyQcKQyXXyQ%7CUG6XyQ%7CB%2D7%20E7%20Z%20==0=0===Lamp%20Is%20Low%2C%20The",
-    "charts": [],
+    "charts": [
+      {
+        "book": "The New Real Book, Vol. 3",
+        "page": "202"
+      }
+    ],
     "time_signature": "4/4",
     "tags": [],
-    "obscurity_score": 97,
+    "obscurity_score": 88,
     "difficulty_score": 50
   },
   {
@@ -16001,6 +16614,10 @@
     "ireal_url": "irealb://Laurie=Evans%20Bill==Ballad=Bb==1r34LbKcu7%7CQyX7b%5E7Xy%237Dpp%7CQyX7%2DAZL%2359%237E%20sus9b7E%7CQ5LZGhB44T%7BQyX7%2D5XyQ%7CX5%239%237bB%7CQyX7%2DZFL5%237Fpp%7CQyX7%2DCyQ%7CEb%239%237C2N%7C%7DQ9XyQ%7CL7C%20sus7CZL7bDs%20us7bD%7CQyX7hD1NZB9Xy%237bA%7Cs7bB%7CQ%7CA%2D79%237F%7CQyX7hC%7CQy7X%2D%23C%7CQyX7%2DB%7CQyX%235XyQyX7%2DGusXyQ%7CAb7susXyQ%7CGb7susXyQ%7CF7sus%20F7%20Z==0=0===Laurie",
     "charts": [
       {
+        "book": "Bill Evans Fake Book",
+        "page": "36"
+      },
+      {
         "book": "Jazz LTD",
         "page": "194"
       },
@@ -16011,7 +16628,7 @@
     ],
     "time_signature": "4/4",
     "tags": [],
-    "obscurity_score": 79,
+    "obscurity_score": 70,
     "difficulty_score": 50
   },
   {
@@ -16624,6 +17241,21 @@
     "difficulty_score": 50
   },
   {
+    "alternate_titles": [],
+    "additional_feels": [],
+    "ireal_style": null,
+    "ireal_url": null,
+    "time_signature": null,
+    "tags": [],
+    "obscurity_score": 85,
+    "difficulty_score": 70,
+    "title": "Liquid Streets",
+    "composer": null,
+    "original_key": null,
+    "feel": "medium_swing",
+    "charts": []
+  },
+  {
     "title": "Litha",
     "composer": "Chick Corea",
     "original_key": "D",
@@ -17055,10 +17687,6 @@
     "ireal_url": "irealb://Long%20Ago%20And%20Far%20Away=Kern%20Jerome==Up%20Tempo%20Swing=F==1r34LbKcu77%2DGZL4F6%20DFZL7C%207%2DGZL7%2DD7%20%5EFZL7C%207%2DGZL7%2D6%20D%2D74T%5BA%2A%7CQyX7F6%20D77bE%207%2DbBZL7%2DF%20b6A%5BB%2A%5D%207C%207%2DGZLLZAb%5EZL7C%207C%207%2D%7CC%5E7XD%206F%5BA%2A%5DQyX7C%7CyQX7%2DG%7CQyX7%2DA%7CQy%2D7LZGQyX7G%5D%207C%20%20D%2D7L7D%206FZL7C%207%2DGZ7L%2DD%206FZL7C%207%2DGZLZG%2D77%5EFZLC%207%2DG7XyQ%7CA%20A%2F6FZL7bE%206%2DBb%7CQyX7%5EbB%7CQyX7Fbo7LZ%2DC%5BC%2A7LZF6XyQ%7CG%2D7%20C7%20Z==0=0===Long%20Ago%20And%20Far%20Away",
     "charts": [
       {
-        "book": "Jazz Fakebook",
-        "page": "225"
-      },
-      {
         "book": "The New Real Book, Vol. 1",
         "page": "192"
       },
@@ -17069,7 +17697,7 @@
     ],
     "time_signature": "4/4",
     "tags": [],
-    "obscurity_score": 70,
+    "obscurity_score": 79,
     "difficulty_score": 50
   },
   {
@@ -17424,6 +18052,10 @@
     "ireal_style": "Ballad",
     "ireal_url": "irealb://Lover%20Man=Davis%2DRamirez%2DSherman==Ballad=F==1r34LbKcu7QyX7b4D%2D7%207FZL7C%207%2DGZL7C7%20%2DGZL7G%207%2DDZL7GXyQ%7CB4T%5BA%2A2N%7CQy7%2CDb7yXQyX%7Dl%2C7A%2ChEs7%20%5EF1N%7Cl%2C7C%2C7%2DG%2CQXyQX%2DbAs%7C7D%2C7%2D7b9%20%5DBZL7%2DA%207%5EGZL7D7%20%2DAZL7%5E%2DA%20%2DA%5BB%2A%2D7%20sAE%207%5EF%2DDZL7%20G%2D%5E7%5BA%2A%5D%209b7A%207hE%7CyQX7%5EFZL7C%207%2DGZLD%2D7%20G%2DG%7Cl%2CC%2C7%2DGZG%2D7%207%2DbAs%7CQyX7bB%7CQXy7FZL7C%207%2DGZL7C%2CDb7%2CL7G%2077%2Cl%7CF%5E7%20%20%28Eh7%29%20%28A7%29Z==0=0===Lover%20Man",
     "charts": [
+      {
+        "book": "Jazz Fakebook",
+        "page": "233"
+      },
       {
         "book": "The Real Book, Vol. 2",
         "page": "224"
@@ -18002,10 +18634,15 @@
     "additional_feels": [],
     "ireal_style": "Ballad",
     "ireal_url": "irealb://Masquerade%20Is%20Over%2C%20The=Wrubel%20Allie==Ballad=Eb==1r34LbKcu7A%28%20%2074Eb%5E77bE%207%2DbBZL7F%207C%2DZL9b7G%207hD%7CQyXLZAb%5E4T%7BA%2A7bE%207D7%29%7CGyX7%5EbEZL7bB%207%2D%7CFQyX7FZL9b7C%207%2DQ%7CBb%2D%28%20%297hG2N%7C%7D7XyQ%7CB%7CQyX7%2DF%7CQyX7CQ%7CyX7%2DG1N%7CQyX7bDb7XyQ%5EbAZLC%207%2DGLZF%2D7%207%2DF%5BB%2A%5D%207C%206bZEL7bD%206bEZL7bB%20Bb7LZ7C%207%2Dla%20%2EC7%20Bb7%2DCZL7C%207%2DGZL9bD7%207hA%7CQyX7%5EbEZL7%20%3CD%2E%2DFZL7EZLsuEndin7%2DFZL7C%207%2DG3N%7C%5DY%207bB%207%2DFZL7F%3Eg%20Bb7s%20dr3%20b6XyQ%7CF%2D7%20Bb7%20Z==0=0===Masquerade%20Is%20Over%2C%20The",
-    "charts": [],
+    "charts": [
+      {
+        "book": "The New Real Book, Vol. 2",
+        "page": "199"
+      }
+    ],
     "time_signature": "4/4",
     "tags": [],
-    "obscurity_score": 97,
+    "obscurity_score": 88,
     "difficulty_score": 50
   },
   {
@@ -18035,6 +18672,30 @@
     "tags": [],
     "obscurity_score": 97,
     "difficulty_score": 50
+  },
+  {
+    "alternate_titles": [],
+    "additional_feels": [],
+    "ireal_style": null,
+    "ireal_url": null,
+    "time_signature": null,
+    "tags": [],
+    "obscurity_score": 70,
+    "difficulty_score": 65,
+    "title": "Mayreh",
+    "composer": "Horace Silver",
+    "original_key": null,
+    "feel": "up",
+    "charts": [
+      {
+        "book": "The Real Book, Vol. 2",
+        "page": "231"
+      },
+      {
+        "book": "The Real Book, Vol. 3",
+        "page": "191"
+      }
+    ]
   },
   {
     "title": "Maze, The",
@@ -18133,10 +18794,15 @@
     "additional_feels": [],
     "ireal_style": "Even 8ths",
     "ireal_url": "irealb://Meaning%20Of%20The%20Blues%2C%20The=Worth%2DTroup==Even%208ths=D%2D==1r34LbKcu7%2DD%20%2DD4D%2D%20DA%207hEZLF%2F7%2DG%207G%2DZL7%2DD%206%2DDZL6b%2D7b9LZ4T%5BA%2AFZL7C%2D7%20D%2DL7%2DD%207%5EF%5BB%2A%5D%207%20C6%2DbB%7CQyX7%2DGZL6ZG%2D7%20DZL7%5EQyX9b%7CEh7%20bB%207%2DGZL7%2DD%206%2DZDL6b%2DD%20%2DDZL9b7A7LZA7QyX7%5E7%5E%2DD%20%2D%20D%2Dbb7A%207hEZLF%2F7%2DG7%20%2DGZL7%2DD%206%2DDZL69LZD%2DD%5BA%2A%5D%5EbBZL%20D%2D6Ls7F%7CQyX7%2DC%5BC%2A%5D7%20C%206%2DbB%7CQyX7%2DGZus%20F77%2DDZLyX%2DDlBb%2D6%20bBs%207%2DGZL7%2DD%206D%2DZL6b%2DD%20%2DDZL7bE7%2CA7%7C%7CQyX7QZ%20==0=0===Meaning%20Of%20The%20Blues%2C%20The",
-    "charts": [],
+    "charts": [
+      {
+        "book": "The Real Book, Vol. 3",
+        "page": "192"
+      }
+    ],
     "time_signature": "4/4",
     "tags": [],
-    "obscurity_score": 97,
+    "obscurity_score": 88,
     "difficulty_score": 50
   },
   {
@@ -18253,6 +18919,34 @@
     "difficulty_score": 50
   },
   {
+    "alternate_titles": [],
+    "additional_feels": [],
+    "ireal_style": null,
+    "ireal_url": "irealb://Mercy%20Mercy%20Mercy=Zawinul%20Joe==Funk=Bb==1r34LbKcu7bB%7CQy4Bb7XQyX7bB%7CQyX7bE%7CyQX7bB%7CQyX7bE%7CQy%7CEb7X4TA%2A%5B%207bBZEb7XyE%20bBZLbB%2FbE%207bZBLbB%2FbE%20bBB%2A%5B%5DQb%2FBbL%7CQyX7Xsus7LZBb%20E%2CD%2FbBs%20bB%7CQyXuss7Fl%7C%2CbE%2CD%2FbBsb%2C%7ClFbB%2FbEyQ%7CC%2D7XyQ%7CD%2D7XyQ%7CsG%2D%2CF%2CG%2D%2CF%2C%7ClG%2DXyQZ%20==0=0===Mercy%20Mercy%20Mercy",
+    "time_signature": null,
+    "tags": [],
+    "obscurity_score": 35,
+    "difficulty_score": 35,
+    "title": "Mercy, Mercy, Mercy",
+    "composer": "Joe Zawinul",
+    "original_key": "Bb",
+    "feel": "medium_swing",
+    "charts": [
+      {
+        "book": "Jazz Fakebook",
+        "page": "242"
+      },
+      {
+        "book": "The New Real Book, Vol. 1",
+        "page": "205"
+      },
+      {
+        "book": "The Real Book, Vol. 2",
+        "page": "235"
+      }
+    ]
+  },
+  {
     "title": "Mi Historia Entre Tus Dedos",
     "composer": "Grigniani Gianluca",
     "original_key": "D-",
@@ -18322,13 +19016,17 @@
         "page": "78"
       },
       {
+        "book": "The New Real Book, Vol. 1",
+        "page": "207"
+      },
+      {
         "book": "The Real Book, Vol. 3",
         "page": "196"
       }
     ],
     "time_signature": "4/4",
     "tags": [],
-    "obscurity_score": 70,
+    "obscurity_score": 61,
     "difficulty_score": 50
   },
   {
@@ -18510,6 +19208,26 @@
     "tags": [],
     "obscurity_score": 88,
     "difficulty_score": 50
+  },
+  {
+    "alternate_titles": [],
+    "additional_feels": [],
+    "ireal_style": null,
+    "ireal_url": null,
+    "time_signature": null,
+    "tags": [],
+    "obscurity_score": 65,
+    "difficulty_score": 70,
+    "title": "Minor's Holiday",
+    "composer": "Kenny Dorham",
+    "original_key": null,
+    "feel": "up",
+    "charts": [
+      {
+        "book": "Library of Musicians' Jazz",
+        "page": "186"
+      }
+    ]
   },
   {
     "title": "Minority",
@@ -19140,10 +19858,19 @@
     "additional_feels": [],
     "ireal_style": "Medium Swing",
     "ireal_url": "irealb://Moontrane%2C%20The=Shaw%20Woody==Medium%20Swing=D==1r34LbKcu7%5EbE%2074Bb%5E7sus7F%2096CZL%20lcQKyX7%2DAZL%20lcKQyXLZBb%5E4TA%2A%7B%5EbEB%2A7XyQ%7CB%207%2DF2N%7CQyXQyXyQXQyX%7D%207F%207%2DC1Nb7%20%5D%5B%5EDZL7CZL7%2DF%2D7%20BbBZL7%2DF%207%2DGZL7A%2Dpp%7CQyX7%5EbEZL7b%2D7%20Ab%7CQyX77F%2096%2D7LZBcKQyX7%2DAZL%20lcKyQX7%5EbBA%2A%5B%5DQyX7%2Dl%20LZCB%207%2D%23susLZBb%5E7%20Eb%5E7LZD%5E7XyQKcl%20%20Z%20==0=0===Moontrane%2C%20The",
-    "charts": [],
+    "charts": [
+      {
+        "book": "The Colorado Cookbook",
+        "page": "139"
+      },
+      {
+        "book": "The Real Book, Vol. 2",
+        "page": "246"
+      }
+    ],
     "time_signature": "4/4",
     "tags": [],
-    "obscurity_score": 97,
+    "obscurity_score": 79,
     "difficulty_score": 50
   },
   {
@@ -19354,6 +20081,30 @@
     "difficulty_score": 50
   },
   {
+    "alternate_titles": [],
+    "additional_feels": [],
+    "ireal_style": null,
+    "ireal_url": null,
+    "time_signature": null,
+    "tags": [],
+    "obscurity_score": 70,
+    "difficulty_score": 65,
+    "title": "Mr. Clean",
+    "composer": "Weldon Irvine",
+    "original_key": null,
+    "feel": "medium_swing",
+    "charts": [
+      {
+        "book": "The New Real Book, Vol. 1",
+        "page": "223"
+      },
+      {
+        "book": "The Real Book, Vol. 2",
+        "page": "227"
+      }
+    ]
+  },
+  {
     "title": "Mr. P.C.",
     "composer": "John Coltrane",
     "original_key": "C-",
@@ -19381,6 +20132,21 @@
     ],
     "obscurity_score": 4,
     "difficulty_score": 10
+  },
+  {
+    "alternate_titles": [],
+    "additional_feels": [],
+    "ireal_style": null,
+    "ireal_url": null,
+    "time_signature": null,
+    "tags": [],
+    "obscurity_score": 70,
+    "difficulty_score": 55,
+    "title": "Mr. Syms",
+    "composer": "John Coltrane",
+    "original_key": null,
+    "feel": "medium_swing",
+    "charts": []
   },
   {
     "title": "Muito Obrigado",
@@ -20016,10 +20782,15 @@
     "additional_feels": [],
     "ireal_style": "Ballad",
     "ireal_url": "irealb://Nearness%20Of%20You%2C%20The=Carmichael%20Hoagy==Ballad=F==1r34LbKcu7%2DAZL%294F%5E7X%20%20%297hB%287obB%7CQy7X%5EbBZL7F%207%2DC%7CQy%28E7b94T%7BA%2A7bE%207ZG%2D7%20L%20QyXQyX%7D%207C%207G%2DZL7D%207%2DA1NZL7CZN2F%5EL7D%2077hA%7CQyQ%5D%2ABBZL7F%207%2DC%7CQyX7F%5E%7CQyX7C%7CQyX7%2DG%5Bb%5E7XyX6FZLL%20QyXLZG7%20%207C%207%2DGZL%20%3Egninde%20dr3%20la%20%2EC%2ED%3C%5DYXyQ9b7D%20ZN3Ah7XyQ%7CD7b9XyQ%7CG%2D7XyQ%7CC7XyQ%7CF%5E7%20D%2D7LZG%2D7%20C7%20Z==0=0===Nearness%20Of%20You%2C%20The",
-    "charts": [],
+    "charts": [
+      {
+        "book": "The Real Book, Vol. 2",
+        "page": "261"
+      }
+    ],
     "time_signature": "4/4",
     "tags": [],
-    "obscurity_score": 97,
+    "obscurity_score": 88,
     "difficulty_score": 50
   },
   {
@@ -20101,10 +20872,15 @@
     "additional_feels": [],
     "ireal_style": "Ballad",
     "ireal_url": "irealb://Nevertheless=Kalmar%2DRuby==Ballad=Bb==1r34LbKcu7%209CZL4Bb6XCZL5%237G%207hDZL7%20F6%2DC%7CQyX7obD%7CQy%2D7%20G74TA%2A%5BhDZL7b%5E7%20G%7CQyX7obD%7CQyX6bAB%2A%5B%5D%207F%207%2DCZL7%2DC%2D6%20FBZL7F%2DFlB%2A5LZC%2DF%2C%2DGs%2Cp%2Cp%7CQyX7b%5EBZL7F%209CZL7G%207%23%2D%2C%5D%5B%237G%207%5DQyX7LZ%20x%207%2DCZL%20x%20ZL7C%207ZGL%20lcKQyX7%5EbEZLXyQ%7CF7bB%207L7F%2096XyQ%7C%207%2DCZL5%237G%207hDLZ7F%206%2DC%7CQyX7obDG7LZCbBA%2A%5BZBb%5E7XyQ%7CC%2D7%20F7%20Z%20==0=0===Nevertheless",
-    "charts": [],
+    "charts": [
+      {
+        "book": "Jazz Fakebook",
+        "page": "270"
+      }
+    ],
     "time_signature": "4/4",
     "tags": [],
-    "obscurity_score": 97,
+    "obscurity_score": 88,
     "difficulty_score": 50
   },
   {
@@ -20270,10 +21046,19 @@
     "additional_feels": [],
     "ireal_style": "Latin",
     "ireal_url": "irealb://Night%20Has%20A%20Thousand%20Eyes%2C%20The=Jerry%2DBrainin==Latin=G==1r34LbKcu77DZL%204G%5E7%2FXD%2F7%5EGZL%20lcKQysXus7DZL%20lcKQyXDyQKcl4T%7BA%2A7D%7CQyQ%7CD7XG%7CQyX7F%7CQyX7%5ECQ%7CyX7G%7CQyX7%2DD%7CQy%5E7%2FDXyXsus%5BB%2A%5DQQ%7CG%2FD2N%7CQyXQyXQyXQy%7DXQyXsus7D1N%7CQyXG%5E7XyyXsuscKQyXQ%7CF7XQyX7bE%7CQyX7%2DbBLZ%20lcKQyX7%5EbB%7CQy%7CAb%5E7yX7%2DCyXsus%2D7XyQXD%2F7%5EG%7CQyX7%2DE%7CyQX7%5EG%7CQyXsus7D%7CyQ%7CD7AZL%20lQ%7CG%5E7%2FDXyQ%7CD7sus%20%20%20Z==0=0===Night%20Has%20A%20Thousand%20Eyes%2C%20The",
-    "charts": [],
+    "charts": [
+      {
+        "book": "The Colorado Cookbook",
+        "page": "236"
+      },
+      {
+        "book": "The Real Book, Vol. 1",
+        "page": "322"
+      }
+    ],
     "time_signature": "4/4",
     "tags": [],
-    "obscurity_score": 97,
+    "obscurity_score": 79,
     "difficulty_score": 50
   },
   {
@@ -20284,10 +21069,15 @@
     "additional_feels": [],
     "ireal_style": "Slow Swing",
     "ireal_url": "irealb://Night%20We%20Called%20It%20A%20Day%2C%20The=Dennis%20Matt==Slow%20Swing=G==1r34LbKcu7%23CZL%2CAAh7%20%207%2DEZL%2C9b7B%207hF%23%7CQyX7%5EGZL%2C9b7DE%2D7%2FD%2A%7B44TXQyX%7D%29%20C7%28G1NZL%2C11%237bA%207A%2DZL7bB%207%2DBZL%297A%5E7XyQ7%2DE%287%237B%206XyQ%7CN%5EC%207oC%7CQyX7%5ECl%2AB%5B%5D7G%2C7%2DDs%207%5EG27LZC%2DQyXQy%5B%5D%207D%2D7XyQL%2C9b7A%207hE%7CQyX%2D7EZL31b7B%207h%23F%7CZA%2D7%20EZL%2C9ZLD%2F7%20D7b9E%7CQyX7%2DEZL%2C9b7%20B7h%23F%7CQyX7%5EGZL%2C%2D7%20E%2D7hAC%2AC%23h7%20C%2D7LZsB%2D7%2CBb7%2CA%2D7%2CAb7%2C%7ClG%5E7XyQZ%20==0=0===Night%20We%20Called%20It%20A%20Day%2C%20The",
-    "charts": [],
+    "charts": [
+      {
+        "book": "The Real Book, Vol. 3",
+        "page": "212"
+      }
+    ],
     "time_signature": "4/4",
     "tags": [],
-    "obscurity_score": 97,
+    "obscurity_score": 88,
     "difficulty_score": 50
   },
   {
@@ -20298,10 +21088,15 @@
     "additional_feels": [],
     "ireal_style": "Bossa Nova",
     "ireal_url": "irealb://Nightmood=Lins%20Ivan==Bossa%20Nova=C==1r34LbKcu7%20sus94C%5E7X7%2DEZL7B%207%2D%23F%7CQXy7%2DAZL7E%207%2DB%7CQyXyQ%7CA4TA%2A%7B9C%7CQyZD9suCB%2A%5B%7D%20%2C5%239G%297C%20%28%2Csus31GlZL9D%20s9susXL5%239A%239bA%209%235LZA%7CQyX7%2DbEZL5%239Bb%20sus9bB%7CQyX7%2DFb9susC%20sus%2D%23F%7CQ%5E7XyQZL7E%207%2DB%7CQyX7%5ECC%2A%5B%5D%20tla7G%207hD%7CA%2D7XybDZL5%3EadoCLZE%2D7C%2ED%3CZL9D%20sus9DLZ5%239A%20sus9A%7CQyX%2E%20al%20%2C7B%207a%20pmas%20G9%23yX%3C%207%5EC%7DQyX11%23b9D%7CQyX7%5ECQ%7BYZ%205QXyQVus31Gnd%20fade%3E%20LZDb9%2311XyQ%7CfC%5E9%2311XyQZ%20=Jazz%2DBossa%20Nova=140=3===Nightmood",
-    "charts": [],
+    "charts": [
+      {
+        "book": "The New Real Book, Vol. 2",
+        "page": "263"
+      }
+    ],
     "time_signature": "4/4",
     "tags": [],
-    "obscurity_score": 97,
+    "obscurity_score": 88,
     "difficulty_score": 50
   },
   {
@@ -21027,6 +21822,10 @@
     "ireal_url": "irealb://On%20A%20Clear%20Day=Lane%20Burton==Medium%20Swing=G==1r34LbKcu7QyX7%2D4G%5E7XcKQyX7%5EGZL%20lcKyQX11%237CZL%20lcKQyl%20LZB4T%5BA%2A%7CQyX7XyQ%7CAyX7%2DBZL%20lcKQyX11%237FZL%20lcKQyX7%2DQ%7CBbo9b7E%7CA%7CQyXQ%7CD7XyX7G%7CQyX7%2DD%7CQy7XG%7CQyX7%2DD%5BB%2A%5DQyQ%7CC%5E7yX7%2DA%2DA%7CQyA%2D7Xy%7CQyX7%2DBZL%20lcKQXy7%5EG%5BC%2A%5DQyX7D%7CQE7b9X%7CQyX77%20B%2D7LZC%5E7%20B%2D7LZA%2D7XyQ%7CD7XyQ%7CG6XyQ%7CA%2D7%20D7%20Z==0=0===On%20A%20Clear%20Day",
     "charts": [
       {
+        "book": "Jazz Fakebook",
+        "page": "283"
+      },
+      {
         "book": "The Real Book, Vol. 2",
         "page": "273"
       },
@@ -21037,7 +21836,7 @@
     ],
     "time_signature": "4/4",
     "tags": [],
-    "obscurity_score": 79,
+    "obscurity_score": 70,
     "difficulty_score": 50
   },
   {
@@ -21341,11 +22140,15 @@
       {
         "book": "Jazz LTD",
         "page": "250"
+      },
+      {
+        "book": "The New Real Book, Vol. 1",
+        "page": "253"
       }
     ],
     "time_signature": "4/4",
     "tags": [],
-    "obscurity_score": 88,
+    "obscurity_score": 79,
     "difficulty_score": 50
   },
   {
@@ -21488,6 +22291,26 @@
     "tags": [],
     "obscurity_score": 97,
     "difficulty_score": 50
+  },
+  {
+    "alternate_titles": [],
+    "additional_feels": [],
+    "ireal_style": null,
+    "ireal_url": null,
+    "time_signature": null,
+    "tags": [],
+    "obscurity_score": 75,
+    "difficulty_score": 75,
+    "title": "Orbits",
+    "composer": "Wayne Shorter",
+    "original_key": null,
+    "feel": "up",
+    "charts": [
+      {
+        "book": "The Real Book, Vol. 1",
+        "page": "334"
+      }
+    ]
   },
   {
     "title": "Ornithology",
@@ -22263,11 +23086,15 @@
       {
         "book": "The Colorado Cookbook",
         "page": "126"
+      },
+      {
+        "book": "The Real Book, Vol. 1",
+        "page": "348"
       }
     ],
     "time_signature": "4/4",
     "tags": [],
-    "obscurity_score": 88,
+    "obscurity_score": 79,
     "difficulty_score": 50
   },
   {
@@ -22441,10 +23268,15 @@
     "additional_feels": [],
     "ireal_style": "Latin",
     "ireal_url": "irealb://Poinciana=Simon%20Nat==Latin=D==1r34LbKcu7KQyX64A7sucKQyXsus7AZL%20xZ%20L%20x%20ZL%20lcKQyXsl%20LZD4T%7Bi%2AZL9b7Y%2AA%7BD%7CQyX7%2DGZL%20lcKQXyD%2F%2DAZL%20lcKQyX6Eh7%20A%7D%20%20lcZL%20lcKcl%20%20%2DGZL%20lcKQyX7%5EALZ%20lcKQyX7%2DG%5BB%2A%7D7XyQKQyX6DhE%7CQyXyQKcL%20lcKQyXD%2F%2DAZLl%20cKQyX6D%5BA%2A%5D%20%20lZG%2D7Xsus7A7%20A7b9LZD6XyQ%7CA7sus%20%20%20Z==0=0===Poinciana",
-    "charts": [],
+    "charts": [
+      {
+        "book": "Jazz Fakebook",
+        "page": "302"
+      }
+    ],
     "time_signature": "4/4",
     "tags": [],
-    "obscurity_score": 97,
+    "obscurity_score": 88,
     "difficulty_score": 50
   },
   {
@@ -22623,6 +23455,30 @@
     "difficulty_score": 50
   },
   {
+    "alternate_titles": [],
+    "additional_feels": [],
+    "ireal_style": null,
+    "ireal_url": "irealb://Prince%20Of%20Darkness=Shorter%20Wayne==Medium%20Up%20Swing=C%2D==1r34LbKcu7KQyX1%2D7XyQ%20lcKQyX9%2DbBZL%20clKQyX11%2DGZL%20lcKLZG%2D1C44T%5BbG%7CQy%7CGb%5E7%7CQyX%2C11%237%5EB%7CQy5X%237%5EbBZL%20lcKQyXAb%5E7XZL%20lc%5E7%2C%20Eb%2D7%2CLZD%2D11XyQKcl%20%20Z%20==0=0===Prince%20Of%20Darkness",
+    "time_signature": null,
+    "tags": [],
+    "obscurity_score": 70,
+    "difficulty_score": 75,
+    "title": "Prince of Darkness",
+    "composer": "Wayne Shorter",
+    "original_key": "C-",
+    "feel": "up",
+    "charts": [
+      {
+        "book": "Jazz LTD",
+        "page": "265"
+      },
+      {
+        "book": "The Real Book, Vol. 1",
+        "page": "354"
+      }
+    ]
+  },
+  {
     "title": "Prism",
     "composer": "Keith Jarrett",
     "original_key": "G-",
@@ -22774,6 +23630,34 @@
     "tags": [],
     "obscurity_score": 97,
     "difficulty_score": 50
+  },
+  {
+    "alternate_titles": [],
+    "additional_feels": [],
+    "ireal_style": null,
+    "ireal_url": null,
+    "time_signature": null,
+    "tags": [],
+    "obscurity_score": 62,
+    "difficulty_score": 70,
+    "title": "Quicksilver",
+    "composer": "Horace Silver",
+    "original_key": null,
+    "feel": "up",
+    "charts": [
+      {
+        "book": "Library of Musicians' Jazz",
+        "page": "87"
+      },
+      {
+        "book": "The New Real Book, Vol. 2",
+        "page": "293"
+      },
+      {
+        "book": "The Real Book, Vol. 2",
+        "page": "301"
+      }
+    ]
   },
   {
     "title": "Quiet Now",
@@ -22997,6 +23881,26 @@
     "difficulty_score": 50
   },
   {
+    "alternate_titles": [],
+    "additional_feels": [],
+    "ireal_style": null,
+    "ireal_url": null,
+    "time_signature": null,
+    "tags": [],
+    "obscurity_score": 35,
+    "difficulty_score": 55,
+    "title": "Red Clay",
+    "composer": "Freddie Hubbard",
+    "original_key": "F-",
+    "feel": "medium_swing",
+    "charts": [
+      {
+        "book": "The Real Book, Vol. 1",
+        "page": "362"
+      }
+    ]
+  },
+  {
     "title": "Red House",
     "composer": "Jimi Hendrix",
     "original_key": "B",
@@ -23065,6 +23969,21 @@
     "tags": [],
     "obscurity_score": 34,
     "difficulty_score": 50
+  },
+  {
+    "alternate_titles": [],
+    "additional_feels": [],
+    "ireal_style": null,
+    "ireal_url": null,
+    "time_signature": null,
+    "tags": [],
+    "obscurity_score": 75,
+    "difficulty_score": 70,
+    "title": "Relaxin' with Lee",
+    "composer": "Charlie Parker",
+    "original_key": null,
+    "feel": "up",
+    "charts": []
   },
   {
     "title": "Remember",
@@ -23373,6 +24292,21 @@
     "tags": [],
     "obscurity_score": 88,
     "difficulty_score": 50
+  },
+  {
+    "alternate_titles": [],
+    "additional_feels": [],
+    "ireal_style": null,
+    "ireal_url": null,
+    "time_signature": null,
+    "tags": [],
+    "obscurity_score": 85,
+    "difficulty_score": 65,
+    "title": "Roy Allan",
+    "composer": null,
+    "original_key": null,
+    "feel": "medium_swing",
+    "charts": []
   },
   {
     "title": "Ruby, My Dear",
@@ -23801,6 +24735,26 @@
     "difficulty_score": 50
   },
   {
+    "alternate_titles": [],
+    "additional_feels": [],
+    "ireal_style": null,
+    "ireal_url": "irealb://Search%20For%20Peace=Tyner%20McCoy==Ballad=C==1r34LbKcu77%2DFZL4Ah7%2011%2DGZLQyX%7CrQyXQ%7CyXsus31GZL9b7D%20C7b94TA%2A%7BZL%2CC%2Fb9LZE31CB%2A%5B%7D%20%2CB%2F7E%20%2D7%23CZL9b31bA%207%2Db%20Ab1331bB%2031G%20s%20x%20LZZL%20x%20ZL%20x%20ZLG%2F%5E7bA%209%2DGZL7D%207%2DAG13suZL%20x%20%207%2DFZAh7%20D%2011%2DGZLQyX%7CrQy%7CXQyXsus31GZL9b7C7b9LC%2A%5B%5D%20CQU%7CY9LZEbXQyXQyXZ%20%2CB%2F7E7%20%2D%23CZL9b31bA%207%2DyQXyQb31bB13XyQZ%20==0=0===Search%20For%20Peace",
+    "time_signature": null,
+    "tags": [],
+    "obscurity_score": 60,
+    "difficulty_score": 55,
+    "title": "Search for Peace",
+    "composer": "McCoy Tyner",
+    "original_key": "C",
+    "feel": "ballad",
+    "charts": [
+      {
+        "book": "The New Real Book, Vol. 1",
+        "page": "312"
+      }
+    ]
+  },
+  {
     "title": "Second Star To The Right, The",
     "composer": "Sammy Fain",
     "original_key": "Eb",
@@ -23822,10 +24776,15 @@
     "additional_feels": [],
     "ireal_style": "Medium Swing",
     "ireal_url": "irealb://Second%20Time%20Around%2C%20The=Van%2DHeusen%20Jimmy==Medium%20Swing=C==1r34LbKcu7%7C%297G%284C%5E7%20%28%20%207%2DD%7CQyX7%2DDZ7LobE%207%2DEZL%297F%28%20F%237%29%204T%7BA%2A7%2DA%7CQ%28F%5E7%29EZL%297F%28%20%207hBZL7%29%2DA%28%20%20%297%2DE%286CZL7b9Xy%20%207%5EC%7CQyX77%29LZC7%2DAZL%20lcKQyX6FN1ZL%297C%28%20%20%297%2DG%287XyQ%7CDbA%28%20%20%2DDZL%29Q%7CG7X%20%207DZL%297bE%28%20%207F%5E2NZL%20QyXQyX%7DQy%28Ebo7yX7%2DDs9b7GG7XyQGZL7D%20sus7D%7CQy7XAZL%297bB%28%20%207hE%7C7sus%20%7CQyX7usLZC6XyQ%7CD%2D7%20G7%20Z==0=0===Second%20Time%20Around%2C%20The",
-    "charts": [],
+    "charts": [
+      {
+        "book": "The New Real Book, Vol. 3",
+        "page": "332"
+      }
+    ],
     "time_signature": "4/4",
     "tags": [],
-    "obscurity_score": 97,
+    "obscurity_score": 88,
     "difficulty_score": 50
   },
   {
@@ -24126,10 +25085,19 @@
     "additional_feels": [],
     "ireal_style": "Bossa Nova",
     "ireal_url": "irealb://Shadow%20Of%20Your%20Smile%2C%20The=Mandel%20Johnny==Bossa%20Nova=G==1r34LbKcu7%5EG%7CQy4F%23%2D7yX7%2DA%7CQyX7A%7CQy7X%2DE%7CQyX9b7B%7CQyXQ%7CD7X4T%5BA%2AyX7h%23C%5E7XyD%2F7%2DE%7CQyX7%2DE%7CQXy9b7B%7CQyX7h%23F%7CQXyQ%7CC%7CQyX77%2DE%7CQb9XyQB%7CQyX7%2D%23F%5BB%2A%5DQXy31b7B%7CQyX7h%23F%7C7b9Xy7%23F%7CQF%207%2DC7XyQ%7C%2DA%7CQyX9b7E%7CQyXh7B%7CQyX7D%7CQyX7%2DA7XyQ%7CA%7CQyX7LZB%2D7XyQ%7CE7b13XyQ%7CA7XyQ%7CD7sus%20D7b9LZG6XyQKcl%20%20Z==0=0===Shadow%20Of%20Your%20Smile%2C%20The",
-    "charts": [],
+    "charts": [
+      {
+        "book": "The New Real Book, Vol. 3",
+        "page": "336"
+      },
+      {
+        "book": "The Real Book, Vol. 1",
+        "page": "381"
+      }
+    ],
     "time_signature": "4/4",
     "tags": [],
-    "obscurity_score": 97,
+    "obscurity_score": 79,
     "difficulty_score": 50
   },
   {
@@ -24791,10 +25759,15 @@
     "additional_feels": [],
     "ireal_style": "Bossa Nova",
     "ireal_url": "irealb://So%20Nice%20%28Summer%20Samba%29=Valles%20Marco==Bossa%20Nova=F==1r34LbKcu7E%7CQyX4F%5E7XyX7%5EbB%7CQyX31b7%7CEQyX7%2DBZL%20lcKQyQ%7CBb64T%7BA%2ADZL31Kcl%20%20hE%7CQyX7%2DG%7CQyX97bD%7CQyX7%2DA1N%5BB%2A%5D7%20A7bQyX7b7%2DG%7CQ%7CG7XyD%7CQyX7%2DA%5B2NC%2A%7D7%20C%207bD%7CQyX7%2DG%7CQ7b9XyQyX7%2DXyQ%7CC7b9XyQ%7CF%5E7XyQ%7CBb7XyQ%7CF6XyQ%7CG%2D7%20C7%20Z==0=0===So%20Nice%20(Summer%20Samba)",
-    "charts": [],
+    "charts": [
+      {
+        "book": "Jazz Fakebook",
+        "page": "344"
+      }
+    ],
     "time_signature": "4/4",
     "tags": [],
-    "obscurity_score": 94,
+    "obscurity_score": 85,
     "difficulty_score": 50
   },
   {
@@ -25310,11 +26283,23 @@
       {
         "book": "Jazz LTD",
         "page": "327"
+      },
+      {
+        "book": "The Colorado Cookbook",
+        "page": "238"
+      },
+      {
+        "book": "The New Real Book, Vol. 1",
+        "page": "329"
+      },
+      {
+        "book": "The Real Book, Vol. 1",
+        "page": "395"
       }
     ],
     "time_signature": "4/4",
     "tags": [],
-    "obscurity_score": 79,
+    "obscurity_score": 60,
     "difficulty_score": 50
   },
   {
@@ -25400,11 +26385,15 @@
       {
         "book": "Jazz LTD",
         "page": "323"
+      },
+      {
+        "book": "The Real Book, Vol. 1",
+        "page": "398"
       }
     ],
     "time_signature": "4/4",
     "tags": [],
-    "obscurity_score": 88,
+    "obscurity_score": 79,
     "difficulty_score": 50
   },
   {
@@ -25628,6 +26617,26 @@
     "tags": [],
     "obscurity_score": 79,
     "difficulty_score": 50
+  },
+  {
+    "alternate_titles": [],
+    "additional_feels": [],
+    "ireal_style": null,
+    "ireal_url": null,
+    "time_signature": null,
+    "tags": [],
+    "obscurity_score": 70,
+    "difficulty_score": 65,
+    "title": "Split Kick",
+    "composer": "Horace Silver",
+    "original_key": null,
+    "feel": "up",
+    "charts": [
+      {
+        "book": "Library of Musicians' Jazz",
+        "page": "121"
+      }
+    ]
   },
   {
     "title": "Spoonful",
@@ -25906,10 +26915,19 @@
     "additional_feels": [],
     "ireal_style": "Ballad",
     "ireal_url": "irealb://Star%2DCrossed%20Lovers%2C%20The=Strayhorn%2DEllington==Ballad=Db==1r34LbKcu7b7G%2074Gb%5E731bA%207%2DbEZL7%2Db%20BbA%2F7%5EbDZL5b9G%20LZDb%5E4TA%2A%5B%2DbEB%2A%5E7%20G9%2DFZL9b7C%207hGZL%2D7bB%20bA%2F7%5EbDZL5bXyQ%5D%5BbGZL51bA%207Db%5E7%2F31bA%207hbEZLbA%2F%5E7bD%20bA%2F7%2DbEZLbALZEbh%20bA%2F731bA%207susXZL9%237bG%207%5EbGZLb931bD%20sus7bD%7CQyF%23%2D%5E7bDZL39ddaEDb%5E7%20bA%7CQyXbA%2F7%5EbDZ7LbE%207%5EbGZL5%239bD7sus%20C%2A%5B%5D%20%2FG%23LZDb%5E7%20Bb7LZEb7%20sAb7%2CG7Z%20==0=0===Star-Crossed%20Lovers%2C%20The",
-    "charts": [],
+    "charts": [
+      {
+        "book": "The New Real Book, Vol. 2",
+        "page": "344"
+      },
+      {
+        "book": "The Real Book, Vol. 1",
+        "page": "407"
+      }
+    ],
     "time_signature": "4/4",
     "tags": [],
-    "obscurity_score": 97,
+    "obscurity_score": 79,
     "difficulty_score": 50
   },
   {
@@ -26189,6 +27207,21 @@
     "tags": [],
     "obscurity_score": 88,
     "difficulty_score": 50
+  },
+  {
+    "alternate_titles": [],
+    "additional_feels": [],
+    "ireal_style": null,
+    "ireal_url": "irealb://Strasbourg%2DSt%2E%20Denis=Hargrove%20Roy==Funk=Ab==1r34LbKcu7bDZL74Bb%2D7bBZLQyX%7CrQyXZLb97F%207%5EbDZL%2C7%2DC%20%2D7%20C%2D4Ti%2A%5BL9b7F7b9LZZL%2C7%2DC%207%2DbBA%2A%7BQ%5DyX9b7F%7CQyX7%5EbADb%5E7%20bE%207%5E%5B%7DQyX%7CXyQLQyX7%5EbAZL9b7bE7%20%5EbDZL7%2DC%207%2DbBZ%7CF7b9rQyXZE%207%5Eb7%20C%2D7C%207%2DbBZLQyX%7CrQXyZL9b7F%207%5EbDZL%2C%2D7LZD%2DbBB%2Ab7b9LZAb%5E7XyQ%7CF7b9XyQZ%20==0=0===Strasbourg-St.%20Denis",
+    "time_signature": null,
+    "tags": [],
+    "obscurity_score": 45,
+    "difficulty_score": 50,
+    "title": "Strasbourg / St. Denis",
+    "composer": "Roy Hargrove",
+    "original_key": "Ab",
+    "feel": "medium_swing",
+    "charts": []
   },
   {
     "title": "Strayhorn 2",
@@ -26763,10 +27796,15 @@
     "additional_feels": [],
     "ireal_style": "Slow Swing",
     "ireal_url": "irealb://Swinging%20Shepherd%20Blues%2C%20The=Koffman%2DRoberts%2DJacobson==Slow%20Swing=Bb==1r34LbKcu7C%2C7%2DC4Bb6XZL%20lcKQyX7bEZLx%20%20ZL%20x%20ZL%20lcKQyBb7%20s4TA%2A%5BB%207FlBb%2FD%20bG%2C7bEs%207bB%7CQy7XF%7CQyX7%2DCZL9%237G7%2FE%2C%7Cl%7C%2Co%23b7%20Z%20%3CSolos%20on%20Bb%20blues%3E%20==0=0===Swinging%20Shepherd%20Blues%2C%20The",
-    "charts": [],
+    "charts": [
+      {
+        "book": "Jazz Fakebook",
+        "page": "374"
+      }
+    ],
     "time_signature": "4/4",
     "tags": [],
-    "obscurity_score": 97,
+    "obscurity_score": 88,
     "difficulty_score": 50
   },
   {
@@ -27128,6 +28166,10 @@
     "charts": [
       {
         "book": "The New Real Book, Vol. 3",
+        "page": "380"
+      },
+      {
+        "book": "The New Real Book, Vol. 3",
         "page": "381"
       },
       {
@@ -27137,7 +28179,7 @@
     ],
     "time_signature": "4/4",
     "tags": [],
-    "obscurity_score": 76,
+    "obscurity_score": 67,
     "difficulty_score": 50
   },
   {
@@ -27187,6 +28229,61 @@
     "difficulty_score": 50
   },
   {
+    "alternate_titles": [],
+    "additional_feels": [],
+    "ireal_style": null,
+    "ireal_url": "irealb://Chicken%2C%20The=Ellis%20Pee%2DWee==Funk=Bb==1r34LbKcu7%5BY%7D%20%20%2Ai%2C%3CVx%20ZL%20x%20ZL7bE%207Bb%3Eortni%20rof%20pma%20LZ%20x%2C44T%7B7C%7CQyXyQKcyX7DZL%20lcKQyX7EbZL%20x%20ZL%20x%20ZL%20lQ%7CG7X7bBA%2AZL%20x%20l%20LZ%20%207bBZL%20%3EeniFQy%3CXn%20%3E%29ffiR%28%3CZL%20xEb7LZcKQyX%20x%20LZ%20x%20%20Z%20==0=0===Chicken%2C%20The",
+    "time_signature": null,
+    "tags": [],
+    "obscurity_score": 40,
+    "difficulty_score": 40,
+    "title": "The Chicken",
+    "composer": "Pee Wee Ellis",
+    "original_key": "Bb",
+    "feel": "medium_swing",
+    "charts": []
+  },
+  {
+    "alternate_titles": [],
+    "additional_feels": [],
+    "ireal_style": null,
+    "ireal_url": "irealb://Intrepid%20Fox%2C%20The=Hubbard%20Freddie==Medium%20Up%20Swing=C%2D==1r34LbKcu71%237%5EB4sC%2D7KQyX7%2DCZL%20lcKQXy7%2DCZL%20n%20ZL%20nl%2Ccl%20LZ4TA%2A%7BL%20lcKcl%20LZs7bBZL%20x%20ZL%20x%20LZ%20lcKQyX11%237%5EB%7CusXyQKQyX1sus7%23Z%20x%20L7A%20sus7CZLsus7Eb%20sus7%23F%20sus7AZsus%20FL%20x%20ZbBB%2A%5Bine%3EF%20Q%20x%20ZL%20lcKQyXs%2Cus7F%7C%7CQyX%2Csus7%7DXyQ%20F%3CUZLus7F%20yQ%7CDbEZLsus7bD%20sus7BbZL%2Csus7bE%20sus7b7susXsus7%20la%20%2E7susXLsus7G%20sus7FZLuss7bE%20sus7bD%7CQyZ%3CD%2ECbBZLs%3CxZLxA7susL%20xZL%20xZL%20%3EsolSo47%2A%3C7%2DCQ%7BY%5DQyXZx%20LZ%3EadoCxZL%20x%29%3ELZBs7bBZLxZLxZL%20xLZ%20xZL%20xZL%2011%237%5Eus%20LZ6%2886%2A%20LZx%20LZxLZxLZF7sus%20LZx%20LZx%20LZx%20LZxLZx%20%7D==0=0===Intrepid%20Fox%2C%20The",
+    "time_signature": null,
+    "tags": [],
+    "obscurity_score": 70,
+    "difficulty_score": 80,
+    "title": "The Intrepid Fox",
+    "composer": "Freddie Hubbard",
+    "original_key": "C-",
+    "feel": "up",
+    "charts": [
+      {
+        "book": "The Real Book, Vol. 1",
+        "page": "231"
+      }
+    ]
+  },
+  {
+    "alternate_titles": [],
+    "additional_feels": [],
+    "ireal_style": null,
+    "ireal_url": "irealb://Sidewinder=Morgan%20Lee==Funk=Eb==1r34LbKcu7QyXZLnD7%2Cl7bEl%2C7Dns%7CZLQy%7CXrQyXZL%20x%20ZL7bELZ%20x%20s44T%5BZL%20x%20LZ%7Csnl%2C7DnsZLQyX%7CrQXyZL%20x%20ZL7bAl%2C7GEb7LZQyX%7Crl%2C7DnsnGh%2CX%7CrQyXZL%20x%20ZL7Bbl%2C7%2DFnsZL9b7ClyQLZsZL%20x%20Eb7LZ%20x%20LZEb7%2Cn%20LZ%20n%20%20Z%20==0=0===Sidewinder",
+    "time_signature": null,
+    "tags": [],
+    "obscurity_score": 30,
+    "difficulty_score": 40,
+    "title": "The Sidewinder",
+    "composer": "Lee Morgan",
+    "original_key": "Eb",
+    "feel": "medium_swing",
+    "charts": [
+      {
+        "book": "The Real Book, Vol. 1",
+        "page": "382"
+      }
+    ]
+  },
+  {
     "title": "Thelonious",
     "composer": "Thelonious Monk",
     "original_key": "Bb",
@@ -27229,13 +28326,21 @@
     "ireal_url": "irealb://Theme%2C%20The=Davis%20Miles==Up%20Tempo%20Swing=Bb==1r34LbKcu7bEZL74Bb%5E7FZL7F%207%2DCZL7G%20%2D7DZL7F%207%2DCZL7G%20%2D7%20Bb4T%7BA%2AQyX6bLZN1D%207%2DC2NZL%20QyXQy%7DX%207F%207%2DCZL7G%207%2DF7LZB7bA%207A%2A%5D%20%207XyQKX7FZL%20lcKQyX7CLZ%20lcKQyX7GZL%20lcyQKclD%5BB%2A%5D7bA%207%20G7LZbB%207%2DFZL7F%207%2DCLZ7G%207%2DDZL7F%207%2DC7LZEb7%5EbB%5BLZC%2D7%20F7LZBb6%20%20%20Z==0=0===Theme%2C%20The",
     "charts": [
       {
+        "book": "Bill Evans Fake Book",
+        "page": "70"
+      },
+      {
         "book": "Library of Musicians' Jazz",
         "page": "131"
+      },
+      {
+        "book": "The Colorado Cookbook",
+        "page": "240"
       }
     ],
     "time_signature": "4/4",
     "tags": [],
-    "obscurity_score": 88,
+    "obscurity_score": 70,
     "difficulty_score": 50
   },
   {
@@ -27389,6 +28494,10 @@
       {
         "book": "The New Real Book, Vol. 1",
         "page": "356"
+      },
+      {
+        "book": "The Real Book, Vol. 2",
+        "page": "364"
       }
     ],
     "time_signature": "4/4",
@@ -28153,11 +29262,15 @@
       {
         "book": "Jazz Fakebook",
         "page": "400"
+      },
+      {
+        "book": "The Real Book, Vol. 3",
+        "page": "324"
       }
     ],
     "time_signature": "4/4",
     "tags": [],
-    "obscurity_score": 88,
+    "obscurity_score": 79,
     "difficulty_score": 50
   },
   {
@@ -28755,6 +29868,26 @@
     "tags": [],
     "obscurity_score": 67,
     "difficulty_score": 50
+  },
+  {
+    "alternate_titles": [],
+    "additional_feels": [],
+    "ireal_style": null,
+    "ireal_url": null,
+    "time_signature": null,
+    "tags": [],
+    "obscurity_score": 55,
+    "difficulty_score": 55,
+    "title": "Unit 7",
+    "composer": "Sam Jones",
+    "original_key": null,
+    "feel": "medium_swing",
+    "charts": [
+      {
+        "book": "Jazz LTD",
+        "page": "365"
+      }
+    ]
   },
   {
     "title": "Unit Seven",
@@ -29478,13 +30611,17 @@
         "page": "415"
       },
       {
+        "book": "The New Real Book, Vol. 1",
+        "page": "395"
+      },
+      {
         "book": "The Real Book, Vol. 2",
         "page": "388"
       }
     ],
     "time_signature": "4/4",
     "tags": [],
-    "obscurity_score": 79,
+    "obscurity_score": 70,
     "difficulty_score": 50
   },
   {
@@ -29622,6 +30759,14 @@
       {
         "book": "Jazz Fakebook",
         "page": "419"
+      },
+      {
+        "book": "The Colorado Cookbook",
+        "page": "263"
+      },
+      {
+        "book": "The Colorado Cookbook",
+        "page": "264"
       },
       {
         "book": "The New Real Book, Vol. 1",
@@ -30462,6 +31607,10 @@
     "ireal_url": "irealb://Woody%27n%20You=Gillespie%20Dizzy==Up%20Tempo%20Swing=Db==1r34LbKcu79b7bA4Gh7XhbE%7CQyX9b7bB%7CQXy7hF%7CQyX9b7C%7CQy7XyQ%7C4T%7BA%2AAZL%297b%5E7Xy%20%297%2DA%287%2DbAZL7b%20D7%2DbA%5BB%2A%7D%20%20lcKQDb7%28DD%7CQyX7%2DbBZb7LZG7bE%20%297%2DB%287%2DbBZ7LbE%207%2DbB%7CQyX7%5Eb%28E7%29LD%207%2DbbE%7CQyZAb%5E7B%7CQyX7hF%7CQyX9bC7%7CQyX7hG%5BA%2A%5DQyXb7b9XL7bE%20h7XyQ%7CAb7b9XyQ%7CDb%5E7XyQKcl%20%20Z==0=0===Woody'n%20You",
     "charts": [
       {
+        "book": "The Colorado Cookbook",
+        "page": "271"
+      },
+      {
         "book": "The New Real Book, Vol. 2",
         "page": "436"
       },
@@ -30472,7 +31621,7 @@
     ],
     "time_signature": "4/4",
     "tags": [],
-    "obscurity_score": 79,
+    "obscurity_score": 70,
     "difficulty_score": 50
   },
   {
@@ -30925,10 +32074,15 @@
     "additional_feels": [],
     "ireal_style": "Medium Swing",
     "ireal_url": "irealb://You%20Made%20Me%20Love%20You=Monaco%20James==Medium%20Swing=C==1r34LbKcu7XCZL74CXyQ%7CQyX7GZL%20x%20ZL7%20G7%2DDZL7obE%20E%2FC%7CD%2D7%20G4TA%2A%5BG%7CQyX%20LZ%7CA%20lcKQyX7DZL%20lcQKyX7DZL%20lcKQyX7LZD%2D7lcKQyEZL7F%5B%2ABCXyX7GZL%20x%20ZL7G%20%2D7DZL7obE%20E%2FC%7CQyQ%7CG7%20%5DQyX7%7CQyXCcl%20LZ7%2DD%7CQyXCZL%20lcKyQX7DZL%20lcKQyX7A%20G7LZKQyX7%20%28G7%29x%20%20Z%20==0=0===You%20Made%20Me%20Love%20You",
-    "charts": [],
+    "charts": [
+      {
+        "book": "Jazz Fakebook",
+        "page": "440"
+      }
+    ],
     "time_signature": "4/4",
     "tags": [],
-    "obscurity_score": 97,
+    "obscurity_score": 88,
     "difficulty_score": 50
   },
   {

@@ -61,6 +61,17 @@ def _clamp_score(v) -> float | None:
         return None
 
 
+def _clamp_stars(v) -> float | None:
+    """1–5 star rating, rounded to a whole star. None if absent/out of range."""
+    if v is None:
+        return None
+    try:
+        n = round(float(v))
+    except (TypeError, ValueError):
+        return None
+    return float(n) if 1 <= n <= 5 else None
+
+
 # --------------------------------------------------------------------------- #
 # API
 # --------------------------------------------------------------------------- #
@@ -120,28 +131,32 @@ def pick(tune_id: str):
 
 @app.post("/api/tunes/<tune_id>/played")
 def played(tune_id: str):
-    """User confirms the band actually played this tune."""
+    """User confirms the band actually played this tune. The key it was played in
+    (whatever was on screen) becomes last_played_key — this is the ONLY thing that
+    updates it; randomizing the key for a view does not."""
+    body = request.get_json(silent=True) or {}
+    key = (body.get("key") or "").strip() or None
     with SessionLocal() as session:
         tune = session.get(Tune, tune_id)
         if tune is None:
             return jsonify(error="not found"), 404
         tune.times_played += 1
         tune.last_played_at = datetime.now(timezone.utc)
+        if key:
+            tune.last_played_key = key
         session.commit()
         return jsonify(tune.to_dict())
 
 
 @app.post("/api/tunes/<tune_id>/key")
 def randomize_key(tune_id: str):
-    """Pick a random chromatic root, persist as last_played_key, return it."""
+    """Generate a random in-mode key for THIS view only. Deliberately does not
+    persist — last_played_key changes only when the user marks a tune played."""
     with SessionLocal() as session:
         tune = session.get(Tune, tune_id)
         if tune is None:
             return jsonify(error="not found"), 404
-        new_key = _random_key_in_mode(tune.original_key)
-        tune.last_played_key = new_key
-        session.commit()
-        return jsonify(last_played_key=new_key)
+        return jsonify(key=_random_key_in_mode(tune.original_key))
 
 
 @app.post("/api/tunes/<tune_id>/rate")
@@ -150,8 +165,9 @@ def rate(tune_id: str):
     body = request.get_json(silent=True) or {}
     obscurity = _clamp_score(body.get("obscurity"))
     difficulty = _clamp_score(body.get("difficulty"))
-    if obscurity is None and difficulty is None:
-        return jsonify(error="provide obscurity and/or difficulty"), 400
+    stars = _clamp_stars(body.get("stars"))
+    if obscurity is None and difficulty is None and stars is None:
+        return jsonify(error="provide obscurity, difficulty, and/or stars"), 400
 
     with SessionLocal() as session:
         tune = session.get(Tune, tune_id)
@@ -162,6 +178,7 @@ def rate(tune_id: str):
             anonymous_user_id=(body.get("anonymous_user_id") or None),
             obscurity_rating=obscurity,
             difficulty_rating=difficulty,
+            star_rating=stars,
         ))
         recompute(session, tune)
         session.commit()

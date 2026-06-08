@@ -13,6 +13,35 @@ import { useInstrument } from "./useInstrument";
 
 const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
 
+// "Lame" mode alternates Spain with one of these wedding-band warhorses. Titles
+// must match the library (Ipanema is stored "...The"); Cantaloupe Island and
+// Chameleon aren't in the iReal backup yet, so they simply no-op until added.
+const LAME_TUNES = [
+  "Autumn Leaves",
+  "Blue Bossa",
+  "Satin Doll",
+  "Take the 'A' Train",
+  "All Blues",
+  "Girl From Ipanema, The",
+  "Fly Me to the Moon",
+  "Take Five",
+  "Summertime",
+  "Cantaloupe Island",
+  "My Funny Valentine",
+  "Misty",
+  "Body and Soul",
+  "Georgia on My Mind",
+  "All of Me",
+  "Mack the Knife",
+  "What a Wonderful World",
+  "Watermelon Man",
+  "St. Thomas",
+  "So What",
+  "Stella by Starlight",
+  "There Will Never Be Another You",
+  "Chameleon",
+];
+
 export default function App() {
   const [tunes, setTunes] = useState<Tune[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -20,8 +49,10 @@ export default function App() {
     feels: [],
     obscurity: 10, // aim at the canon by default; slide up to explore deep cuts
     difficulty: 50,
+    hipness: 50,
     obscurityOn: true,
     difficultyOn: true,
+    hipnessOn: false, // opt-in: ratings are sparse at first
     excludeHenny: false,
   });
   const [current, setCurrent] = useState<Tune | null>(null);
@@ -80,7 +111,16 @@ export default function App() {
       if (lameOn.current) {
         next = findTune("Spain");
       } else {
-        next = pickRandomTune(tunes, filters, suggested.current);
+        // every other draw: a random tune from the curated lame list (filters
+        // ignored — the list IS the curation), avoiding repeats until exhausted
+        const pool = LAME_TUNES.map(findTune).filter(
+          (t): t is Tune => t !== null,
+        );
+        const fresh = pool.filter((t) => !suggested.current.has(t.id));
+        const choose = fresh.length ? fresh : pool;
+        next = choose.length
+          ? choose[Math.floor(Math.random() * choose.length)]
+          : null;
         if (next) remember(next);
       }
     } else {
@@ -100,11 +140,10 @@ export default function App() {
     );
   }
 
-  // randomize: show the new key in this view AND remember it as the tune's
-  // last-played key (the corner badge / next time it comes up).
+  // randomize: show the new key in THIS view only. It is NOT persisted — the
+  // tune's last_played_key updates only when the user marks it played.
   function handleRandomized(key: string) {
     setSessionKey(key);
-    if (current) updateCurrent({ ...current, last_played_key: key });
   }
 
   // drop a tune from the pool and deal the next one
@@ -162,6 +201,7 @@ export default function App() {
         <ResultControls
           tune={current}
           anonId={anonId}
+          currentKey={sessionKey ?? current.original_key}
           onUpdate={updateCurrent}
           onDelete={removeCurrent}
           onRandomized={handleRandomized}

@@ -3,10 +3,12 @@ import { deleteTune, markPlayed, randomizeKey, submitRating } from "../core/api"
 import { irealUrlFor } from "../core/irealLink";
 import type { Tune } from "../core/types";
 import Slider from "./Slider";
+import Stars from "./Stars";
 
 interface Props {
   tune: Tune;
   anonId: string;
+  currentKey: string | null; // concert key currently shown (randomized or original)
   onUpdate: (t: Tune) => void;
   onDelete: (id: string) => void;
   onRandomized: (key: string) => void;
@@ -23,12 +25,14 @@ function coverSlug(book: string): string {
 export default function ResultControls({
   tune,
   anonId,
+  currentKey,
   onUpdate,
   onDelete,
   onRandomized,
 }: Props) {
   const [obscurity, setObscurity] = useState(tune.obscurity_score);
   const [difficulty, setDifficulty] = useState(tune.difficulty_score);
+  const [stars, setStars] = useState(0); // this user's pick (0 = not rated)
   const [busyKey, setBusyKey] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [thanks, setThanks] = useState(false);
@@ -40,6 +44,7 @@ export default function ResultControls({
   useEffect(() => {
     setObscurity(tune.obscurity_score);
     setDifficulty(tune.difficulty_score);
+    setStars(0);
     setThanks(false);
     setSubmitted(false);
     setDeleting(false);
@@ -50,7 +55,8 @@ export default function ResultControls({
   async function onPlayed() {
     setPlayedBusy(true);
     try {
-      onUpdate(await markPlayed(tune.id));
+      // record the key it was actually played in (whatever's on screen)
+      onUpdate(await markPlayed(tune.id, currentKey));
     } catch (e) {
       console.error(e);
     } finally {
@@ -61,8 +67,8 @@ export default function ResultControls({
   async function onRandomize() {
     setBusyKey(true);
     try {
-      const { last_played_key } = await randomizeKey(tune.id);
-      onRandomized(last_played_key);
+      const { key } = await randomizeKey(tune.id);
+      onRandomized(key);
     } catch (e) {
       console.error(e);
     } finally {
@@ -75,7 +81,7 @@ export default function ResultControls({
     try {
       const updated = await submitRating(
         tune.id,
-        { obscurity, difficulty },
+        { obscurity, difficulty, stars: stars || undefined },
         anonId,
       );
       onUpdate(updated);
@@ -146,6 +152,10 @@ export default function ResultControls({
 
       <div className="rating-card">
         <h3 className="rating-title">Weigh in</h3>
+        <div className="like-row">
+          <span className="like-label">How hip?</span>
+          <Stars value={stars} onChange={setStars} />
+        </div>
         <Slider
           label="How obscure?"
           leftLabel="Common"
@@ -167,7 +177,12 @@ export default function ResultControls({
         </button>
         <p className="vote-note">
           {thanks ? "Thanks — crowd scores updated. " : ""}
-          obscurity {Math.round(tune.obscurity_score)} ({tune.obscurity_votes}{" "}
+          {tune.rating_score != null
+            ? `★ ${tune.rating_score.toFixed(1)} (${tune.rating_votes} ${
+                tune.rating_votes === 1 ? "rating" : "ratings"
+              })`
+            : "★ no ratings yet"}{" "}
+          · obscurity {Math.round(tune.obscurity_score)} ({tune.obscurity_votes}{" "}
           {tune.obscurity_votes === 1 ? "vote" : "votes"}) · difficulty{" "}
           {Math.round(tune.difficulty_score)} ({tune.difficulty_votes}{" "}
           {tune.difficulty_votes === 1 ? "vote" : "votes"})

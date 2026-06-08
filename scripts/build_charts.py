@@ -42,7 +42,15 @@ KNOWN = sorted(BOOK_NAMES, key=len, reverse=True)  # longest-first for suffix ma
 
 
 def norm(t: str) -> str:
-    return re.sub(r"[^a-z0-9]", "", t.lower())
+    # Must match build_seed.mjs chartKey() exactly. Article-aware so the three
+    # inversion forms converge: "The Nearness Of You" == "Nearness Of You, The"
+    # == "Nearness Of You (The)". The \s+ / [,\s]+ boundaries keep words like
+    # "Anthropology"/"Theme" intact.
+    s = t.lower()
+    s = re.sub(r"\([^)]*\)", " ", s)            # drop parentheticals incl. "(The)"
+    s = re.sub(r"^(the|a|an)\s+", "", s)
+    s = re.sub(r"[,\s]+(the|a|an)\s*$", "", s)  # "X, The" or "X The"
+    return re.sub(r"[^a-z0-9]", "", s)
 
 
 def parse_line(line: str):

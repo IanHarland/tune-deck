@@ -57,6 +57,16 @@ export default function FiltersPanel({ filters, onChange, matchCount }: Props) {
         onChange={(v) => onChange({ ...filters, difficulty: v })}
         accent="var(--gold)"
       />
+      <Slider
+        label="Hipness"
+        leftLabel="Cheesy"
+        rightLabel="Hip"
+        enabled={filters.hipnessOn}
+        value={filters.hipness}
+        onToggle={() => onChange({ ...filters, hipnessOn: !filters.hipnessOn })}
+        onChange={(v) => onChange({ ...filters, hipness: v })}
+        accent="var(--violet)"
+      />
 
       <button
         type="button"

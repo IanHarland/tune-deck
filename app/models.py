@@ -74,6 +74,12 @@ class Tune(Base):
     obscurity_votes = Column(Integer, nullable=False, default=0)
     difficulty_votes = Column(Integer, nullable=False, default=0)
 
+    # overall "how much do you like it" star rating (1–5). Unlike the scores
+    # above there's no seed prior (nothing in iReal predicts taste), so it's the
+    # plain mean of star votes and stays null until the first one lands.
+    rating_score = Column(Float, nullable=True)
+    rating_votes = Column(Integer, nullable=False, default=0)
+
     # play history. NOTE: last_played_key (above) is the randomized KEY; the
     # *_at columns here are timestamps. "picked" = drawn from the deck;
     # "played" = the user confirmed the band actually played it.
@@ -108,6 +114,8 @@ class Tune(Base):
             "difficulty_score": round(self.difficulty_score, 1),
             "obscurity_votes": self.obscurity_votes,
             "difficulty_votes": self.difficulty_votes,
+            "rating_score": round(self.rating_score, 1) if self.rating_score is not None else None,
+            "rating_votes": self.rating_votes,
             "times_picked": self.times_picked,
             "times_played": self.times_played,
             "last_picked_at": self.last_picked_at.isoformat() if self.last_picked_at else None,
@@ -125,6 +133,7 @@ class TuneRating(Base):
 
     obscurity_rating = Column(Float, nullable=True)
     difficulty_rating = Column(Float, nullable=True)
+    star_rating = Column(Float, nullable=True)  # 1–5 "how much I like it"
 
     created_at = Column(DateTime(timezone=True), default=_now)
 

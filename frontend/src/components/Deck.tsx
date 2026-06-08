@@ -167,6 +167,14 @@ function TuneFace({
       {glyph(15)}
     </>
   );
+  // shrink for long titles — by total length OR a long single word (which can't
+  // wrap), so things like "Klactoveedsedstene" don't run off the card.
+  const longestWord = Math.max(...tune.title.split(/\s+/).map((w) => w.length));
+  const titleClass =
+    tune.title.length > 30 || longestWord > 13 ? "title-xs"
+    : tune.title.length > 20 || longestWord > 10 ? "title-sm"
+    : "";
+  const hip = tune.rating_score;
   return (
     // deal-in runs ONCE on mount (the .top-card key changes per tune). It must
     // NOT depend on drag state, or every tap/scroll-grab replays it (the flash).
@@ -183,13 +191,7 @@ function TuneFace({
           {feels.map((f) => FEEL_LABELS[f as Feel]).join(" · ")}
         </span>
       </div>
-      <h2
-        className={`face-title ${
-          tune.title.length > 30 ? "title-xs" : tune.title.length > 20 ? "title-sm" : ""
-        }`}
-      >
-        {tune.title}
-      </h2>
+      <h2 className={`face-title ${titleClass}`}>{tune.title}</h2>
       {tune.composer && <p className="face-composer">{tune.composer}</p>}
       {card.suit && (
         <div className="card-pips">
@@ -200,21 +202,28 @@ function TuneFace({
           ))}
         </div>
       )}
-      <div className="face-key">
-        <span className="key-big">
-          <KeyLabel k={playKey} />
-        </span>
-        <span className="key-sub">
+      {playKey && (
+        <div className="face-key">
+          <span className="key-big">
+            <KeyLabel k={playKey} />
+          </span>
           {randomizedKey ? (
-            <>
-              original: <KeyLabel k={originalKey} />
-            </>
+            originalKey && (
+              <span className="key-sub">
+                original: <KeyLabel k={originalKey} />
+              </span>
+            )
           ) : (
-            "original key"
+            <span className="key-sub">original key</span>
           )}
-        </span>
-      </div>
+        </div>
+      )}
       <div className="card-scores">
+        {hip != null && (
+          <span className="score-badge">
+            <span className="mini-star">★</span> <b>{hip.toFixed(1)}</b>
+          </span>
+        )}
         <span className="score-badge">
           obscurity <b>{Math.round(tune.obscurity_score)}</b>
         </span>

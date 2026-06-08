@@ -15,6 +15,7 @@ from pathlib import Path
 from sqlalchemy import create_engine, inspect, select, text
 from sqlalchemy.orm import Session, sessionmaker
 
+from .hip_seed import seed_hipness
 from .models import Base, Tune
 
 _DEFAULT_SQLITE = f"sqlite:///{Path(__file__).resolve().parent.parent / 'tunedeck.db'}"
@@ -31,24 +32,31 @@ SessionLocal = sessionmaker(bind=engine, expire_on_commit=False)
 SEED_PATH = Path(__file__).resolve().parent.parent / "data" / "tunes.json"
 
 
-# Additive columns added after the first deploy. create_all() won't ALTER an
-# existing table, so (Leif Bot pattern) we add missing columns idempotently.
-# A value may be a single DDL string (works on both backends) or a per-dialect
-# dict where the DDL differs (e.g. boolean defaults).
+# Additive columns added after the first deploy, keyed by table. create_all()
+# won't ALTER an existing table, so (Leif Bot pattern) we add missing columns
+# idempotently. A value may be a single DDL string (works on both backends) or
+# a per-dialect dict where the DDL differs (e.g. boolean defaults).
 _ADDITIVE_COLUMNS = {
-    "times_played": "ALTER TABLE tunes ADD COLUMN times_played INTEGER NOT NULL DEFAULT 0",
-    "last_picked_at": "ALTER TABLE tunes ADD COLUMN last_picked_at TIMESTAMP",
-    "last_played_at": "ALTER TABLE tunes ADD COLUMN last_played_at TIMESTAMP",
-    # JSON storage is TEXT on SQLite, native JSON on Postgres; TEXT works for both.
-    "charts": "ALTER TABLE tunes ADD COLUMN charts TEXT",
-    "tags": {
-        "sqlite": "ALTER TABLE tunes ADD COLUMN tags TEXT",
-        "postgresql": "ALTER TABLE tunes ADD COLUMN tags JSON",
+    "tunes": {
+        "times_played": "ALTER TABLE tunes ADD COLUMN times_played INTEGER NOT NULL DEFAULT 0",
+        "last_picked_at": "ALTER TABLE tunes ADD COLUMN last_picked_at TIMESTAMP",
+        "last_played_at": "ALTER TABLE tunes ADD COLUMN last_played_at TIMESTAMP",
+        # JSON storage is TEXT on SQLite, native JSON on Postgres; TEXT works for both.
+        "charts": "ALTER TABLE tunes ADD COLUMN charts TEXT",
+        "tags": {
+            "sqlite": "ALTER TABLE tunes ADD COLUMN tags TEXT",
+            "postgresql": "ALTER TABLE tunes ADD COLUMN tags JSON",
+        },
+        "time_signature": "ALTER TABLE tunes ADD COLUMN time_signature TEXT",
+        "deleted": {
+            "sqlite": "ALTER TABLE tunes ADD COLUMN deleted BOOLEAN NOT NULL DEFAULT 0",
+            "postgresql": "ALTER TABLE tunes ADD COLUMN deleted BOOLEAN NOT NULL DEFAULT false",
+        },
+        "rating_score": "ALTER TABLE tunes ADD COLUMN rating_score FLOAT",
+        "rating_votes": "ALTER TABLE tunes ADD COLUMN rating_votes INTEGER NOT NULL DEFAULT 0",
     },
-    "time_signature": "ALTER TABLE tunes ADD COLUMN time_signature TEXT",
-    "deleted": {
-        "sqlite": "ALTER TABLE tunes ADD COLUMN deleted BOOLEAN NOT NULL DEFAULT 0",
-        "postgresql": "ALTER TABLE tunes ADD COLUMN deleted BOOLEAN NOT NULL DEFAULT false",
+    "tune_ratings": {
+        "star_rating": "ALTER TABLE tune_ratings ADD COLUMN star_rating FLOAT",
     },
 }
 
@@ -59,21 +67,24 @@ def init_db() -> None:
     _run_migrations()
     with SessionLocal() as session:
         _seed(session)
+        seed_hipness(session)
 
 
 def _run_migrations() -> None:
     inspector = inspect(engine)
-    if "tunes" not in inspector.get_table_names():
-        return
-    existing = {c["name"] for c in inspector.get_columns("tunes")}
+    tables = set(inspector.get_table_names())
     dialect = engine.dialect.name
     with engine.begin() as conn:
-        for col, ddl in _ADDITIVE_COLUMNS.items():
-            if col in existing:
+        for table, cols in _ADDITIVE_COLUMNS.items():
+            if table not in tables:
                 continue
-            stmt = ddl[dialect] if isinstance(ddl, dict) else ddl
-            conn.execute(text(stmt))
-            print(f"[db] migrated: added tunes.{col}")
+            existing = {c["name"] for c in inspector.get_columns(table)}
+            for col, ddl in cols.items():
+                if col in existing:
+                    continue
+                stmt = ddl[dialect] if isinstance(ddl, dict) else ddl
+                conn.execute(text(stmt))
+                print(f"[db] migrated: added {table}.{col}")
 
 
 def _natural_key(title: str) -> str:

@@ -28,13 +28,14 @@ export function recordPick(tuneId: string): Promise<Tune> {
   return req(`/api/tunes/${tuneId}/pick`, { method: "POST" });
 }
 
-export function markPlayed(tuneId: string): Promise<Tune> {
-  return req(`/api/tunes/${tuneId}/played`, { method: "POST" });
+export function markPlayed(tuneId: string, key?: string | null): Promise<Tune> {
+  return req(`/api/tunes/${tuneId}/played`, {
+    method: "POST",
+    body: JSON.stringify({ key: key ?? null }),
+  });
 }
 
-export function randomizeKey(
-  tuneId: string,
-): Promise<{ last_played_key: string }> {
+export function randomizeKey(tuneId: string): Promise<{ key: string }> {
   return req(`/api/tunes/${tuneId}/key`, { method: "POST" });
 }
 
@@ -44,7 +45,7 @@ export function deleteTune(tuneId: string): Promise<{ ok: boolean }> {
 
 export function submitRating(
   tuneId: string,
-  ratings: { obscurity?: number; difficulty?: number },
+  ratings: { obscurity?: number; difficulty?: number; stars?: number },
   anonymousUserId?: string,
 ): Promise<Tune> {
   return req<Tune>(`/api/tunes/${tuneId}/rate`, {

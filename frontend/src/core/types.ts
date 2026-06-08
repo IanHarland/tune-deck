@@ -35,6 +35,8 @@ export interface Tune {
   difficulty_score: number;
   obscurity_votes: number;
   difficulty_votes: number;
+  rating_score: number | null; // crowd "like" stars (1–5), null until first vote
+  rating_votes: number;
   times_picked: number;
   times_played: number;
   last_picked_at: string | null;
@@ -49,8 +51,10 @@ export interface Filters {
   feels: Feel[];
   obscurity: number; // 0..100 slider position
   difficulty: number; // 0..100 slider position
+  hipness: number; // 0..100 slider position (biases by the 5★ crowd rating)
   obscurityOn: boolean; // does obscurity bias the draw?
   difficultyOn: boolean; // does difficulty bias the draw?
+  hipnessOn: boolean; // does hipness bias the draw?
   excludeHenny: boolean; // hard-exclude all Joe Henderson ("Henny") tunes
 }
 

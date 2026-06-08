@@ -7,6 +7,7 @@
   --ink-soft: #5a5346;
   --gold: #e0b24a;
   --teal: #3fb6a8;
+  --violet: #a98be8;
   --burgundy: #7d2b35;
   --card-red: #b3272d;
   --card-black: #20201d;
@@ -495,6 +496,7 @@ body::after {
   line-height: 1.15;
   font-weight: 700;
   flex: 0 0 auto;
+  overflow-wrap: break-word; /* last-resort: break a too-long single word */
 }
 /* shrink long titles so they don't crowd the pips below */
 .face-title.title-sm {
@@ -559,18 +561,25 @@ body::after {
 .card-scores {
   display: flex;
   justify-content: center;
-  gap: 8px;
+  flex-wrap: wrap;
+  gap: 5px;
   margin-top: 12px;
+}
+.mini-star {
+  color: var(--gold);
+}
+.score-badge {
+  white-space: nowrap;
 }
 .score-badge {
   font-size: 10px;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px;
   text-transform: uppercase;
   color: var(--ink-soft);
   background: rgba(0, 0, 0, 0.05);
   border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: 999px;
-  padding: 3px 9px;
+  padding: 3px 7px;
 }
 .score-badge b {
   color: var(--burgundy);
@@ -698,6 +707,37 @@ body::after {
   font-size: 13px;
   letter-spacing: 1.5px;
   text-transform: uppercase;
+  color: var(--gold);
+}
+.like-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 2px 0 14px;
+}
+.like-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--cream);
+}
+.stars {
+  display: flex;
+  gap: 6px;
+}
+.star {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 30px;
+  line-height: 1;
+  cursor: pointer;
+  color: rgba(246, 241, 227, 0.28);
+  transition: color 0.12s ease, transform 0.08s ease;
+}
+.star:hover {
+  transform: scale(1.12);
+}
+.star-on {
   color: var(--gold);
 }
 .vote-note {

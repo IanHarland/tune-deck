@@ -40,6 +40,15 @@ const norm = (t) => (t || '')
   .replace(/\([^)]*\)/g, ' ')      // drop parentheticals
   .toLowerCase()
   .replace(/[^a-z0-9]/g, '');      // strip everything but alphanumerics
+// article-aware key for matching charts.json, which build_charts.py keys the
+// same way: "The Nearness Of You" == "Nearness Of You, The". Used ONLY for chart
+// lookups (the plain `norm` above still drives canon/dedup).
+const chartKey = (t) => (t || '')
+  .replace(/\([^)]*\)/g, ' ')
+  .toLowerCase()
+  .replace(/^(the|a|an)\s+/, '')
+  .replace(/[,\s]+(the|a|an)\s*$/, '')   // "X, The" or "X The"
+  .replace(/[^a-z0-9]/g, '');
 const toSet = (list) => new Set(list.map(norm));
 
 const CORE_SET = toSet(canon.CORE);
@@ -192,7 +201,7 @@ for (const [k, t] of tunes) {
   if (!cls) { dropped++; continue; }
 
   const appearances = (playlistCount.get(k)?.size) || 0;
-  const chartRefs = charts[k] || [];
+  const chartRefs = charts[chartKey(t.title)] || [];
   const bookCount = chartRefs.length; // # of fake books that include the tune
   const obscurity = obscurityFor(k, bookCount, appearances);
   const difficulty = difficultyFor(k);
@@ -223,15 +232,28 @@ for (const [k, t] of tunes) {
   });
 }
 
-// manual additions not in the iReal library (e.g. for Smalls mode)
+// iReal deep links for manual tunes, pulled from a supplemental pack by
+// scripts/extract_manual_ireal.mjs (keyed by normalized title). Optional.
+let manualIreal = {};
+try {
+  manualIreal = JSON.parse(fs.readFileSync(
+    path.join(process.cwd(), 'data', 'manual_ireal.json'), 'utf8'));
+} catch { /* no pack extracted — manual tunes stay button-less */ }
+
+// manual additions not in the iReal library: playable/rateable cards. Merge in
+// fake-book chart refs (Real Book + page) and, when the supplemental pack had
+// them, an iReal deep link + its authentic key (so the card matches the chart).
 for (const extra of canon.MANUAL_TUNES) {
   if (out.some((o) => norm(o.title) === norm(extra.title))) continue;
+  const link = manualIreal[norm(extra.title)];
   out.push({
     alternate_titles: [],
     additional_feels: [],
-    ireal_style: null, ireal_url: null, charts: [], time_signature: null,
+    ireal_style: null, ireal_url: null, time_signature: null,
     tags: [], obscurity_score: 30, difficulty_score: 50,
     ...extra,
+    ...(link ? { ireal_url: link.ireal_url, original_key: link.key || extra.original_key } : {}),
+    charts: charts[chartKey(extra.title)] || [],
   });
 }
 

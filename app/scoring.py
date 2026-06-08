@@ -26,11 +26,15 @@ def recompute(session: Session, tune: Tune) -> None:
     """Recompute a tune's aggregate scores from its ratings + seed prior."""
     obs_sum, obs_n = _aggregate(session, tune.id, TuneRating.obscurity_rating)
     dif_sum, dif_n = _aggregate(session, tune.id, TuneRating.difficulty_rating)
+    star_sum, star_n = _aggregate(session, tune.id, TuneRating.star_rating)
 
     tune.obscurity_score = _blend(tune.obscurity_seed, obs_sum, obs_n)
     tune.difficulty_score = _blend(tune.difficulty_seed, dif_sum, dif_n)
     tune.obscurity_votes = obs_n
     tune.difficulty_votes = dif_n
+    # stars have no seed: plain mean, null while unrated
+    tune.rating_score = (star_sum / star_n) if star_n else None
+    tune.rating_votes = star_n
 
 
 def _aggregate(session: Session, tune_id: str, column) -> tuple[float, int]:

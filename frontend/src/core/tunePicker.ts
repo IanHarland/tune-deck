@@ -19,8 +19,10 @@ const SPREAD = 25;
 // "Freshness" penalty so over-played / recently-played tunes surface less.
 // Driven by times_played (persistent) and last_played_at (recovers over days).
 // Soft — floored so a tune is never fully excluded.
-const VOLUME_HALF = 5; // plays at which the volume weight is halved
-const RECENCY_HALFLIFE_DAYS = 20; // how fast a recent play "cools off"
+const VOLUME_HALF = 40; // plays at which the volume weight is halved (gentle:
+// total play count should barely affect whether a tune shows up — recency does
+// the heavy lifting for "don't repeat what we just played")
+const RECENCY_HALFLIFE_DAYS = 7; // how fast a recent play "cools off"
 const RECENCY_MAX_PENALTY = 0.9; // weight of a tune played seconds ago: 1-0.9
 const PLAY_FLOOR = 0.15; // minimum freshness weight
 
@@ -53,11 +55,31 @@ function targetWeight(score: number, target: number | null): number {
   return Math.exp(-(d * d) / (2 * SPREAD * SPREAD));
 }
 
-/** Mode lean: beginner heavily favors the canon (near-exclusive), hard is a
- * softer lean toward the difficult tunes (not a hard filter). Multipliers are
- * low because the tagged sets are small relative to the whole library. */
+/** Hipness bullseye: bias by the 5★ crowd rating, mapped onto the 0–100 slider
+ * (1★→0, 5★→100). An unrated tune is treated as a middling 3★ (→50) so the
+ * slider still biases the (currently large) unrated majority. */
+function hipnessWeight(tune: Tune, target: number | null): number {
+  if (target == null) return 1;
+  const stars = tune.rating_score ?? 3;
+  return targetWeight(((stars - 1) / 4) * 100, target);
+}
+
+// Beginner mode draws ONLY from the beginner canon and never anything obscure.
+// It's a hard pool (see beginnerPool / pickRandomTune), not a soft lean, so the
+// obscurity slider can't pull an obscure tune in. The tag has one high-obscurity
+// outlier (I Remember You), so we also cap obscurity at the canon edge (45).
+const BEGINNER_OBSCURITY_MAX = 45;
+
+/** The beginner-mode pool: easy canon only, nothing obscure. */
+export function beginnerPool(tunes: Tune[]): Tune[] {
+  return tunes.filter(
+    (t) => t.tags.includes("beginner") && t.obscurity_score < BEGINNER_OBSCURITY_MAX,
+  );
+}
+
+/** Mode lean: "hard" is a soft lean toward the difficult tunes (not a hard
+ * filter). Beginner is handled as a hard pool, not here. */
 function modeWeight(tune: Tune, mode: Mode): number {
-  if (mode === "beginner") return tune.tags.includes("beginner") ? 1 : 0.01;
   if (mode === "hard") return tune.tags.includes("hard") ? 1 : 0.05;
   return 1;
 }
@@ -92,6 +114,7 @@ export function tuneWeight(
       tune.difficulty_score,
       filters.difficultyOn ? filters.difficulty : null,
     ) *
+    hipnessWeight(tune, filters.hipnessOn ? filters.hipness : null) *
     freshnessWeight(tune, now) *
     modeWeight(tune, mode)
   );
@@ -108,7 +131,9 @@ export function pickRandomTune(
   excludeIds?: Set<string>,
   mode: Mode = "normal",
 ): Tune | null {
-  const pool = deckTunes(tunes, filters);
+  const base = deckTunes(tunes, filters);
+  // beginner mode hard-restricts to the easy, non-obscure canon
+  const pool = mode === "beginner" ? beginnerPool(base) : base;
   if (pool.length === 0) return null;
 
   const remaining =
