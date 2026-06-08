@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { getTunes, recordPick, undoVote, voteLike } from "./core/api";
+import { castVote, getTunes, recordPick, undoVote } from "./core/api";
 import { deckTunes, pickRandomTune } from "./core/tunePicker";
 import type { Filters, Mode, Tune } from "./core/types";
-import Deck from "./components/Deck";
+import Deck, { type WeighIn } from "./components/Deck";
 import FiltersPanel from "./components/Filters";
 import InstrumentSelector from "./components/InstrumentSelector";
 import ModeSelector from "./components/ModeSelector";
@@ -91,7 +91,7 @@ export default function App() {
     [tunes, filters.feels, filters.excludeHenny],
   );
 
-    const findTune = (title: string): Tune | null =>
+  const findTune = (title: string): Tune | null =>
     tunes?.find((t) => norm(t.title) === norm(title)) ?? null;
 
   // record a normal pick into the no-repeat set (cycling when exhausted)
@@ -151,34 +151,33 @@ export default function App() {
     setSessionKey(key);
   }
 
-  // patch a tune's crowd rating in the in-memory pool after a vote/undo
-  function patchRating(updated: Tune) {
+  // patch a tune's crowd aggregates in the in-memory pool after a vote/undo
+  function patchScores(updated: Tune) {
     setTunes((prev) =>
-      prev
-        ? prev.map((t) =>
-            t.id === updated.id
-              ? { ...t, rating_score: updated.rating_score, rating_votes: updated.rating_votes }
-              : t,
-          )
-        : prev,
+      prev ? prev.map((t) => (t.id === updated.id ? updated : t)) : prev,
     );
   }
 
-  // swipe right/left → record like/dislike, then advance. Remember it for undo.
-  async function handleVote(liked: boolean) {
+  // swipe (like/dislike) or a nudge-carrying tap → record it, then advance.
+  // Remember the rating for undo.
+  async function handleVote(liked: boolean | null, weighIn: WeighIn) {
     const voted = current;
     draw(); // advance now (also clears any prior undo state)
     if (!voted) return;
     try {
-      const { tune: updated, rating_id } = await voteLike(voted.id, liked, anonId);
-      patchRating(updated);
+      const { tune: updated, rating_id } = await castVote(
+        voted.id,
+        { liked, obscurity: weighIn.obscurity, difficulty: weighIn.difficulty },
+        anonId,
+      );
+      patchScores(updated);
       setLastVote({ tune: updated, ratingId: rating_id });
     } catch (e) {
       console.error(e);
     }
   }
 
-  // undo the last swipe: bring the card back and delete the vote
+  // undo the last swipe: bring the card back and delete the rating row
   async function handleUndo() {
     if (!lastVote) return;
     const { tune, ratingId } = lastVote;
@@ -187,12 +186,8 @@ export default function App() {
     setCurrent(tune);
     try {
       const reverted = await undoVote(ratingId);
-      patchRating(reverted);
-      setCurrent((c) =>
-        c && c.id === reverted.id
-          ? { ...c, rating_score: reverted.rating_score, rating_votes: reverted.rating_votes }
-          : c,
-      );
+      patchScores(reverted);
+      setCurrent((c) => (c && c.id === reverted.id ? reverted : c));
     } catch (e) {
       console.error(e);
     }
@@ -259,7 +254,6 @@ export default function App() {
       {current && (
         <ResultControls
           tune={current}
-          anonId={anonId}
           currentKey={sessionKey ?? current.original_key}
           onUpdate={updateCurrent}
           onDelete={removeCurrent}

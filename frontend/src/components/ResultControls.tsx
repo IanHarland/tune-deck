@@ -1,12 +1,10 @@
 import { useEffect, useState } from "react";
-import { deleteTune, markPlayed, randomizeKey, submitRating } from "../core/api";
+import { deleteTune, markPlayed, randomizeKey } from "../core/api";
 import { irealUrlFor } from "../core/irealLink";
 import type { Tune } from "../core/types";
-import Slider from "./Slider";
 
 interface Props {
   tune: Tune;
-  anonId: string;
   currentKey: string | null; // concert key currently shown (randomized or original)
   onUpdate: (t: Tune) => void;
   onDelete: (id: string) => void;
@@ -21,29 +19,21 @@ function coverSlug(book: string): string {
     .replace(/^-+|-+$/g, "");
 }
 
+// Obscurity/difficulty weigh-in now lives on the card (the draggable pills);
+// this strip is the per-tune actions: key, play tracking, charts, delete.
 export default function ResultControls({
   tune,
-  anonId,
   currentKey,
   onUpdate,
   onDelete,
   onRandomized,
 }: Props) {
-  const [obscurity, setObscurity] = useState(tune.obscurity_score);
-  const [difficulty, setDifficulty] = useState(tune.difficulty_score);
   const [busyKey, setBusyKey] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [thanks, setThanks] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
   const [playedBusy, setPlayedBusy] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
   // reset transient state when a new tune is drawn
   useEffect(() => {
-    setObscurity(tune.obscurity_score);
-    setDifficulty(tune.difficulty_score);
-    setThanks(false);
-    setSubmitted(false);
     setDeleting(false);
     setBusyKey(false);
     setPlayedBusy(false);
@@ -70,20 +60,6 @@ export default function ResultControls({
       console.error(e);
     } finally {
       setBusyKey(false);
-    }
-  }
-
-  async function onSubmit() {
-    setSubmitting(true);
-    try {
-      const updated = await submitRating(tune.id, { obscurity, difficulty }, anonId);
-      onUpdate(updated);
-      setThanks(true);
-      setSubmitted(true);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setSubmitting(false);
     }
   }
 
@@ -142,39 +118,6 @@ export default function ResultControls({
           </ul>
         </div>
       )}
-
-      <div className="rating-card">
-        <h3 className="rating-title">Weigh in</h3>
-        <Slider
-          label="How obscure?"
-          leftLabel="Common"
-          rightLabel="Obscure"
-          value={obscurity}
-          onChange={setObscurity}
-          accent="var(--teal)"
-        />
-        <Slider
-          label="How hard?"
-          leftLabel="Easy"
-          rightLabel="Hard"
-          value={difficulty}
-          onChange={setDifficulty}
-          accent="var(--gold)"
-        />
-        <button className={`btn btn-submit ${submitted ? "btn-submitted cursor-default" : ""}`} onClick={onSubmit} disabled={submitting || submitted}>
-          {submitting ? "Saving…" : submitted ? "Rating submitted" : "Submit rating"}
-        </button>
-        <p className="vote-note">
-          {thanks ? "Thanks — crowd scores updated. " : ""}
-          {tune.rating_score != null
-            ? `♥ ${Math.round(tune.rating_score)}% liked (${tune.rating_votes})`
-            : "♥ no swipes yet"}{" "}
-          · obscurity {Math.round(tune.obscurity_score)} ({tune.obscurity_votes}{" "}
-          {tune.obscurity_votes === 1 ? "vote" : "votes"}) · difficulty{" "}
-          {Math.round(tune.difficulty_score)} ({tune.difficulty_votes}{" "}
-          {tune.difficulty_votes === 1 ? "vote" : "votes"})
-        </p>
-      </div>
 
       <button className="btn-delete" onClick={onDeleteClick} disabled={deleting}>
         🗑 Remove this tune from the deck

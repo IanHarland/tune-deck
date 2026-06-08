@@ -148,37 +148,18 @@ def randomize_key(tune_id: str):
         return jsonify(key=_random_key_in_mode(tune.original_key))
 
 
-@app.post("/api/tunes/<tune_id>/rate")
-def rate(tune_id: str):
-    """Submit an obscurity/difficulty weigh-in and return refreshed aggregates."""
-    body = request.get_json(silent=True) or {}
-    obscurity = _clamp_score(body.get("obscurity"))
-    difficulty = _clamp_score(body.get("difficulty"))
-    if obscurity is None and difficulty is None:
-        return jsonify(error="provide obscurity and/or difficulty"), 400
-
-    with SessionLocal() as session:
-        tune = session.get(Tune, tune_id)
-        if tune is None:
-            return jsonify(error="not found"), 404
-        session.add(TuneRating(
-            tune_id=tune.id,
-            anonymous_user_id=(body.get("anonymous_user_id") or None),
-            obscurity_rating=obscurity,
-            difficulty_rating=difficulty,
-        ))
-        recompute(session, tune)
-        session.commit()
-        return jsonify(tune.to_dict())
-
-
 @app.post("/api/tunes/<tune_id>/vote")
 def vote(tune_id: str):
-    """Swipe like/dislike. Returns the refreshed tune + the rating id (for undo)."""
+    """One swipe/tap: a like/dislike and/or an obscurity/difficulty nudge, written
+    as a single rating row (so undo reverts all of it at once). Returns the
+    refreshed tune + the rating id."""
     body = request.get_json(silent=True) or {}
     liked = body.get("liked")
-    if not isinstance(liked, bool):
-        return jsonify(error="provide liked: true|false"), 400
+    liked = liked if isinstance(liked, bool) else None
+    obscurity = _clamp_score(body.get("obscurity"))
+    difficulty = _clamp_score(body.get("difficulty"))
+    if liked is None and obscurity is None and difficulty is None:
+        return jsonify(error="provide liked and/or obscurity/difficulty"), 400
 
     with SessionLocal() as session:
         tune = session.get(Tune, tune_id)
@@ -188,6 +169,8 @@ def vote(tune_id: str):
             tune_id=tune.id,
             anonymous_user_id=(body.get("anonymous_user_id") or None),
             liked=liked,
+            obscurity_rating=obscurity,
+            difficulty_rating=difficulty,
         )
         session.add(rating)
         session.flush()  # assign rating.id

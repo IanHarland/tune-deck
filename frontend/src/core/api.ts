@@ -43,26 +43,16 @@ export function deleteTune(tuneId: string): Promise<{ ok: boolean }> {
   return req(`/api/tunes/${tuneId}`, { method: "DELETE" });
 }
 
-export function submitRating(
+// one swipe/tap: like/dislike and/or an obscurity/difficulty nudge, in one row.
+// Returns the refreshed tune + the rating id (for undo).
+export function castVote(
   tuneId: string,
-  ratings: { obscurity?: number; difficulty?: number },
-  anonymousUserId?: string,
-): Promise<Tune> {
-  return req<Tune>(`/api/tunes/${tuneId}/rate`, {
-    method: "POST",
-    body: JSON.stringify({ ...ratings, anonymous_user_id: anonymousUserId }),
-  });
-}
-
-// swipe like/dislike. Returns the refreshed tune + the rating id (for undo).
-export function voteLike(
-  tuneId: string,
-  liked: boolean,
+  vote: { liked?: boolean | null; obscurity?: number | null; difficulty?: number | null },
   anonymousUserId?: string,
 ): Promise<{ tune: Tune; rating_id: string }> {
   return req(`/api/tunes/${tuneId}/vote`, {
     method: "POST",
-    body: JSON.stringify({ liked, anonymous_user_id: anonymousUserId }),
+    body: JSON.stringify({ ...vote, anonymous_user_id: anonymousUserId }),
   });
 }
 

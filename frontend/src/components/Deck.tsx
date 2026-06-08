@@ -1,16 +1,24 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { keyCard, toRelativeMajor, transposeKey } from "../core/keys";
 import { FEEL_LABELS, type Feel, type Tune } from "../core/types";
 import KeyLabel from "./KeyLabel";
 import Suit from "./Suit";
+
+// obscurity/difficulty nudged on this card (null = not touched → don't submit)
+export interface WeighIn {
+  obscurity: number | null;
+  difficulty: number | null;
+}
 
 interface Props {
   tune: Tune | null;
   randomizedKey: string | null; // concert pitch; null = show original key
   instrumentOffset: number;
   noMinor: boolean; // display minor keys as their relative major
-  onDraw: () => void; // neutral advance (tap) — no opinion recorded
-  onVote: (liked: boolean) => void; // swipe right=like / left=dislike
+  onDraw: () => void; // neutral advance with no opinion recorded at all
+  // swipe (like=true/dislike=false) or a neutral tap that still carries a nudge
+  // (liked=null); weighIn holds any obscurity/difficulty the user moved
+  onVote: (liked: boolean | null, weighIn: WeighIn) => void;
 }
 
 const SWIPE_THRESHOLD = 90;
@@ -33,21 +41,49 @@ export default function Deck({
   const [dx, setDx] = useState(0);
   const [dragging, setDragging] = useState(false);
   const [exit, setExit] = useState<"like" | "dislike" | "neutral" | null>(null);
+  // obscurity/difficulty as nudged on THIS card; *Touched gates submission
+  const [weigh, setWeigh] = useState({
+    obscurity: 50,
+    difficulty: 50,
+    obsTouched: false,
+    difTouched: false,
+  });
   const start = useRef<{ x: number; t: number } | null>(null);
   const busy = useRef(false);
 
   const faceDown = tune === null;
 
-  // animate the card out, then tell the parent what happened
+  // reset the pills to the new tune's crowd values each time a card is dealt
+  useEffect(() => {
+    setWeigh({
+      obscurity: tune?.obscurity_score ?? 50,
+      difficulty: tune?.difficulty_score ?? 50,
+      obsTouched: false,
+      difTouched: false,
+    });
+  }, [tune?.id]);
+
+  const setObscurity = (v: number) =>
+    setWeigh((w) => ({ ...w, obscurity: v, obsTouched: true }));
+  const setDifficulty = (v: number) =>
+    setWeigh((w) => ({ ...w, difficulty: v, difTouched: true }));
+
+  // animate the card out, then tell the parent what happened (carrying any nudge)
   function commit(kind: "like" | "dislike" | "neutral") {
     if (busy.current) return;
     busy.current = true;
     setDragging(false);
     setExit(kind);
+    const weighIn: WeighIn = {
+      obscurity: weigh.obsTouched ? weigh.obscurity : null,
+      difficulty: weigh.difTouched ? weigh.difficulty : null,
+    };
+    const nudged = weighIn.obscurity !== null || weighIn.difficulty !== null;
     window.setTimeout(() => {
-      if (kind === "like") onVote(true);
-      else if (kind === "dislike") onVote(false);
-      else onDraw();
+      if (kind === "like") onVote(true, weighIn);
+      else if (kind === "dislike") onVote(false, weighIn);
+      else if (nudged) onVote(null, weighIn); // neutral tap that still carries a nudge
+      else onDraw(); // pure neutral advance
       setExit(null);
       setDx(0);
       busy.current = false;
@@ -141,6 +177,11 @@ export default function Deck({
               randomizedKey={randomizedKey}
               instrumentOffset={instrumentOffset}
               noMinor={noMinor}
+              obscurity={weigh.obscurity}
+              difficulty={weigh.difficulty}
+              onObscurity={setObscurity}
+              onDifficulty={setDifficulty}
+              onPillTap={() => commit("neutral")}
             />
           </>
         )}
@@ -154,11 +195,21 @@ function TuneFace({
   randomizedKey,
   instrumentOffset,
   noMinor,
+  obscurity,
+  difficulty,
+  onObscurity,
+  onDifficulty,
+  onPillTap,
 }: {
   tune: Tune;
   randomizedKey: string | null;
   instrumentOffset: number;
   noMinor: boolean;
+  obscurity: number;
+  difficulty: number;
+  onObscurity: (v: number) => void;
+  onDifficulty: (v: number) => void;
+  onPillTap: () => void;
 }) {
   const feels = [tune.feel, ...tune.additional_feels];
   // headline key = the just-randomized key (this view) or the tune's original.
@@ -249,14 +300,79 @@ function TuneFace({
             <span className="mini-heart">♥</span> <b>{Math.round(hip)}%</b>
           </span>
         )}
-        <span className="score-badge">
-          obscurity <b>{Math.round(tune.obscurity_score)}</b>
-        </span>
-        <span className="score-badge">
-          difficulty <b>{Math.round(tune.difficulty_score)}</b>
-        </span>
+        <ScorePill
+          label="obscurity"
+          value={obscurity}
+          accent="var(--teal)"
+          onChange={onObscurity}
+          onTap={onPillTap}
+        />
+        <ScorePill
+          label="difficulty"
+          value={difficulty}
+          accent="var(--gold)"
+          onChange={onDifficulty}
+          onTap={onPillTap}
+        />
       </div>
       <div className="face-bottom">swipe or tap for another</div>
     </div>
+  );
+}
+
+// A draggable fill-pill: the label sits on a bar filled to `value`% in `accent`.
+// Drag left/right to set it (capturing its own pointer so the card doesn't
+// swipe). A tap that doesn't drag falls through to onTap (advance the card).
+function ScorePill({
+  label,
+  value,
+  accent,
+  onChange,
+  onTap,
+}: {
+  label: string;
+  value: number;
+  accent: string;
+  onChange: (v: number) => void;
+  onTap: () => void;
+}) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const drag = useRef<{ moved: boolean } | null>(null);
+
+  function valueAt(clientX: number): number {
+    const el = ref.current;
+    if (!el) return value;
+    const r = el.getBoundingClientRect();
+    return Math.max(0, Math.min(100, Math.round(((clientX - r.left) / r.width) * 100)));
+  }
+  function down(e: React.PointerEvent) {
+    e.stopPropagation(); // don't let the card start a swipe
+    e.currentTarget.setPointerCapture?.(e.pointerId);
+    drag.current = { moved: false };
+  }
+  function move(e: React.PointerEvent) {
+    if (!drag.current) return;
+    e.stopPropagation();
+    drag.current.moved = true;
+    onChange(valueAt(e.clientX));
+  }
+  function up(e: React.PointerEvent) {
+    e.stopPropagation();
+    const tapped = drag.current && !drag.current.moved;
+    drag.current = null;
+    if (tapped) onTap(); // a tap on the pill advances, like tapping the card
+  }
+  return (
+    <span
+      ref={ref}
+      className="score-pill"
+      onPointerDown={down}
+      onPointerMove={move}
+      onPointerUp={up}
+      onPointerCancel={up}
+    >
+      <span className="score-fill" style={{ width: `${value}%`, background: accent }} />
+      <span className="score-text">{label}</span>
+    </span>
   );
 }

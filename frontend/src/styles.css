@@ -611,6 +611,39 @@ body::after {
 .mini-heart {
   color: #d24a63;
 }
+
+/* draggable fill-pill: same shape as a score badge, filled to its value */
+.score-pill {
+  position: relative;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  font-size: 10px;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 999px;
+  padding: 4px 12px;
+  white-space: nowrap;
+  cursor: ew-resize;
+  touch-action: none;
+  user-select: none;
+}
+.score-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  opacity: 0.55;
+  pointer-events: none;
+}
+.score-text {
+  position: relative;
+  z-index: 1;
+  font-weight: 600;
+}
 .score-badge {
   white-space: nowrap;
 }
