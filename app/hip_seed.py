@@ -22,7 +22,7 @@ from sqlalchemy.orm import Session
 from .models import Tune, TuneRating
 from .scoring import recompute
 
-SEED_VERSION = "hipseed:v1"
+SEED_VERSION = "hipseed:v2"  # v2 = like/dislike votes (v1 was 1–5 stars)
 _HIP_SEEDS_PATH = Path(__file__).resolve().parent.parent / "data" / "hip_seeds.py"
 
 # target star (1–5) per list, hippest → least hip
@@ -61,13 +61,11 @@ def _targets() -> dict[str, tuple[float, int]]:
     return {k: (sum(v) / len(v), len(v)) for k, v in acc.items()}
 
 
-def _votes_for(target: float, k: int) -> list[int]:
-    """k integer star votes (1–5) whose mean ≈ target."""
-    lo = max(1, min(5, int(target)))
-    hi = min(5, lo + 1)
-    n_hi = round((target - lo) * k)
-    n_hi = max(0, min(k, n_hi))
-    return [hi] * n_hi + [lo] * (k - n_hi)
+def _likes_for(target_star: float, k: int) -> list[bool]:
+    """k like/dislike votes whose like-rate ≈ the target star (1★→0%, 5★→100%)."""
+    prob = (target_star - 1) / 4
+    n_likes = max(0, min(k, round(prob * k)))
+    return [True] * n_likes + [False] * (k - n_likes)
 
 
 def seed_hipness(session: Session) -> None:
@@ -93,11 +91,11 @@ def seed_hipness(session: Session) -> None:
         if tune is None:
             continue
         k = min(12, 4 + 2 * n)
-        for v in _votes_for(target, k):
+        for liked in _likes_for(target, k):
             session.add(TuneRating(
                 tune_id=tune.id,
                 anonymous_user_id=SEED_VERSION,
-                star_rating=float(v),
+                liked=liked,
             ))
         recompute(session, tune)
         seeded += 1

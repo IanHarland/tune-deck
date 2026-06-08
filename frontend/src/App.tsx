@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { getTunes, recordPick } from "./core/api";
+import { getTunes, recordPick, undoVote, voteLike } from "./core/api";
 import { deckTunes, pickRandomTune } from "./core/tunePicker";
 import type { Filters, Mode, Tune } from "./core/types";
 import Deck from "./components/Deck";
@@ -62,6 +62,10 @@ export default function App() {
   // Deliberately session-local so a stale global last_played_key never becomes
   // the headline on a tune the user hasn't randomized.
   const [sessionKey, setSessionKey] = useState<string | null>(null);
+  // the most recent swipe, so it can be undone (Tinder-style, single level)
+  const [lastVote, setLastVote] = useState<{ tune: Tune; ratingId: string } | null>(
+    null,
+  );
   const anonId = useAnonId();
   const [instrument, setInstrument] = useInstrument();
   // tunes already suggested this round; skipped on draw until the pool is
@@ -98,6 +102,7 @@ export default function App() {
 
   function draw() {
     if (!tunes) return;
+    setLastVote(null); // navigating away — the previous swipe is no longer undoable
     let next: Tune | null;
     if (mode === "spain") {
       next = findTune("Spain");
@@ -144,6 +149,53 @@ export default function App() {
   // tune's last_played_key updates only when the user marks it played.
   function handleRandomized(key: string) {
     setSessionKey(key);
+  }
+
+  // patch a tune's crowd rating in the in-memory pool after a vote/undo
+  function patchRating(updated: Tune) {
+    setTunes((prev) =>
+      prev
+        ? prev.map((t) =>
+            t.id === updated.id
+              ? { ...t, rating_score: updated.rating_score, rating_votes: updated.rating_votes }
+              : t,
+          )
+        : prev,
+    );
+  }
+
+  // swipe right/left → record like/dislike, then advance. Remember it for undo.
+  async function handleVote(liked: boolean) {
+    const voted = current;
+    draw(); // advance now (also clears any prior undo state)
+    if (!voted) return;
+    try {
+      const { tune: updated, rating_id } = await voteLike(voted.id, liked, anonId);
+      patchRating(updated);
+      setLastVote({ tune: updated, ratingId: rating_id });
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  // undo the last swipe: bring the card back and delete the vote
+  async function handleUndo() {
+    if (!lastVote) return;
+    const { tune, ratingId } = lastVote;
+    setLastVote(null);
+    setSessionKey(null);
+    setCurrent(tune);
+    try {
+      const reverted = await undoVote(ratingId);
+      patchRating(reverted);
+      setCurrent((c) =>
+        c && c.id === reverted.id
+          ? { ...c, rating_score: reverted.rating_score, rating_votes: reverted.rating_votes }
+          : c,
+      );
+    } catch (e) {
+      console.error(e);
+    }
   }
 
   // drop a tune from the pool and deal the next one
@@ -193,9 +245,16 @@ export default function App() {
             instrumentOffset={instrument.offset}
             noMinor={noMinor}
             onDraw={draw}
+            onVote={handleVote}
           />
         )}
       </main>
+
+      {lastVote && (
+        <button className="undo-btn" onClick={handleUndo}>
+          ↩ undo swipe
+        </button>
+      )}
 
       {current && (
         <ResultControls

@@ -3,7 +3,6 @@ import { deleteTune, markPlayed, randomizeKey, submitRating } from "../core/api"
 import { irealUrlFor } from "../core/irealLink";
 import type { Tune } from "../core/types";
 import Slider from "./Slider";
-import Stars from "./Stars";
 
 interface Props {
   tune: Tune;
@@ -32,7 +31,6 @@ export default function ResultControls({
 }: Props) {
   const [obscurity, setObscurity] = useState(tune.obscurity_score);
   const [difficulty, setDifficulty] = useState(tune.difficulty_score);
-  const [stars, setStars] = useState(0); // this user's pick (0 = not rated)
   const [busyKey, setBusyKey] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [thanks, setThanks] = useState(false);
@@ -44,7 +42,6 @@ export default function ResultControls({
   useEffect(() => {
     setObscurity(tune.obscurity_score);
     setDifficulty(tune.difficulty_score);
-    setStars(0);
     setThanks(false);
     setSubmitted(false);
     setDeleting(false);
@@ -79,11 +76,7 @@ export default function ResultControls({
   async function onSubmit() {
     setSubmitting(true);
     try {
-      const updated = await submitRating(
-        tune.id,
-        { obscurity, difficulty, stars: stars || undefined },
-        anonId,
-      );
+      const updated = await submitRating(tune.id, { obscurity, difficulty }, anonId);
       onUpdate(updated);
       setThanks(true);
       setSubmitted(true);
@@ -152,10 +145,6 @@ export default function ResultControls({
 
       <div className="rating-card">
         <h3 className="rating-title">Weigh in</h3>
-        <div className="like-row">
-          <span className="like-label">How hip?</span>
-          <Stars value={stars} onChange={setStars} />
-        </div>
         <Slider
           label="How obscure?"
           leftLabel="Common"
@@ -178,10 +167,8 @@ export default function ResultControls({
         <p className="vote-note">
           {thanks ? "Thanks — crowd scores updated. " : ""}
           {tune.rating_score != null
-            ? `★ ${tune.rating_score.toFixed(1)} (${tune.rating_votes} ${
-                tune.rating_votes === 1 ? "rating" : "ratings"
-              })`
-            : "★ no ratings yet"}{" "}
+            ? `♥ ${Math.round(tune.rating_score)}% liked (${tune.rating_votes})`
+            : "♥ no swipes yet"}{" "}
           · obscurity {Math.round(tune.obscurity_score)} ({tune.obscurity_votes}{" "}
           {tune.obscurity_votes === 1 ? "vote" : "votes"}) · difficulty{" "}
           {Math.round(tune.difficulty_score)} ({tune.difficulty_votes}{" "}

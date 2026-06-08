@@ -55,13 +55,12 @@ function targetWeight(score: number, target: number | null): number {
   return Math.exp(-(d * d) / (2 * SPREAD * SPREAD));
 }
 
-/** Hipness bullseye: bias by the 5★ crowd rating, mapped onto the 0–100 slider
- * (1★→0, 5★→100). An unrated tune is treated as a middling 3★ (→50) so the
- * slider still biases the (currently large) unrated majority. */
+/** Hipness bullseye: bias by the crowd like-rate (rating_score is already 0–100).
+ * An unrated tune is treated as a middling 50 so the slider still biases the
+ * (currently large) un-swiped majority. */
 function hipnessWeight(tune: Tune, target: number | null): number {
   if (target == null) return 1;
-  const stars = tune.rating_score ?? 3;
-  return targetWeight(((stars - 1) / 4) * 100, target);
+  return targetWeight(tune.rating_score ?? 50, target);
 }
 
 // Beginner mode draws ONLY from the beginner canon and never anything obscure.

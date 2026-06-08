@@ -56,7 +56,7 @@ _ADDITIVE_COLUMNS = {
         "rating_votes": "ALTER TABLE tunes ADD COLUMN rating_votes INTEGER NOT NULL DEFAULT 0",
     },
     "tune_ratings": {
-        "star_rating": "ALTER TABLE tune_ratings ADD COLUMN star_rating FLOAT",
+        "liked": "ALTER TABLE tune_ratings ADD COLUMN liked BOOLEAN",
     },
 }
 

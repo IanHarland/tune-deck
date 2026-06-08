@@ -360,6 +360,49 @@ body::after {
   cursor: grabbing;
 }
 
+/* swipe like/dislike stamps (shown as you drag, opacity set inline) */
+.swipe-stamp {
+  position: absolute;
+  top: 24px;
+  z-index: 3;
+  padding: 4px 14px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 800;
+  font-size: 26px;
+  letter-spacing: 2px;
+  border: 4px solid;
+  border-radius: 10px;
+  pointer-events: none;
+}
+.stamp-like {
+  left: 20px;
+  transform: rotate(-18deg);
+  color: #2fae7a;
+  border-color: #2fae7a;
+}
+.stamp-nope {
+  right: 20px;
+  transform: rotate(18deg);
+  color: var(--card-red);
+  border-color: var(--card-red);
+}
+
+.undo-btn {
+  display: block;
+  margin: 12px auto 0;
+  padding: 7px 18px;
+  border-radius: 999px;
+  border: 1px solid rgba(246, 241, 227, 0.22);
+  background: rgba(0, 0, 0, 0.22);
+  color: var(--cream);
+  font-size: 13px;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+}
+.undo-btn:active {
+  transform: scale(0.97);
+}
+
 /* card back — the ornate deck art (page-art image) */
 .card-back,
 .card-back-img {
@@ -565,8 +608,8 @@ body::after {
   gap: 5px;
   margin-top: 12px;
 }
-.mini-star {
-  color: var(--gold);
+.mini-heart {
+  color: #d24a63;
 }
 .score-badge {
   white-space: nowrap;
@@ -707,37 +750,6 @@ body::after {
   font-size: 13px;
   letter-spacing: 1.5px;
   text-transform: uppercase;
-  color: var(--gold);
-}
-.like-row {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin: 2px 0 14px;
-}
-.like-label {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--cream);
-}
-.stars {
-  display: flex;
-  gap: 6px;
-}
-.star {
-  background: none;
-  border: none;
-  padding: 0;
-  font-size: 30px;
-  line-height: 1;
-  cursor: pointer;
-  color: rgba(246, 241, 227, 0.28);
-  transition: color 0.12s ease, transform 0.08s ease;
-}
-.star:hover {
-  transform: scale(1.12);
-}
-.star-on {
   color: var(--gold);
 }
 .vote-note {

@@ -74,11 +74,10 @@ class Tune(Base):
     obscurity_votes = Column(Integer, nullable=False, default=0)
     difficulty_votes = Column(Integer, nullable=False, default=0)
 
-    # overall "how much do you like it" star rating (1–5). Unlike the scores
-    # above there's no seed prior (nothing in iReal predicts taste), so it's the
-    # plain mean of star votes and stays null until the first one lands.
+    # "hipness" = crowd like-rate, 0–100 (% of swipes that were a like). No seed
+    # prior (nothing in iReal predicts taste); null until the first swipe.
     rating_score = Column(Float, nullable=True)
-    rating_votes = Column(Integer, nullable=False, default=0)
+    rating_votes = Column(Integer, nullable=False, default=0)  # total likes+dislikes
 
     # play history. NOTE: last_played_key (above) is the randomized KEY; the
     # *_at columns here are timestamps. "picked" = drawn from the deck;
@@ -133,7 +132,7 @@ class TuneRating(Base):
 
     obscurity_rating = Column(Float, nullable=True)
     difficulty_rating = Column(Float, nullable=True)
-    star_rating = Column(Float, nullable=True)  # 1–5 "how much I like it"
+    liked = Column(Boolean, nullable=True)  # swipe: True=like, False=dislike
 
     created_at = Column(DateTime(timezone=True), default=_now)
 

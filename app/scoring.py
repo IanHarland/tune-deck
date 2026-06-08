@@ -12,7 +12,7 @@ ratings to fully own the score, not be diluted by the build-time guess.
 """
 from __future__ import annotations
 
-from sqlalchemy import func, select
+from sqlalchemy import case, func, select
 from sqlalchemy.orm import Session
 
 from .models import Tune, TuneRating
@@ -26,15 +26,26 @@ def recompute(session: Session, tune: Tune) -> None:
     """Recompute a tune's aggregate scores from its ratings + seed prior."""
     obs_sum, obs_n = _aggregate(session, tune.id, TuneRating.obscurity_rating)
     dif_sum, dif_n = _aggregate(session, tune.id, TuneRating.difficulty_rating)
-    star_sum, star_n = _aggregate(session, tune.id, TuneRating.star_rating)
+    likes, total = _like_counts(session, tune.id)
 
     tune.obscurity_score = _blend(tune.obscurity_seed, obs_sum, obs_n)
     tune.difficulty_score = _blend(tune.difficulty_seed, dif_sum, dif_n)
     tune.obscurity_votes = obs_n
     tune.difficulty_votes = dif_n
-    # stars have no seed: plain mean, null while unrated
-    tune.rating_score = (star_sum / star_n) if star_n else None
-    tune.rating_votes = star_n
+    # hipness = like-rate (0–100), no seed; null until the first swipe
+    tune.rating_score = (100.0 * likes / total) if total else None
+    tune.rating_votes = total
+
+
+def _like_counts(session: Session, tune_id: str) -> tuple[int, int]:
+    """(# likes, # total like/dislike votes) for a tune."""
+    row = session.execute(
+        select(
+            func.count(case((TuneRating.liked.is_(True), 1))),
+            func.count(TuneRating.liked),
+        ).where(TuneRating.tune_id == tune_id)
+    ).one()
+    return int(row[0]), int(row[1])
 
 
 def _aggregate(session: Session, tune_id: str, column) -> tuple[float, int]:

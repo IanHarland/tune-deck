@@ -9,7 +9,8 @@ interface Props {
   randomizedKey: string | null; // concert pitch; null = show original key
   instrumentOffset: number;
   noMinor: boolean; // display minor keys as their relative major
-  onDraw: () => void;
+  onDraw: () => void; // neutral advance (tap) — no opinion recorded
+  onVote: (liked: boolean) => void; // swipe right=like / left=dislike
 }
 
 const SWIPE_THRESHOLD = 90;
@@ -27,21 +28,27 @@ export default function Deck({
   instrumentOffset,
   noMinor,
   onDraw,
+  onVote,
 }: Props) {
   const [dx, setDx] = useState(0);
   const [dragging, setDragging] = useState(false);
+  const [exit, setExit] = useState<"like" | "dislike" | "neutral" | null>(null);
   const start = useRef<{ x: number; t: number } | null>(null);
   const busy = useRef(false);
 
   const faceDown = tune === null;
 
-  function triggerDraw(direction: number) {
+  // animate the card out, then tell the parent what happened
+  function commit(kind: "like" | "dislike" | "neutral") {
     if (busy.current) return;
     busy.current = true;
     setDragging(false);
-    setDx(direction * window.innerWidth * 1.2);
+    setExit(kind);
     window.setTimeout(() => {
-      onDraw();
+      if (kind === "like") onVote(true);
+      else if (kind === "dislike") onVote(false);
+      else onDraw();
+      setExit(null);
       setDx(0);
       busy.current = false;
     }, FLY_MS);
@@ -65,15 +72,16 @@ export default function Deck({
     const quick = Date.now() - start.current.t < 250;
     start.current = null;
 
-    if (Math.abs(moved) > SWIPE_THRESHOLD) {
-      triggerDraw(moved > 0 ? 1 : -1);
-    } else if (Math.abs(moved) < 8 && quick) {
-      // tap — only draws from a face-down deck (avoids accidental redraws)
-      if (faceDown) triggerDraw(1);
+    // face-down deck: nothing to judge yet — any deliberate gesture just draws
+    if (faceDown) {
+      if (Math.abs(moved) > SWIPE_THRESHOLD || (Math.abs(moved) < 8 && quick))
+        commit("neutral");
       else snapBack();
-    } else {
-      snapBack();
+      return;
     }
+    if (Math.abs(moved) > SWIPE_THRESHOLD) commit(moved > 0 ? "like" : "dislike");
+    else if (Math.abs(moved) < 8 && quick) commit("neutral"); // tap = neutral next
+    else snapBack();
   }
 
   function snapBack() {
@@ -81,11 +89,17 @@ export default function Deck({
     setDx(0);
   }
 
-  const rotate = dx / 22;
+  const W = typeof window !== "undefined" ? window.innerWidth : 400;
+  let transform = `translateX(${dx}px) rotate(${dx / 22}deg)`;
+  if (exit === "like") transform = `translateX(${W * 1.3}px) rotate(22deg)`;
+  else if (exit === "dislike") transform = `translateX(${-W * 1.3}px) rotate(-22deg)`;
+  else if (exit === "neutral") transform = "translateY(-130%) scale(0.92)";
   const topStyle: React.CSSProperties = {
-    transform: `translateX(${dx}px) rotate(${rotate}deg)`,
+    transform,
     transition: dragging ? "none" : `transform ${FLY_MS}ms ease-out`,
   };
+  const likeOpacity = Math.max(0, Math.min(1, dx / SWIPE_THRESHOLD));
+  const nopeOpacity = Math.max(0, Math.min(1, -dx / SWIPE_THRESHOLD));
 
   return (
     <div className="deck">
@@ -104,7 +118,10 @@ export default function Deck({
         role="button"
         tabIndex={0}
         onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") triggerDraw(1);
+          if (faceDown && (e.key === "Enter" || e.key === " ")) commit("neutral");
+          else if (e.key === "ArrowRight") commit("like");
+          else if (e.key === "ArrowLeft") commit("dislike");
+          else if (e.key === "Enter" || e.key === " ") commit("neutral");
         }}
       >
         {faceDown ? (
@@ -112,12 +129,20 @@ export default function Deck({
             <span className="back-hint">Tap or swipe to draw</span>
           </div>
         ) : (
-          <TuneFace
-            tune={tune!}
-            randomizedKey={randomizedKey}
-            instrumentOffset={instrumentOffset}
-            noMinor={noMinor}
-          />
+          <>
+            <div className="swipe-stamp stamp-like" style={{ opacity: likeOpacity }}>
+              LIKE
+            </div>
+            <div className="swipe-stamp stamp-nope" style={{ opacity: nopeOpacity }}>
+              NOPE
+            </div>
+            <TuneFace
+              tune={tune!}
+              randomizedKey={randomizedKey}
+              instrumentOffset={instrumentOffset}
+              noMinor={noMinor}
+            />
+          </>
         )}
       </div>
     </div>
@@ -221,7 +246,7 @@ function TuneFace({
       <div className="card-scores">
         {hip != null && (
           <span className="score-badge">
-            <span className="mini-star">★</span> <b>{hip.toFixed(1)}</b>
+            <span className="mini-heart">♥</span> <b>{Math.round(hip)}%</b>
           </span>
         )}
         <span className="score-badge">
@@ -231,7 +256,7 @@ function TuneFace({
           difficulty <b>{Math.round(tune.difficulty_score)}</b>
         </span>
       </div>
-      <div className="face-bottom">swipe for another</div>
+      <div className="face-bottom">swipe or tap for another</div>
     </div>
   );
 }

@@ -61,17 +61,6 @@ def _clamp_score(v) -> float | None:
         return None
 
 
-def _clamp_stars(v) -> float | None:
-    """1–5 star rating, rounded to a whole star. None if absent/out of range."""
-    if v is None:
-        return None
-    try:
-        n = round(float(v))
-    except (TypeError, ValueError):
-        return None
-    return float(n) if 1 <= n <= 5 else None
-
-
 # --------------------------------------------------------------------------- #
 # API
 # --------------------------------------------------------------------------- #
@@ -161,13 +150,12 @@ def randomize_key(tune_id: str):
 
 @app.post("/api/tunes/<tune_id>/rate")
 def rate(tune_id: str):
-    """Submit a crowd weigh-in and return the tune with refreshed aggregates."""
+    """Submit an obscurity/difficulty weigh-in and return refreshed aggregates."""
     body = request.get_json(silent=True) or {}
     obscurity = _clamp_score(body.get("obscurity"))
     difficulty = _clamp_score(body.get("difficulty"))
-    stars = _clamp_stars(body.get("stars"))
-    if obscurity is None and difficulty is None and stars is None:
-        return jsonify(error="provide obscurity, difficulty, and/or stars"), 400
+    if obscurity is None and difficulty is None:
+        return jsonify(error="provide obscurity and/or difficulty"), 400
 
     with SessionLocal() as session:
         tune = session.get(Tune, tune_id)
@@ -178,11 +166,51 @@ def rate(tune_id: str):
             anonymous_user_id=(body.get("anonymous_user_id") or None),
             obscurity_rating=obscurity,
             difficulty_rating=difficulty,
-            star_rating=stars,
         ))
         recompute(session, tune)
         session.commit()
         return jsonify(tune.to_dict())
+
+
+@app.post("/api/tunes/<tune_id>/vote")
+def vote(tune_id: str):
+    """Swipe like/dislike. Returns the refreshed tune + the rating id (for undo)."""
+    body = request.get_json(silent=True) or {}
+    liked = body.get("liked")
+    if not isinstance(liked, bool):
+        return jsonify(error="provide liked: true|false"), 400
+
+    with SessionLocal() as session:
+        tune = session.get(Tune, tune_id)
+        if tune is None:
+            return jsonify(error="not found"), 404
+        rating = TuneRating(
+            tune_id=tune.id,
+            anonymous_user_id=(body.get("anonymous_user_id") or None),
+            liked=liked,
+        )
+        session.add(rating)
+        session.flush()  # assign rating.id
+        rating_id = rating.id
+        recompute(session, tune)
+        session.commit()
+        return jsonify(tune=tune.to_dict(), rating_id=rating_id)
+
+
+@app.delete("/api/ratings/<rating_id>")
+def delete_rating(rating_id: str):
+    """Undo a swipe: remove the vote and re-aggregate its tune."""
+    with SessionLocal() as session:
+        rating = session.get(TuneRating, rating_id)
+        if rating is None:
+            return jsonify(ok=True)  # already gone — idempotent
+        tune = session.get(Tune, rating.tune_id)
+        session.delete(rating)
+        session.flush()
+        if tune is not None:
+            recompute(session, tune)
+        session.commit()
+        return jsonify(tune.to_dict() if tune is not None else {"ok": True})
 
 
 # --------------------------------------------------------------------------- #
