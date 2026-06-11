@@ -7,11 +7,15 @@ import FiltersPanel from "./components/Filters";
 import InstrumentSelector from "./components/InstrumentSelector";
 import ModeSelector from "./components/ModeSelector";
 import NoMinorToggle from "./components/NoMinorToggle";
+import InstallButton from "./components/InstallButton";
 import ResultControls from "./components/ResultControls";
 import { useAnonId } from "./useAnonId";
 import { useInstrument } from "./useInstrument";
 
 const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
+
+// shown once per device, then re-openable from the header "?"
+const INTRO_KEY = "tunedeck.seenIntro";
 
 // "Lame" mode alternates Spain with one of these wedding-band warhorses. Titles
 // must match the library (Ipanema is stored "...The"); Cantaloupe Island and
@@ -62,10 +66,26 @@ export default function App() {
   // Deliberately session-local so a stale global last_played_key never becomes
   // the headline on a tune the user hasn't randomized.
   const [sessionKey, setSessionKey] = useState<string | null>(null);
-  // the most recent swipe, so it can be undone (Tinder-style, single level)
-  const [lastVote, setLastVote] = useState<{ tune: Tune; ratingId: string } | null>(
-    null,
-  );
+  // Undo history: a stack of cards we've left behind, newest last. Every advance
+  // (a vote, a nudge, or a plain tap) pushes the card being left, so undo walks
+  // back through all of them — votes get their rating row deleted, taps just
+  // restore the card. ratingId is filled in async once castVote returns; id lets
+  // us target the right entry if several are in flight.
+  const [history, setHistory] = useState<
+    { id: number; tune: Tune; ratingId: string | null; sessionKey: string | null }[]
+  >([]);
+  const histId = useRef(0);
+  // first-run tutorial lives on the FIRST card's back (not a modal). Gated by
+  // localStorage so it shows once per device, then reverts to the plain back.
+  // The "?" reopens it as a non-modal peek over the deck.
+  const [seenIntro, setSeenIntro] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem(INTRO_KEY) === "1";
+    } catch {
+      return false;
+    }
+  });
+  const [helpOpen, setHelpOpen] = useState(false);
   const anonId = useAnonId();
   const [instrument, setInstrument] = useInstrument();
   // tunes already suggested this round; skipped on draw until the pool is
@@ -102,7 +122,7 @@ export default function App() {
 
   function draw() {
     if (!tunes) return;
-    setLastVote(null); // navigating away — the previous swipe is no longer undoable
+    markIntroSeen(); // drawing the first card retires the how-to-play back
     let next: Tune | null;
     if (mode === "spain") {
       next = findTune("Spain");
@@ -158,11 +178,28 @@ export default function App() {
     );
   }
 
+  // push the card we're leaving onto the undo stack, returning its entry id so a
+  // later castVote can attach its rating row. Returns null if there's no card.
+  function pushHistory(): number | null {
+    if (!current) return null;
+    const id = ++histId.current;
+    const left = current;
+    const key = sessionKey;
+    setHistory((h) => [...h, { id, tune: left, ratingId: null, sessionKey: key }]);
+    return id;
+  }
+
+  // plain advance (tap / swipe with no opinion): undoable, but no server write
+  function handleDraw() {
+    pushHistory();
+    draw();
+  }
+
   // swipe (like/dislike) or a nudge-carrying tap → record it, then advance.
-  // Remember the rating for undo.
   async function handleVote(liked: boolean | null, weighIn: WeighIn) {
     const voted = current;
-    draw(); // advance now (also clears any prior undo state)
+    const entryId = pushHistory();
+    draw(); // advance immediately; the vote round-trips in the background
     if (!voted) return;
     try {
       const { tune: updated, rating_id } = await castVote(
@@ -171,25 +208,42 @@ export default function App() {
         anonId,
       );
       patchScores(updated);
-      setLastVote({ tune: updated, ratingId: rating_id });
+      // attach the rating row to its history entry so undo can delete it
+      if (entryId !== null) {
+        setHistory((h) =>
+          h.map((e) => (e.id === entryId ? { ...e, ratingId: rating_id } : e)),
+        );
+      }
     } catch (e) {
       console.error(e);
     }
   }
 
-  // undo the last swipe: bring the card back and delete the rating row
-  async function handleUndo() {
-    if (!lastVote) return;
-    const { tune, ratingId } = lastVote;
-    setLastVote(null);
-    setSessionKey(null);
-    setCurrent(tune);
+  // step back one card: restore it (and its view), and if it carried a vote,
+  // delete that rating row. Repeatable until the stack is empty.
+  function handleUndo() {
+    if (history.length === 0) return;
+    const entry = history[history.length - 1];
+    setHistory((h) => h.slice(0, -1));
+    setSessionKey(entry.sessionKey);
+    setCurrent(entry.tune);
+    if (entry.ratingId) {
+      undoVote(entry.ratingId)
+        .then((reverted) => {
+          patchScores(reverted);
+          setCurrent((c) => (c && c.id === reverted.id ? reverted : c));
+        })
+        .catch((e) => console.error(e));
+    }
+  }
+
+  function markIntroSeen() {
+    if (seenIntro) return;
+    setSeenIntro(true);
     try {
-      const reverted = await undoVote(ratingId);
-      patchScores(reverted);
-      setCurrent((c) => (c && c.id === reverted.id ? reverted : c));
-    } catch (e) {
-      console.error(e);
+      localStorage.setItem(INTRO_KEY, "1");
+    } catch {
+      /* private mode / storage disabled — fine, just shows again next visit */
     }
   }
 
@@ -239,17 +293,33 @@ export default function App() {
             randomizedKey={sessionKey}
             instrumentOffset={instrument.offset}
             noMinor={noMinor}
-            onDraw={draw}
+            onDraw={handleDraw}
             onVote={handleVote}
+            firstVisit={!seenIntro}
+            helpOpen={helpOpen}
+            onCloseHelp={() => setHelpOpen(false)}
           />
         )}
       </main>
 
-      {lastVote && (
-        <button className="undo-btn" onClick={handleUndo}>
-          ↩ undo swipe
+      <div className="deck-actions">
+        <button
+          className="help-btn"
+          onClick={() => setHelpOpen((v) => !v)}
+          aria-label="How to play"
+          aria-pressed={helpOpen}
+          title="How to play"
+        >
+          ?
         </button>
-      )}
+        <button
+          className="undo-btn"
+          onClick={handleUndo}
+          disabled={history.length === 0}
+        >
+          ↩ undo
+        </button>
+      </div>
 
       {current && (
         <ResultControls
@@ -260,6 +330,8 @@ export default function App() {
           onRandomized={handleRandomized}
         />
       )}
+
+      <InstallButton />
 
       <footer className="app-footer">
         {current ? "swipe the card for another tune" : "tap the deck to begin"}

@@ -19,6 +19,9 @@ interface Props {
   // swipe (like=true/dislike=false) or a neutral tap that still carries a nudge
   // (liked=null); weighIn holds any obscurity/difficulty the user moved
   onVote: (liked: boolean | null, weighIn: WeighIn) => void;
+  firstVisit: boolean; // show the how-to-play on the (first) face-down back
+  helpOpen: boolean; // "?" peek: re-show the instructions over the deck
+  onCloseHelp: () => void;
 }
 
 const SWIPE_THRESHOLD = 90;
@@ -37,6 +40,9 @@ export default function Deck({
   noMinor,
   onDraw,
   onVote,
+  firstVisit,
+  helpOpen,
+  onCloseHelp,
 }: Props) {
   const [dx, setDx] = useState(0);
   const [dragging, setDragging] = useState(false);
@@ -80,7 +86,8 @@ export default function Deck({
     };
     const nudged = weighIn.obscurity !== null || weighIn.difficulty !== null;
     window.setTimeout(() => {
-      if (kind === "like") onVote(true, weighIn);
+      if (faceDown) onDraw(); // the face-down deck never votes — just deal a card
+      else if (kind === "like") onVote(true, weighIn);
       else if (kind === "dislike") onVote(false, weighIn);
       else if (nudged) onVote(null, weighIn); // neutral tap that still carries a nudge
       else onDraw(); // pure neutral advance
@@ -108,10 +115,11 @@ export default function Deck({
     const quick = Date.now() - start.current.t < 250;
     start.current = null;
 
-    // face-down deck: nothing to judge yet — any deliberate gesture just draws
+    // face-down deck: nothing to judge yet, so no gesture votes — but still fly
+    // the card the way it was thrown (a tap flies up) so the motion feels honest.
     if (faceDown) {
-      if (Math.abs(moved) > SWIPE_THRESHOLD || (Math.abs(moved) < 8 && quick))
-        commit("neutral");
+      if (Math.abs(moved) > SWIPE_THRESHOLD) commit(moved > 0 ? "like" : "dislike");
+      else if (Math.abs(moved) < 8 && quick) commit("neutral");
       else snapBack();
       return;
     }
@@ -130,9 +138,19 @@ export default function Deck({
   if (exit === "like") transform = `translateX(${W * 1.3}px) rotate(22deg)`;
   else if (exit === "dislike") transform = `translateX(${-W * 1.3}px) rotate(-22deg)`;
   else if (exit === "neutral") transform = "translateY(-130%) scale(0.92)";
+  // Exit accelerates away and fades (a card being thrown off); snap-back is a
+  // springier settle. Keeping the two curves distinct makes the fly-up read as
+  // deliberate motion rather than a stiff linear slide.
+  const exiting = exit !== null;
+  const transition = dragging
+    ? "none"
+    : exiting
+      ? `transform ${FLY_MS}ms cubic-bezier(0.4, 0.05, 0.8, 0.35), opacity ${FLY_MS}ms ease-in`
+      : "transform 240ms cubic-bezier(0.22, 1, 0.36, 1)";
   const topStyle: React.CSSProperties = {
     transform,
-    transition: dragging ? "none" : `transform ${FLY_MS}ms ease-out`,
+    transition,
+    opacity: exiting ? 0 : 1,
   };
   const likeOpacity = Math.max(0, Math.min(1, dx / SWIPE_THRESHOLD));
   const nopeOpacity = Math.max(0, Math.min(1, -dx / SWIPE_THRESHOLD));
@@ -162,7 +180,11 @@ export default function Deck({
       >
         {faceDown ? (
           <div className="card-back-img">
-            <span className="back-hint">Tap or swipe to draw</span>
+            {firstVisit ? (
+              <CardInstructions hint="Tap or swipe to begin" />
+            ) : (
+              <span className="back-hint">Tap or swipe to draw</span>
+            )}
           </div>
         ) : (
           <>
@@ -186,6 +208,51 @@ export default function Deck({
           </>
         )}
       </div>
+
+      {/* "?" peek: re-show the how-to-play over the deck, tap anywhere to close.
+          Not a modal dialog — it's the card back shown again. */}
+      {helpOpen && (
+        <div
+          className="card top-card help-peek"
+          onPointerDown={(e) => {
+            e.stopPropagation();
+            onCloseHelp();
+          }}
+          role="button"
+          aria-label="Close instructions"
+        >
+          <div className="card-back-img">
+            <CardInstructions hint="Tap to close" />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// The how-to-play, rendered onto a card back (first-visit deck + the "?" peek).
+function CardInstructions({ hint }: { hint: string }) {
+  return (
+    <div className="instr">
+      <h3 className="instr-title">How to play</h3>
+      <ul className="instr-list">
+        <li>
+          <span className="instr-ic" aria-hidden>👉</span>
+          <span><b>Swipe right</b> — it’s hip</span>
+        </li>
+        <li>
+          <span className="instr-ic" aria-hidden>👈</span>
+          <span><b>Swipe left</b> — not hip</span>
+        </li>
+        <li>
+          <span className="instr-ic" aria-hidden>👆</span>
+          <span><b>Tap</b> — next tune, no vote</span>
+        </li>
+      </ul>
+      <p className="instr-note">
+        Drag the <b>obscurity</b> / <b>difficulty</b> bars on a tune to weigh in.
+      </p>
+      <span className="back-hint instr-hint">{hint}</span>
     </div>
   );
 }
@@ -250,6 +317,8 @@ function TuneFace({
     tune.title.length > 30 || longestWord > 13 ? "title-xs"
     : tune.title.length > 20 || longestWord > 10 ? "title-sm"
     : "";
+  // always surface the hipness — unvoted tunes legitimately sit at the neutral
+  // 50 prior, so show that too (the score is never null now)
   const hip = tune.rating_score;
   return (
     // deal-in runs ONCE on mount (the .top-card key changes per tune). It must

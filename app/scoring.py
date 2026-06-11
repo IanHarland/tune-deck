@@ -32,8 +32,12 @@ def recompute(session: Session, tune: Tune) -> None:
     tune.difficulty_score = _blend(tune.difficulty_seed, dif_sum, dif_n)
     tune.obscurity_votes = obs_n
     tune.difficulty_votes = dif_n
-    # hipness = like-rate (0–100), no seed; null until the first swipe
-    tune.rating_score = (100.0 * likes / total) if total else None
+    # hipness = like-rate (0–100) with a Bayesian prior of one virtual neutral
+    # vote (0.5 like / 0.5 dislike). Every tune starts at a legitimate 50 and a
+    # single human swipe only nudges it (1 like → 75, 1 dislike → 25) instead of
+    # slamming it to the rail; the prior washes out as real votes accumulate.
+    # rating_votes counts REAL swipes only (0 = still on the bare prior).
+    tune.rating_score = 100.0 * (likes + 0.5) / (total + 1)
     tune.rating_votes = total
 
 

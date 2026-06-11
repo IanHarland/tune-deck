@@ -30,6 +30,7 @@ export default function ResultControls({
 }: Props) {
   const [busyKey, setBusyKey] = useState(false);
   const [playedBusy, setPlayedBusy] = useState(false);
+  const [played, setPlayed] = useState(false); // logged this card once already
   const [deleting, setDeleting] = useState(false);
 
   // reset transient state when a new tune is drawn
@@ -37,13 +38,16 @@ export default function ResultControls({
     setDeleting(false);
     setBusyKey(false);
     setPlayedBusy(false);
+    setPlayed(false);
   }, [tune.id]);
 
   async function onPlayed() {
+    if (played || playedBusy) return; // one log per tune
     setPlayedBusy(true);
     try {
       // record the key it was actually played in (whatever's on screen)
       onUpdate(await markPlayed(tune.id, currentKey));
+      setPlayed(true);
     } catch (e) {
       console.error(e);
     } finally {
@@ -90,9 +94,13 @@ export default function ResultControls({
         )}
       </div>
 
-      {/* play tracking — UI is provisional; the data is what matters for now */}
-      <button className="btn btn-played" onClick={onPlayed} disabled={playedBusy}>
-        ✓ We played this
+      {/* play tracking — one log per drawn tune (re-enabled when you draw again) */}
+      <button
+        className="btn btn-played"
+        onClick={onPlayed}
+        disabled={playedBusy || played}
+      >
+        {played ? "✓ Logged" : "✓ We played this"}
         {tune.times_played > 0 ? ` · ${tune.times_played}×` : ""}
       </button>
 

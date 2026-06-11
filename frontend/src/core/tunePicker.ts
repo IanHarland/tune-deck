@@ -63,11 +63,12 @@ function targetWeight(score: number, target: number | null): number {
 const UNRATED_HIP_FLOOR = 0.006;
 
 /** Hipness bullseye: bias by the crowd like-rate (rating_score is already 0–100).
- * Rated tunes use the bell curve; unrated tunes are suppressed in proportion to
- * how extreme the slider is. */
+ * Rated tunes use the bell curve; unrated tunes (rating_votes === 0 — their
+ * rating_score is just the neutral 50 placeholder, not a real opinion) are
+ * suppressed in proportion to how extreme the slider is. */
 function hipnessWeight(tune: Tune, target: number | null): number {
   if (target == null) return 1;
-  if (tune.rating_score == null) {
+  if (tune.rating_votes === 0 || tune.rating_score == null) {
     const extremity = Math.abs(target - 50) / 50; // 0 at neutral → 1 at 0/100
     return UNRATED_HIP_FLOOR ** extremity;
   }

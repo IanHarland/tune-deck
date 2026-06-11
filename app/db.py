@@ -68,6 +68,7 @@ def init_db() -> None:
     with SessionLocal() as session:
         _seed(session)
         seed_hipness(session)
+        _backfill_hipness(session)
 
 
 def _run_migrations() -> None:
@@ -85,6 +86,17 @@ def _run_migrations() -> None:
                 stmt = ddl[dialect] if isinstance(ddl, dict) else ddl
                 conn.execute(text(stmt))
                 print(f"[db] migrated: added {table}.{col}")
+
+
+def _backfill_hipness(session: Session) -> None:
+    """Give every unvoted tune the neutral 50 placeholder (no nulls in the DB).
+    Idempotent: once backfilled there are no nulls left, so reruns touch 0 rows."""
+    result = session.execute(
+        text("UPDATE tunes SET rating_score = 50 WHERE rating_score IS NULL")
+    )
+    session.commit()
+    if result.rowcount:
+        print(f"[db] backfilled neutral hipness for {result.rowcount} tunes")
 
 
 def _natural_key(title: str) -> str:
@@ -142,6 +154,7 @@ def _seed(session: Session) -> None:
             tags=r.get("tags", []),
             obscurity_seed=obs, difficulty_seed=dif,
             obscurity_score=obs, difficulty_score=dif,
+            rating_score=50.0,  # neutral placeholder until the first swipe
         ))
         existing.add(nk)
         added += 1

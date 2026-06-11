@@ -84,6 +84,37 @@ body::after {
   text-align: center;
   padding: 20px 0 10px;
 }
+
+/* deck action row: help + undo, centered below the deck (always present so the
+   layout never jumps) */
+.deck-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 14px;
+}
+.help-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid rgba(246, 241, 227, 0.22);
+  background: rgba(0, 0, 0, 0.22);
+  color: var(--cream);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  flex: none;
+}
+.help-btn:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+}
 .logo-emblem {
   height: 1.35em;
   width: 1.35em;
@@ -388,9 +419,7 @@ body::after {
 }
 
 .undo-btn {
-  display: block;
-  margin: 12px auto 0;
-  padding: 7px 18px;
+  padding: 8px 18px;
   border-radius: 999px;
   border: 1px solid rgba(246, 241, 227, 0.22);
   background: rgba(0, 0, 0, 0.22);
@@ -399,7 +428,11 @@ body::after {
   letter-spacing: 0.5px;
   cursor: pointer;
 }
-.undo-btn:active {
+.undo-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.undo-btn:not(:disabled):active {
   transform: scale(0.97);
 }
 
@@ -825,8 +858,123 @@ body::after {
   text-transform: uppercase;
   color: rgba(246, 241, 227, 0.35);
 }
+/* add-to-home-screen prompt (mobile web only; hidden once installed) */
+.install {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20px;
+}
+.install-btn {
+  padding: 9px 20px;
+  border-radius: 999px;
+  border: 1px solid rgba(224, 178, 74, 0.5);
+  background: rgba(224, 178, 74, 0.14);
+  color: var(--gold);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+}
+.install-btn:active {
+  transform: scale(0.97);
+}
+.install-tip {
+  margin-top: 10px;
+  max-width: 300px;
+  background: var(--cream);
+  color: var(--ink);
+  border-radius: 12px;
+  padding: 13px 15px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+  text-align: center;
+}
+.install-tip-text {
+  margin: 0 0 11px;
+  font-size: 13px;
+  line-height: 1.55;
+}
+.share-glyph {
+  vertical-align: -3px;
+  color: #0a84ff; /* iOS share-button blue */
+}
+.install-tip-close {
+  border: none;
+  background: var(--ink);
+  color: var(--cream);
+  border-radius: 999px;
+  padding: 6px 16px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
 .error {
   color: #ff9b9b;
   text-align: center;
   font-size: 13px;
+}
+
+/* how-to-play, rendered onto a card back (first-visit deck + the "?" peek) */
+.help-peek {
+  z-index: 5;
+  animation: tut-fade 160ms ease-out;
+}
+@keyframes tut-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.instr {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--card-radius);
+  background: rgba(8, 26, 20, 0.84);
+  color: var(--cream);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 26px 22px;
+  text-align: center;
+}
+.instr-title {
+  margin: 0;
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: var(--gold);
+}
+.instr-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+  width: 100%;
+  max-width: 220px;
+}
+.instr-list li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+  font-size: 14px;
+  line-height: 1.25;
+}
+.instr-ic {
+  font-size: 23px;
+  width: 28px;
+  text-align: center;
+  flex: none;
+}
+.instr-note {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.4;
+  color: rgba(246, 241, 227, 0.72);
+  max-width: 220px;
+}
+.instr-hint {
+  margin-top: 2px;
 }

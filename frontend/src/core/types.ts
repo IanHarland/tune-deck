@@ -35,8 +35,9 @@ export interface Tune {
   difficulty_score: number;
   obscurity_votes: number;
   difficulty_votes: number;
-  rating_score: number | null; // crowd like-rate 0–100 (% liked), null until 1st swipe
-  rating_votes: number; // total swipes (likes + dislikes)
+  rating_score: number | null; // crowd like-rate 0–100 (% liked); a neutral 50
+  // placeholder until the first swipe (gate display/real-opinion on rating_votes)
+  rating_votes: number; // total swipes (likes + dislikes); 0 = unvoted placeholder
   times_picked: number;
   times_played: number;
   last_picked_at: string | null;
