@@ -12,6 +12,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from flask import Flask, jsonify, request, send_from_directory
+from flask_compress import Compress
 from sqlalchemy import select
 
 # Python guesses .m4a as the obscure "audio/mp4a-latm"; serve the AAC voice
@@ -50,6 +51,32 @@ def _random_key_in_mode(original_key: str | None) -> str:
 FRONTEND_DIST = Path(__file__).resolve().parent.parent / "frontend" / "dist"
 
 app = Flask(__name__, static_folder=None)
+
+# gzip JSON/text responses (the /api/tunes payload is ~1.8 MB uncompressed →
+# ~250 KB gzipped). flask-compress negotiates via Accept-Encoding automatically.
+Compress(app)
+
+
+@app.after_request
+def _cache_headers(resp):
+    """Cache policy: hashed build assets forever, everything else revalidated.
+
+    Vite content-hashes files under /assets/, so a new deploy = new URLs — those
+    are safe to cache immutably for a year. The HTML shell and API stay
+    revalidated so deploys and crowd-rating changes are picked up. Other static
+    (icons, covers, card art, audio) changes rarely → a one-day browser cache.
+    """
+    path = request.path
+    if path.startswith("/api/") or path == "/sw.js":
+        # SW must revalidate every load so a new worker rolls out promptly.
+        resp.headers["Cache-Control"] = "no-cache"
+    elif resp.status_code == 200 and path.startswith("/assets/"):
+        resp.headers["Cache-Control"] = "public, max-age=31536000, immutable"
+    elif resp.mimetype == "text/html":
+        resp.headers["Cache-Control"] = "no-cache"
+    elif resp.status_code == 200:
+        resp.headers["Cache-Control"] = "public, max-age=86400"
+    return resp
 
 
 def _clamp_score(v) -> float | None:
