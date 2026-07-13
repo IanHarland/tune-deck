@@ -17,7 +17,7 @@ primary_region = 'sjc'
   # Keep one machine warm so the app opens instantly from the home-screen icon
   # instead of eating a ~19s cold boot. ~$2/mo for an always-on shared-cpu-1x;
   # the second HA machine still scales to zero. Revisit if cost outweighs it.
-  min_machines_running = 1
+  min_machines_running = 0
 
   [[http_service.checks]]
     interval = '30s'
