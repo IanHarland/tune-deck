@@ -93,10 +93,18 @@ export default function App() {
   const suggested = useRef<Set<string>>(new Set());
   const lameOn = useRef(false); // lame mode: every other draw is Spain
 
-  useEffect(() => {
+  // getTunes retries through the cold-start wake internally; if it still fails
+  // (or the user taps "Try again"), reset and re-run rather than dead-ending.
+  function loadTunes() {
+    setError(null);
     getTunes()
       .then(setTunes)
       .catch((e) => setError(String(e)));
+  }
+
+  useEffect(() => {
+    loadTunes();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // new filters/mode ⇒ fresh round, forget what's been suggested
@@ -266,8 +274,6 @@ export default function App() {
         <p className="tagline">draw a tune for the set</p>
       </header>
 
-      {error && <p className="error">Couldn’t load tunes: {error}</p>}
-
       <FiltersPanel
         filters={filters}
         onChange={setFilters}
@@ -283,7 +289,14 @@ export default function App() {
       </div>
 
       <main className="stage">
-        {!tunes ? (
+        {error ? (
+          <div className="loading load-error">
+            <p>Couldn’t reach the server — it may be waking up.</p>
+            <button className="retry-btn" onClick={loadTunes}>
+              Try again
+            </button>
+          </div>
+        ) : !tunes ? (
           <p className="loading">Shuffling the deck…</p>
         ) : matchCount === 0 ? (
           <p className="loading">No tunes match — loosen the filters.</p>

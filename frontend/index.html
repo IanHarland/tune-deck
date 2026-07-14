@@ -24,9 +24,49 @@
     <meta name="twitter:title" content="Tune Deck" />
     <meta name="twitter:description" content="Draw a random jazz standard for the set." />
     <meta name="twitter:image" content="/og.jpg" />
+
+    <!-- Instant loading splash. Painted immediately from the (service-worker-)
+         cached shell before the JS bundle parses or React mounts, so a
+         home-screen / repeat open shows something at once while the scale-to-zero
+         Fly machine wakes (~15–20s). React replaces #root's contents on mount.
+         Self-contained (no image/asset fetch) so it never blocks on the network. -->
+    <style>
+      html, body { margin: 0; background: #123a2a; }
+      .td-splash {
+        position: fixed; inset: 0; z-index: 1;
+        display: flex; flex-direction: column;
+        align-items: center; justify-content: center; gap: 22px;
+        background: radial-gradient(120% 80% at 50% -10%, #1b5038 0%, #123a2a 45%, #0d2c20 100%);
+        color: #f6f1e3;
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        -webkit-user-select: none; user-select: none;
+      }
+      .td-splash__logo {
+        display: flex; align-items: center; gap: 10px;
+        font-size: 30px; letter-spacing: 6px; font-weight: 800;
+      }
+      .td-splash__dot { width: 9px; height: 9px; border-radius: 50%; background: #e0b24a; }
+      .td-splash__spinner {
+        width: 34px; height: 34px; border-radius: 50%;
+        border: 3px solid rgba(246, 241, 227, 0.18); border-top-color: #e0b24a;
+        animation: td-spin 0.9s linear infinite;
+      }
+      .td-splash__msg {
+        font-size: 12px; letter-spacing: 2px; text-transform: uppercase;
+        color: rgba(246, 241, 227, 0.55);
+      }
+      @keyframes td-spin { to { transform: rotate(360deg); } }
+      @media (prefers-reduced-motion: reduce) { .td-splash__spinner { animation-duration: 2.4s; } }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div class="td-splash" role="status" aria-live="polite" aria-label="Loading Tune Deck">
+        <div class="td-splash__logo">TUNE<span class="td-splash__dot"></span>DECK</div>
+        <div class="td-splash__spinner"></div>
+        <div class="td-splash__msg">dealing the deck…</div>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

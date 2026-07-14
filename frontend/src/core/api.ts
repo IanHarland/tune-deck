@@ -15,13 +15,32 @@ async function req<T>(path: string, init?: RequestInit): Promise<T> {
   });
   if (!res.ok) {
     const detail = await res.text().catch(() => "");
-    throw new Error(`${res.status} ${path}: ${detail}`);
+    const err = new Error(`${res.status} ${path}: ${detail}`) as Error & {
+      status?: number;
+    };
+    err.status = res.status;
+    throw err;
   }
   return res.json() as Promise<T>;
 }
 
-export function getTunes(): Promise<Tune[]> {
-  return req<Tune[]>("/api/tunes");
+// The backend scales to zero: a cold open waits ~15–20s for the machine to wake
+// and can briefly 5xx / drop the connection while Postgres resumes. Retry those
+// transient failures with backoff so the app keeps showing its loading screen
+// instead of dead-ending on the first blip. A real 4xx is not retried.
+export async function getTunes(): Promise<Tune[]> {
+  const delays = [800, 1500, 2500, 4000, 6000, 8000]; // + first try ≈ 23s budget
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await req<Tune[]>("/api/tunes");
+    } catch (e) {
+      const status = (e as { status?: number }).status;
+      const transient =
+        status === undefined || status >= 500 || status === 408 || status === 429;
+      if (!transient || attempt >= delays.length) throw e;
+      await new Promise((r) => setTimeout(r, delays[attempt]));
+    }
+  }
 }
 
 export function recordPick(tuneId: string): Promise<Tune> {
