@@ -40,15 +40,40 @@ const norm = (t) => (t || '')
   .replace(/\([^)]*\)/g, ' ')      // drop parentheticals
   .toLowerCase()
   .replace(/[^a-z0-9]/g, '');      // strip everything but alphanumerics
-// article-aware key for matching charts.json, which build_charts.py keys the
-// same way: "The Nearness Of You" == "Nearness Of You, The". Used ONLY for chart
-// lookups (the plain `norm` above still drives canon/dedup).
-const chartKey = (t) => (t || '')
-  .replace(/\([^)]*\)/g, ' ')
-  .toLowerCase()
+// Chart lookup keys for matching charts.json. MUST mirror build_charts.py
+// norm_keys(): fold diacritics, &->and, St.->Saint, article-aware, and emit
+// BOTH the kept- and dropped-parenthetical forms so a title matches whether the
+// index spells a parenthetical inline ("Nancy (With The Laughing Face)") or
+// omits it as a subtitle. Used ONLY for chart lookups (plain `norm` still drives
+// canon/dedup).
+const foldDiacritics = (t) => t.normalize('NFD').replace(/[̀-ͯ]/g, '');
+const chartBase = (t) => foldDiacritics((t || '').toLowerCase())
+  .replace(/&/g, ' and ')
+  .replace(/\bst\.?\s+/g, 'saint ');           // "St."/"St " -> "Saint "
+const finalizeKey = (s) => s
   .replace(/^(the|a|an)\s+/, '')
-  .replace(/[,\s]+(the|a|an)\s*$/, '')   // "X, The" or "X The"
+  .replace(/[,\s]+(the|a|an)\s*$/, '')          // "X, The" or "X The"
   .replace(/[^a-z0-9]/g, '');
+const chartKeys = (t) => {
+  const b = chartBase(t);
+  const kept = finalizeKey(b.replace(/[()]/g, ' '));        // keep parenthetical words
+  const dropped = finalizeKey(b.replace(/\([^)]*\)/g, ' ')); // drop the parenthetical
+  return [...new Set([kept, dropped].filter(Boolean))];
+};
+// union the fake-book refs found under any key variant, deduped by book+page and
+// sorted like build_charts.py (book, then page-as-string).
+const chartsFor = (t) => {
+  const seen = new Set();
+  const refs = [];
+  for (const k of chartKeys(t)) {
+    for (const c of charts[k] || []) {
+      const id = `${c.book}|${c.page}`;
+      if (!seen.has(id)) { seen.add(id); refs.push(c); }
+    }
+  }
+  refs.sort((a, b) => a.book.localeCompare(b.book) || a.page.localeCompare(b.page));
+  return refs;
+};
 const toSet = (list) => new Set(list.map(norm));
 
 const CORE_SET = toSet(canon.CORE);
@@ -196,12 +221,18 @@ hrefs.forEach((href) => {
 // ---------------------------------------------------------------------------
 const out = [];
 let dropped = 0;
+let droppedExercises = 0;
 for (const [k, t] of tunes) {
+  // iReal Pro ships built-in practice exercises (composer "Exercise": "Blues -
+  // Minor", "Fast Jazz 1", "Rhythm Changes", II-V-I workouts, …). They're
+  // backing-track templates, not real tunes — never seed them.
+  if ((t.composer || '').trim().toLowerCase() === 'exercise') { droppedExercises++; continue; }
+
   const cls = classify(t.irealStyle);
   if (!cls) { dropped++; continue; }
 
   const appearances = (playlistCount.get(k)?.size) || 0;
-  const chartRefs = charts[chartKey(t.title)] || [];
+  const chartRefs = chartsFor(t.title);
   const bookCount = chartRefs.length; // # of fake books that include the tune
   const obscurity = obscurityFor(k, bookCount, appearances);
   const difficulty = difficultyFor(k);
@@ -253,7 +284,7 @@ for (const extra of canon.MANUAL_TUNES) {
     tags: [], obscurity_score: 30, difficulty_score: 50,
     ...extra,
     ...(link ? { ireal_url: link.ireal_url, original_key: link.key || extra.original_key } : {}),
-    charts: charts[chartKey(extra.title)] || [],
+    charts: chartsFor(extra.title),
   });
 }
 
@@ -266,7 +297,7 @@ fs.writeFileSync(OUT, JSON.stringify(out, null, 2));
 // ---------------------------------------------------------------------------
 const byFeel = {};
 for (const t of out) byFeel[t.feel] = (byFeel[t.feel] || 0) + 1;
-console.log(`Parsed ${tunes.size} unique tunes; kept ${out.length}, dropped ${dropped} (non-jazz).`);
+console.log(`Parsed ${tunes.size} unique tunes; kept ${out.length}, dropped ${dropped} (non-jazz), ${droppedExercises} (iReal exercises).`);
 console.log('Feel distribution:', byFeel);
 const canonCount = out.filter((t) => t.obscurity_score < 45).length;
 console.log(`Canon (obscurity <45): ${canonCount}; ` +

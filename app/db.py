@@ -12,7 +12,7 @@ import json
 import os
 from pathlib import Path
 
-from sqlalchemy import create_engine, inspect, select, text
+from sqlalchemy import create_engine, inspect, select, text, update
 from sqlalchemy.orm import Session, sessionmaker
 
 from .hip_seed import seed_hipness
@@ -67,6 +67,7 @@ def init_db() -> None:
     _run_migrations()
     with SessionLocal() as session:
         _seed(session)
+        _prune_exercises(session)
         seed_hipness(session)
         _backfill_hipness(session)
 
@@ -86,6 +87,22 @@ def _run_migrations() -> None:
                 stmt = ddl[dialect] if isinstance(ddl, dict) else ddl
                 conn.execute(text(stmt))
                 print(f"[db] migrated: added {table}.{col}")
+
+
+def _prune_exercises(session: Session) -> None:
+    """Tombstone iReal Pro's built-in practice exercises (composer 'Exercise':
+    'Blues - Minor', 'Fast Jazz 1', 'Rhythm Changes', II-V-I workouts, …) —
+    backing-track templates, not real tunes. They're also dropped from the seed
+    builder, so fresh DBs never import them; this cleans the already-seeded live
+    DB. Idempotent: soft-deletes only rows not yet tombstoned, so reruns hit 0."""
+    result = session.execute(
+        update(Tune)
+        .where(Tune.composer == "Exercise", Tune.deleted.is_(False))
+        .values(deleted=True)
+    )
+    session.commit()
+    if result.rowcount:
+        print(f"[db] tombstoned {result.rowcount} iReal practice exercises")
 
 
 def _backfill_hipness(session: Session) -> None:

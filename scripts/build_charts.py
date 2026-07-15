@@ -14,6 +14,7 @@ import json
 import os
 import re
 import sys
+import unicodedata
 
 from pypdf import PdfReader
 
@@ -41,16 +42,47 @@ BOOK_NAMES = {
 KNOWN = sorted(BOOK_NAMES, key=len, reverse=True)  # longest-first for suffix match
 
 
-def norm(t: str) -> str:
-    # Must match build_seed.mjs chartKey() exactly. Article-aware so the three
-    # inversion forms converge: "The Nearness Of You" == "Nearness Of You, The"
-    # == "Nearness Of You (The)". The \s+ / [,\s]+ boundaries keep words like
-    # "Anthropology"/"Theme" intact.
-    s = t.lower()
-    s = re.sub(r"\([^)]*\)", " ", s)            # drop parentheticals incl. "(The)"
+def _fold(s: str) -> str:
+    # strip diacritics: "Manhã"/"Desafinado" fold to plain ASCII so accented
+    # library titles match the index's un-accented spellings.
+    return "".join(c for c in unicodedata.normalize("NFD", s) if not unicodedata.combining(c))
+
+
+def _base(t: str) -> str:
+    # shared, spelling-tolerant folding applied to BOTH the index and the seed
+    # lookup. Symmetry is what matters: the same transform on both sides always
+    # converges, even where it's "wrong" (e.g. "Greene St. Caper" -> saint), and
+    # it merges split index spellings ("St. Thomas" + "Saint Thomas").
+    s = _fold(t.lower())
+    s = s.replace("&", " and ")                 # "Bangles & Beads" == "...and Beads"
+    s = re.sub(r"\bst\.?\s+", "saint ", s)      # "St."/"St " -> "Saint " (word-initial)
+    return s
+
+
+def _finalize(s: str) -> str:
+    # article-aware, alnum-only. Converges the inversion forms: "The Nearness Of
+    # You" == "Nearness Of You, The" == "Nearness Of You (The)". The \s+ / [,\s]+
+    # boundaries keep words like "Anthropology"/"Theme" intact.
     s = re.sub(r"^(the|a|an)\s+", "", s)
     s = re.sub(r"[,\s]+(the|a|an)\s*$", "", s)  # "X, The" or "X The"
     return re.sub(r"[^a-z0-9]", "", s)
+
+
+def norm_keys(t: str) -> list[str]:
+    # Up to two lookup keys per title, MUST match build_seed.mjs chartKeys().
+    # A parenthetical is ambiguous — it can be a subtitle the index omits
+    # ("Someday My Prince Will Come (From Snow White)" -> index has just the
+    # main title) OR the actual title spelled inline ("Nancy (With The Laughing
+    # Face)" -> index "Nancy With The Laughing Face"). So we emit BOTH the
+    # kept-words form and the dropped form and register the ref under each.
+    b = _base(t)
+    kept = _finalize(re.sub(r"[()]", " ", b))        # keep the parenthetical words
+    dropped = _finalize(re.sub(r"\([^)]*\)", " ", b))  # drop the parenthetical
+    out: list[str] = []
+    for k in (kept, dropped):
+        if k and k not in out:
+            out.append(k)
+    return out
 
 
 def parse_line(line: str):
@@ -94,13 +126,15 @@ def main() -> None:
                 skipped += 1
                 continue
             title, book, page = parsed
-            key = (norm(title), book, page)
-            if key in seen:
-                continue
-            seen.add(key)
-            charts.setdefault(norm(title), []).append(
-                {"book": BOOK_NAMES[book], "page": page}
-            )
+            # register under every key variant (kept- and dropped-parenthetical)
+            # so a lookup from either title form finds the ref; dedup per key.
+            for key in norm_keys(title):
+                if (key, book, page) in seen:
+                    continue
+                seen.add((key, book, page))
+                charts.setdefault(key, []).append(
+                    {"book": BOOK_NAMES[book], "page": page}
+                )
 
     # stable order within each tune
     for refs in charts.values():
