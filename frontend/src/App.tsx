@@ -234,6 +234,20 @@ export default function App() {
     );
   }
 
+  // vote from the search view: record it and fold the fresh crowd scores back
+  // into the shared pool so the deck and search stay in sync. No undo tracking.
+  async function recordSearchVote(
+    tuneId: string,
+    vote: { liked?: boolean | null; obscurity?: number; difficulty?: number },
+  ) {
+    try {
+      const { tune: updated } = await castVote(tuneId, vote, anonId);
+      patchScores(updated);
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
   // push the card we're leaving onto the undo stack, returning its entry id so a
   // later castVote can attach its rating row. Returns null if there's no card.
   function pushHistory(): number | null {
@@ -422,7 +436,11 @@ export default function App() {
       </footer>
 
       {searchOpen && tunes && (
-        <SearchPanel tunes={tunes} onClose={() => setSearchOpen(false)} />
+        <SearchPanel
+          tunes={tunes}
+          onClose={() => setSearchOpen(false)}
+          onVote={recordSearchVote}
+        />
       )}
     </div>
   );

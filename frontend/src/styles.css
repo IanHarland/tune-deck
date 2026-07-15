@@ -935,6 +935,44 @@ body::after {
   color: rgba(246, 241, 227, 0.4);
 }
 
+/* inline crowd ratings + voting on a search result */
+.search-scores {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 6px 0 10px;
+}
+/* light chip on the dark panel so the card's ink-on-fill contrast carries over */
+.search-scores .score-pill {
+  flex: 1 1 130px;
+  justify-content: center;
+  background: rgba(246, 241, 227, 0.92);
+  border-color: rgba(0, 0, 0, 0.18);
+  padding: 6px 12px;
+}
+.hip-vote {
+  flex: 1 1 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.hip-readout {
+  font-size: 12px;
+  color: rgba(246, 241, 227, 0.7);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.hip-btn {
+  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid rgba(246, 241, 227, 0.16);
+  border-radius: 999px;
+  padding: 3px 9px;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+}
+
 .rating-card {
   background: rgba(0, 0, 0, 0.18);
   border: 1px solid rgba(255, 255, 255, 0.06);

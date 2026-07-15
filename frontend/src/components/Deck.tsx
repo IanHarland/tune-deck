@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { keyCard, toRelativeMajor, transposeKey } from "../core/keys";
 import { FEEL_LABELS, type Feel, type Tune } from "../core/types";
 import KeyLabel from "./KeyLabel";
+import ScorePill from "./ScorePill";
 import Suit from "./Suit";
 
 // obscurity/difficulty nudged on this card (null = not touched → don't submit)
@@ -389,59 +390,3 @@ function TuneFace({
   );
 }
 
-// A draggable fill-pill: the label sits on a bar filled to `value`% in `accent`.
-// Drag left/right to set it (capturing its own pointer so the card doesn't
-// swipe). A tap that doesn't drag falls through to onTap (advance the card).
-function ScorePill({
-  label,
-  value,
-  accent,
-  onChange,
-  onTap,
-}: {
-  label: string;
-  value: number;
-  accent: string;
-  onChange: (v: number) => void;
-  onTap: () => void;
-}) {
-  const ref = useRef<HTMLSpanElement>(null);
-  const drag = useRef<{ moved: boolean } | null>(null);
-
-  function valueAt(clientX: number): number {
-    const el = ref.current;
-    if (!el) return value;
-    const r = el.getBoundingClientRect();
-    return Math.max(0, Math.min(100, Math.round(((clientX - r.left) / r.width) * 100)));
-  }
-  function down(e: React.PointerEvent) {
-    e.stopPropagation(); // don't let the card start a swipe
-    e.currentTarget.setPointerCapture?.(e.pointerId);
-    drag.current = { moved: false };
-  }
-  function move(e: React.PointerEvent) {
-    if (!drag.current) return;
-    e.stopPropagation();
-    drag.current.moved = true;
-    onChange(valueAt(e.clientX));
-  }
-  function up(e: React.PointerEvent) {
-    e.stopPropagation();
-    const tapped = drag.current && !drag.current.moved;
-    drag.current = null;
-    if (tapped) onTap(); // a tap on the pill advances, like tapping the card
-  }
-  return (
-    <span
-      ref={ref}
-      className="score-pill"
-      onPointerDown={down}
-      onPointerMove={move}
-      onPointerUp={up}
-      onPointerCancel={up}
-    >
-      <span className="score-fill" style={{ width: `${value}%`, background: accent }} />
-      <span className="score-text">{label}</span>
-    </span>
-  );
-}
