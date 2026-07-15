@@ -3,6 +3,7 @@ import { castVote, getTunes, recordPick, undoVote } from "./core/api";
 import { deckTunes, pickRandomTune } from "./core/tunePicker";
 import type { Filters, Mode, Tune } from "./core/types";
 import Deck, { type WeighIn } from "./components/Deck";
+import { FakebookProvider } from "./components/FakebookProvider";
 import FiltersPanel from "./components/Filters";
 import InstrumentSelector from "./components/InstrumentSelector";
 import ModeSelector from "./components/ModeSelector";
@@ -328,6 +329,7 @@ export default function App() {
   }
 
   return (
+    <FakebookProvider>
     <div className="app">
       <header className="app-header">
         <h1 className="logo">
@@ -443,5 +445,6 @@ export default function App() {
         />
       )}
     </div>
+    </FakebookProvider>
   );
 }

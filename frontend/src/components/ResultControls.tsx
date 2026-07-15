@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { deleteTune, markPlayed, randomizeKey } from "../core/api";
-import { coverSlug } from "../core/covers";
 import { irealUrlFor } from "../core/irealLink";
 import type { Tune } from "../core/types";
+import ChartRef from "./ChartRef";
 
 interface Props {
   tune: Tune;
@@ -102,19 +102,7 @@ export default function ResultControls({
           <span className="charts-label">Charts</span>
           <ul className="charts-list">
             {tune.charts.map((c, i) => (
-              <li key={i} className="chart-ref">
-                <img
-                  className="chart-cover"
-                  src={`/covers/${coverSlug(c.book)}.jpg`}
-                  alt=""
-                  loading="lazy"
-                  onError={(e) => {
-                    e.currentTarget.style.visibility = "hidden";
-                  }}
-                />
-                <span className="chart-book">{c.book}</span>
-                <span className="chart-page">p.{c.page}</span>
-              </li>
+              <ChartRef key={i} chart={c} />
             ))}
           </ul>
         </div>

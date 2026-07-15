@@ -824,6 +824,197 @@ body::after {
   white-space: nowrap;
   margin-left: 10px;
 }
+/* a chart that can open in the private reader */
+.chart-ref.chart-open {
+  cursor: pointer;
+  border-color: rgba(224, 178, 74, 0.35);
+  transition: background 0.12s ease, border-color 0.12s ease;
+}
+.chart-ref.chart-open:hover,
+.chart-ref.chart-open:focus-visible {
+  background: rgba(224, 178, 74, 0.14);
+  border-color: rgba(224, 178, 74, 0.55);
+  outline: none;
+}
+.chart-open-hint {
+  color: var(--gold);
+  font-size: 18px;
+  line-height: 1;
+  margin-left: 2px;
+  flex: 0 0 auto;
+}
+
+/* Fake-book reader (private, password-gated) */
+.fb-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(8, 10, 9, 0.92);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.fb-bar {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: calc(env(safe-area-inset-top) + 10px) 14px 10px;
+  background: rgba(0, 0, 0, 0.4);
+  border-bottom: 1px solid rgba(246, 241, 227, 0.12);
+  flex: 0 0 auto;
+}
+.fb-close {
+  background: transparent;
+  border: none;
+  color: var(--cream);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 4px 6px;
+  flex: 0 0 auto;
+}
+.fb-book {
+  color: var(--cream);
+  font-weight: 600;
+  font-size: 14px;
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.fb-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+.fb-nav button {
+  background: rgba(246, 241, 227, 0.08);
+  border: 1px solid rgba(246, 241, 227, 0.16);
+  color: var(--cream);
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+.fb-nav button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.fb-page {
+  color: var(--gold);
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  min-width: 84px;
+  text-align: center;
+}
+.fb-scroll {
+  flex: 1 1 auto;
+  width: 100%;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 10px 8px calc(env(safe-area-inset-bottom) + 16px);
+}
+.fb-scroll .react-pdf__Page {
+  background: #fff !important;
+  border-radius: 4px;
+  box-shadow: 0 6px 26px rgba(0, 0, 0, 0.6);
+}
+.fb-scroll .react-pdf__Page__canvas {
+  border-radius: 4px;
+  max-width: 100%;
+  height: auto !important;
+}
+.fb-msg {
+  color: rgba(246, 241, 227, 0.7);
+  font-size: 14px;
+  padding: 40px 16px;
+  text-align: center;
+}
+
+/* password prompt (one-time per device) */
+.fb-auth {
+  z-index: 70;
+  justify-content: center;
+  padding: 20px;
+}
+.fb-auth-card {
+  width: 100%;
+  max-width: 340px;
+  background: linear-gradient(165deg, var(--cream), var(--cream-2));
+  color: var(--ink);
+  border-radius: 14px;
+  padding: 22px 20px;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.55);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.fb-auth-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0;
+}
+.fb-auth-sub {
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin: 0 0 4px;
+}
+.fb-auth-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 11px 12px;
+  font-size: 16px;
+  border: 1px solid rgba(28, 28, 28, 0.25);
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.75);
+  color: var(--ink);
+}
+.fb-auth-input:focus {
+  outline: 2px solid var(--teal);
+  border-color: var(--teal);
+}
+.fb-auth-err {
+  color: #b1402f;
+  font-size: 13px;
+  margin: 0;
+}
+.fb-auth-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 6px;
+}
+.fb-auth-cancel,
+.fb-auth-go {
+  padding: 9px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 9px;
+  cursor: pointer;
+}
+.fb-auth-cancel {
+  background: transparent;
+  border: 1px solid rgba(28, 28, 28, 0.28);
+  color: var(--ink-soft);
+}
+.fb-auth-go {
+  background: var(--ink);
+  border: 1px solid var(--ink);
+  color: var(--cream);
+}
+.fb-auth-go:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
 
 /* Search — a lookup overlay (mainly "which fake book is this tune in?") */
 .search-btn {

@@ -20,6 +20,10 @@ RUN pip install -r requirements.txt
 
 COPY app ./app
 COPY data ./data
+# private fake-book PDFs (gitignored; present only in the owner's build context).
+# app/fakebooks.py reads them from /app/books; an empty dir just leaves the
+# reader dark (each book reports available:false).
+COPY books ./books
 # built frontend lands where app/web.py expects it (../frontend/dist)
 COPY --from=frontend /frontend/dist ./frontend/dist
 

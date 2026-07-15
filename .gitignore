@@ -9,3 +9,8 @@ frontend/dist/
 .env.*
 !.env.example
 frontend/tsconfig.tsbuildinfo
+
+# private fake-book PDFs — the owner's own files, embedded into the image at
+# build time (see Dockerfile). Never committed; the dir is kept via .gitkeep.
+/books/*
+!/books/.gitkeep

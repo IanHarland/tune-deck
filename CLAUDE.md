@@ -95,13 +95,40 @@ the iReal library (e.g. Firm Roots, for Smalls mode).
 normalized title → `[{book, page}]`. Book codes map to **actual titles** (read
 off each PDF's cover) in `BOOK_NAMES`. Reference-only (book + printed page) — no
 chart content stored/shipped. `build_seed.mjs` merges them onto each tune as
-`charts`. ~898 of 1,678 tunes have a chart. **No "open the PDF" button** (the
-books are ~2 GB of copyrighted scans, un-hostable; printed→PDF offset varies).
+`charts`. ~898 of 1,678 tunes have a chart. Chart refs are **openable** via a
+private, password-gated PDF reader — see "Fake-book reader" below.
+
+Matching tune titles to the index is spelling-tolerant and symmetric across
+`build_charts.py` (`norm_keys`) and `build_seed.mjs` (`chartKeys`): fold
+diacritics, `&`→`and`, `St.`→`Saint`, article-aware, and emit BOTH a
+kept-parenthetical and dropped-parenthetical key (so "Nancy (With The Laughing
+Face)" matches the index's inline spelling, and subtitles the index omits still
+match). Keep the two implementations identical (a cross-check test exists).
 
 `scripts/build_covers.py` renders **page 1 (the front cover) of each book's PDF**
 into `frontend/public/covers/<slug>.jpg` (small thumbnails, the owner's own
 files). The UI shows the cover next to each chart ref. The frontend recomputes
 the same `slug(book)` to find the image; a missing cover just hides via onError.
+
+### Fake-book reader (private, password-gated)
+Lets the owner open a chart to the tune's page in their own fake books — NOT
+public chart content, but a personal authenticated view of PDFs they own
+(`app/fakebooks.py`, `/api/fakebook/*` in `web.py`, frontend `FakebookProvider`
++ `FakebookViewer`). Design:
+- The ~11 books the index references (~500 MB) are embedded in the image from a
+  gitignored `books/` dir (`scripts/stage_books.sh` stages them from iCloud;
+  Dockerfile `COPY books`). Empty dir → reader stays dark (each `available:false`).
+- One shared password (`FAKEBOOK_PASSWORD` secret) → a year-long signed session
+  cookie (`SECRET_KEY` signs it). `GET /api/fakebook/<slug>.pdf` is 401 without
+  it and Range-capable, so pdf.js fetches only the viewed pages.
+- Frontend uses `react-pdf` (canvas render, so jump-to-page works on iOS). Chart
+  rows (search + main card, shared `ChartRef`) turn tappable only when the reader
+  is configured AND the book is present — invisible to everyone else.
+- `BOOKS` in `app/fakebooks.py` maps display name → file + printed→PDF page
+  `offset` (`PDF_page = printed + offset`); calibrate per book (scans have no
+  page labels). Override offsets WITHOUT a 500 MB rebuild via the
+  `FAKEBOOK_OFFSETS` secret (JSON `{slug: offset}`, fast restart). `slug()`
+  matches build_covers.py / `coverSlug`.
 
 ### Scores (obscurity / difficulty, 0–100)
 Not present in iReal data. Seeded by `scripts/canon.mjs` (tiered repertoire built

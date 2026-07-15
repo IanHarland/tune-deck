@@ -7,18 +7,23 @@ and crowd ratings. See CLAUDE.md.
 from __future__ import annotations
 
 import mimetypes
+import os
 import random
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-from flask import Flask, jsonify, request, send_from_directory
+from flask import Flask, jsonify, request, send_file, send_from_directory, session
 from flask_compress import Compress
 from sqlalchemy import select
 
 # Python guesses .m4a as the obscure "audio/mp4a-latm"; serve the AAC voice
 # clips as the broadly-supported audio/mp4 so every browser plays them.
 mimetypes.add_type("audio/mp4", ".m4a")
+# Some platforms don't map .mjs; a module worker (pdf.js ships one as .mjs) must
+# be served with a JS MIME type or the browser refuses to run it.
+mimetypes.add_type("text/javascript", ".mjs")
 
+from . import fakebooks
 from .db import SessionLocal, init_db
 from .models import FEELS, Tune, TuneRating
 from .scoring import recompute
@@ -52,6 +57,18 @@ FRONTEND_DIST = Path(__file__).resolve().parent.parent / "frontend" / "dist"
 
 app = Flask(__name__, static_folder=None)
 
+# Signed session cookie carries the fake-book auth flag. SECRET_KEY must be set
+# in prod (a Fly secret); the dev fallback is fine for local http only. Cookie is
+# Secure by default (Fly is https); set TUNEDECK_LOCAL=1 to test auth over local
+# http. Year-long so the owner enters the fake-book password just once.
+app.secret_key = os.environ.get("SECRET_KEY", "dev-insecure-secret-change-me")
+app.config.update(
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE="Lax",
+    SESSION_COOKIE_SECURE=os.environ.get("TUNEDECK_LOCAL") != "1",
+    PERMANENT_SESSION_LIFETIME=timedelta(days=365),
+)
+
 # gzip JSON/text responses (the /api/tunes payload is ~1.8 MB uncompressed →
 # ~250 KB gzipped). flask-compress negotiates via Accept-Encoding automatically.
 Compress(app)
@@ -67,6 +84,8 @@ def _cache_headers(resp):
     (icons, covers, card art, audio) changes rarely → a one-day browser cache.
     """
     path = request.path
+    if path.startswith("/api/fakebook/") and path.endswith(".pdf"):
+        return resp  # keep the PDF route's own (private, cacheable) headers
     if path.startswith("/api/") or path == "/sw.js":
         # SW must revalidate every load so a new worker rolls out promptly.
         resp.headers["Cache-Control"] = "no-cache"
@@ -221,6 +240,56 @@ def delete_rating(rating_id: str):
             recompute(session, tune)
         session.commit()
         return jsonify(tune.to_dict() if tune is not None else {"ok": True})
+
+
+# --------------------------------------------------------------------------- #
+# Fake-book reader (private, password-gated). Personal access to the owner's own
+# PDFs so a chart ref can open to the tune. See app/fakebooks.py + CLAUDE.md.
+# --------------------------------------------------------------------------- #
+@app.get("/api/fakebook/meta")
+def fakebook_meta():
+    """Book slug/offset/availability + whether the caller is already authed."""
+    m = fakebooks.meta()
+    m["authed"] = bool(session.get("fb"))
+    return jsonify(m)
+
+
+@app.post("/api/fakebook/auth")
+def fakebook_auth():
+    """Exchange the shared password for a year-long signed session cookie."""
+    if not fakebooks.password():
+        return jsonify(error="fake-book access not configured"), 503
+    body = request.get_json(silent=True) or {}
+    if not fakebooks.check_password(body.get("password") or ""):
+        return jsonify(error="wrong password"), 403
+    session.permanent = True
+    session["fb"] = True
+    return jsonify(ok=True)
+
+
+@app.post("/api/fakebook/logout")
+def fakebook_logout():
+    session.pop("fb", None)
+    return jsonify(ok=True)
+
+
+@app.get("/api/fakebook/<slug>.pdf")
+def fakebook_pdf(slug: str):
+    """Stream a book PDF (Range-capable, so pdf.js fetches only viewed pages).
+    401 without the auth cookie; the bytes never leave the authed session."""
+    if not session.get("fb"):
+        return jsonify(error="unauthorized"), 401
+    found = fakebooks.book_for_slug(slug)
+    if not found:
+        return jsonify(error="unknown book"), 404
+    _name, cfg = found
+    path = fakebooks.book_path(cfg)
+    if not path.exists():
+        return jsonify(error="book unavailable"), 404
+    resp = send_file(path, mimetype="application/pdf", conditional=True)
+    resp.headers["Accept-Ranges"] = "bytes"
+    resp.headers["Cache-Control"] = "private, max-age=86400"
+    return resp
 
 
 # --------------------------------------------------------------------------- #

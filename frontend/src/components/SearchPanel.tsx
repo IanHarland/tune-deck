@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { coverSlug } from "../core/covers";
-import { FEEL_LABELS, type ChartRef, type Feel, type Tune } from "../core/types";
+import { FEEL_LABELS, type ChartRef as ChartRefT, type Feel, type Tune } from "../core/types";
+import ChartRef from "./ChartRef";
 import ScorePill from "./ScorePill";
 
 type VoteFn = (
@@ -45,7 +45,7 @@ interface Hit {
   title: string;
   composer: string | null;
   feel: Feel;
-  charts: ChartRef[];
+  charts: ChartRefT[];
   tune: Tune;
 }
 
@@ -234,19 +234,7 @@ function SearchResult({ hit, onVote }: { hit: Hit; onVote: VoteFn }) {
       {hit.charts.length > 0 ? (
         <ul className="charts-list">
           {hit.charts.map((c, i) => (
-            <li key={i} className="chart-ref">
-              <img
-                className="chart-cover"
-                src={`/covers/${coverSlug(c.book)}.jpg`}
-                alt=""
-                loading="lazy"
-                onError={(e) => {
-                  e.currentTarget.style.visibility = "hidden";
-                }}
-              />
-              <span className="chart-book">{c.book}</span>
-              <span className="chart-page">p.{c.page}</span>
-            </li>
+            <ChartRef key={i} chart={c} />
           ))}
         </ul>
       ) : (
