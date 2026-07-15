@@ -6,6 +6,7 @@ and crowd ratings. See CLAUDE.md.
 """
 from __future__ import annotations
 
+import io
 import mimetypes
 import os
 import random
@@ -289,6 +290,31 @@ def fakebook_pdf(slug: str):
     resp = send_file(path, mimetype="application/pdf", conditional=True)
     resp.headers["Accept-Ranges"] = "bytes"
     resp.headers["Cache-Control"] = "private, max-age=86400"
+    return resp
+
+
+@app.get("/api/fakebook/<slug>/tune-p<int:printed>.pdf")
+def fakebook_tune_page(slug: str, printed: int):
+    """A one-tune PDF: the pages starting at PRINTED page `printed` (offset +
+    span both applied server-side), for handing a single chart to forScore. Small
+    enough to skip Range."""
+    if not session.get("fb"):
+        return jsonify(error="unauthorized"), 401
+    found = fakebooks.book_for_slug(slug)
+    if not found:
+        return jsonify(error="unknown book"), 404
+    name, cfg = found
+    if not fakebooks.book_path(cfg).exists():
+        return jsonify(error="book unavailable"), 404
+    start = printed + fakebooks.offset_for(name, cfg)
+    span = fakebooks.span_for(name, printed)
+    data = fakebooks.extract_pages(cfg, start, span)
+    resp = send_file(
+        io.BytesIO(data),
+        mimetype="application/pdf",
+        download_name=f"{fakebooks.slug(name)}-p{printed}.pdf",
+    )
+    resp.headers["Cache-Control"] = "private, max-age=3600"
     return resp
 
 

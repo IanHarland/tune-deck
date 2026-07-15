@@ -4,9 +4,10 @@ import { useFakebook } from "./FakebookProvider";
 
 // One fake-book reference: cover thumbnail + book + printed page. Tappable when
 // the private reader is available for that book (opens the PDF at this page);
-// otherwise it renders as plain text, exactly as before.
-export default function ChartRef({ chart }: { chart: ChartRefT }) {
-  const { canOpen, openChart } = useFakebook();
+// otherwise it renders as plain text, exactly as before. On Apple devices a
+// small "forScore" button hands just this tune's page(s) to forScore.
+export default function ChartRef({ chart, title }: { chart: ChartRefT; title?: string }) {
+  const { canOpen, openChart, openInForScore, forScoreSupported } = useFakebook();
   const openable = canOpen(chart.book);
   const open = () => openChart(chart.book, chart.page);
 
@@ -39,7 +40,20 @@ export default function ChartRef({ chart }: { chart: ChartRefT }) {
       />
       <span className="chart-book">{chart.book}</span>
       <span className="chart-page">p.{chart.page}</span>
-      {openable && (
+      {openable && forScoreSupported && (
+        <button
+          className="fs-btn"
+          onClick={(e) => {
+            e.stopPropagation();
+            openInForScore(chart.book, chart.page, title);
+          }}
+          aria-label="Open this tune's page in forScore"
+          title="Open this tune's page in forScore"
+        >
+          forScore
+        </button>
+      )}
+      {openable && !forScoreSupported && (
         <span className="chart-open-hint" aria-hidden>
           ›
         </span>

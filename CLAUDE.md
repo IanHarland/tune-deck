@@ -129,6 +129,13 @@ public chart content, but a personal authenticated view of PDFs they own
   page labels). Override offsets WITHOUT a 500 MB rebuild via the
   `FAKEBOOK_OFFSETS` secret (JSON `{slug: offset}`, fast restart). `slug()`
   matches build_covers.py / `coverSlug`.
+- **forScore hand-off** (Apple only): a per-chart "forScore" button fetches just
+  that tune's page(s) as a one-page PDF (`/api/fakebook/<slug>/tune-p<printed>.pdf`,
+  pypdf) and shares it via `navigator.share({files})` → forScore imports it. A
+  tune's page COUNT is inferred from the master index: the gap to the next
+  indexed tune in that book (`fakebooks.span_for`, from the complete charts.json,
+  capped at SPAN_CAP=4) — so 2–3-page New Real Book arrangements come across
+  whole. No OCR needed.
 
 ### Scores (obscurity / difficulty, 0–100)
 Not present in iReal data. Seeded by `scripts/canon.mjs` (tiered repertoire built

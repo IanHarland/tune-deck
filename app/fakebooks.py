@@ -12,10 +12,13 @@ The PDFs live in FAKEBOOKS_DIR — in the image the Dockerfile copies them to
 from __future__ import annotations
 
 import hmac
+import io
 import json
 import os
 import re
 from pathlib import Path
+
+from pypdf import PdfReader, PdfWriter
 
 BOOKS_DIR = Path(os.environ.get(
     "FAKEBOOKS_DIR",
@@ -85,6 +88,61 @@ def check_password(candidate: str) -> bool:
     if not pw or not candidate:
         return False
     return hmac.compare_digest(candidate, pw)
+
+
+# A tune's page count is inferred from the master index: the gap to the next
+# indexed tune in the same book. charts.json is the COMPLETE index (it still holds
+# the pop/rock tunes dropped from the app), so a gap means the tune runs long, not
+# a missing entry. Capped so a rare index hole / photo run can't export a whole
+# section.
+_CHARTS_PATH = Path(__file__).resolve().parent.parent / "data" / "charts.json"
+SPAN_CAP = 4
+
+
+def _load_book_pages() -> dict[str, list[int]]:
+    try:
+        charts = json.loads(_CHARTS_PATH.read_text())
+    except (OSError, ValueError):
+        return {}
+    pages: dict[str, set[int]] = {}
+    for refs in charts.values():
+        for c in refs:
+            try:
+                p = int(c["page"])
+            except (KeyError, ValueError, TypeError):
+                continue
+            pages.setdefault(c["book"], set()).add(p)
+    return {b: sorted(ps) for b, ps in pages.items()}
+
+
+_BOOK_PRINTED_PAGES = _load_book_pages()
+
+
+def span_for(book_name: str, printed_start: int) -> int:
+    """Pages the tune at `printed_start` occupies = gap to the next indexed tune
+    in that book, clamped to [1, SPAN_CAP]."""
+    pages = _BOOK_PRINTED_PAGES.get(book_name)
+    if not pages:
+        return 1
+    nxt = next((p for p in pages if p > printed_start), None)
+    if nxt is None:
+        return 1
+    return max(1, min(SPAN_CAP, nxt - printed_start))
+
+
+def extract_pages(cfg: dict, start_1based: int, count: int) -> bytes:
+    """A small PDF of `count` physical pages starting at `start_1based` — one
+    tune's chart, for handing to forScore etc."""
+    reader = PdfReader(str(book_path(cfg)))
+    n = len(reader.pages)
+    start = max(0, min(n - 1, start_1based - 1))
+    end = min(n, start + max(1, count))
+    writer = PdfWriter()
+    for i in range(start, end):
+        writer.add_page(reader.pages[i])
+    buf = io.BytesIO()
+    writer.write(buf)
+    return buf.getvalue()
 
 
 def meta() -> dict:

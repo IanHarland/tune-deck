@@ -102,7 +102,7 @@ export default function ResultControls({
           <span className="charts-label">Charts</span>
           <ul className="charts-list">
             {tune.charts.map((c, i) => (
-              <ChartRef key={i} chart={c} />
+              <ChartRef key={i} chart={c} title={tune.title} />
             ))}
           </ul>
         </div>

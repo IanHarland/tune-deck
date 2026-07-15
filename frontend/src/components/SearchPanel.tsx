@@ -234,7 +234,7 @@ function SearchResult({ hit, onVote }: { hit: Hit; onVote: VoteFn }) {
       {hit.charts.length > 0 ? (
         <ul className="charts-list">
           {hit.charts.map((c, i) => (
-            <ChartRef key={i} chart={c} />
+            <ChartRef key={i} chart={c} title={hit.title} />
           ))}
         </ul>
       ) : (
