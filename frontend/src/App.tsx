@@ -9,6 +9,7 @@ import ModeSelector from "./components/ModeSelector";
 import NoMinorToggle from "./components/NoMinorToggle";
 import InstallButton from "./components/InstallButton";
 import ResultControls from "./components/ResultControls";
+import SearchPanel from "./components/SearchPanel";
 import { useAnonId } from "./useAnonId";
 import { useInstrument } from "./useInstrument";
 
@@ -16,6 +17,42 @@ const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
 
 // shown once per device, then re-openable from the header "?"
 const INTRO_KEY = "tunedeck.seenIntro";
+
+// Persisted per-device slider prefs: the three weigh-in sliders + their on/off
+// state. The hard feel filter and excludeHenny are left fresh each session, so
+// they're deliberately not saved.
+const FILTERS_KEY = "tunedeck.filters";
+
+const DEFAULT_FILTERS: Filters = {
+  feels: [],
+  obscurity: 10, // aim at the canon by default; slide up to explore deep cuts
+  difficulty: 50,
+  hipness: 50,
+  obscurityOn: true,
+  difficultyOn: true,
+  hipnessOn: false, // opt-in: ratings are sparse at first
+  excludeHenny: false,
+};
+
+function loadFilters(): Filters {
+  try {
+    const saved = JSON.parse(localStorage.getItem(FILTERS_KEY) || "{}");
+    const num = (v: unknown, d: number) =>
+      typeof v === "number" && v >= 0 && v <= 100 ? v : d;
+    const bool = (v: unknown, d: boolean) => (typeof v === "boolean" ? v : d);
+    return {
+      ...DEFAULT_FILTERS,
+      obscurity: num(saved.obscurity, DEFAULT_FILTERS.obscurity),
+      difficulty: num(saved.difficulty, DEFAULT_FILTERS.difficulty),
+      hipness: num(saved.hipness, DEFAULT_FILTERS.hipness),
+      obscurityOn: bool(saved.obscurityOn, DEFAULT_FILTERS.obscurityOn),
+      difficultyOn: bool(saved.difficultyOn, DEFAULT_FILTERS.difficultyOn),
+      hipnessOn: bool(saved.hipnessOn, DEFAULT_FILTERS.hipnessOn),
+    };
+  } catch {
+    return DEFAULT_FILTERS;
+  }
+}
 
 // "Lame" mode alternates Spain with one of these wedding-band warhorses. Titles
 // must match the library (Ipanema is stored "...The"); Cantaloupe Island and
@@ -49,16 +86,7 @@ const LAME_TUNES = [
 export default function App() {
   const [tunes, setTunes] = useState<Tune[] | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [filters, setFilters] = useState<Filters>({
-    feels: [],
-    obscurity: 10, // aim at the canon by default; slide up to explore deep cuts
-    difficulty: 50,
-    hipness: 50,
-    obscurityOn: true,
-    difficultyOn: true,
-    hipnessOn: false, // opt-in: ratings are sparse at first
-    excludeHenny: false,
-  });
+  const [filters, setFilters] = useState<Filters>(loadFilters);
   const [current, setCurrent] = useState<Tune | null>(null);
   const [mode, setMode] = useState<Mode>("normal");
   const [noMinor, setNoMinor] = useState(false); // show minor keys as rel. major
@@ -86,6 +114,7 @@ export default function App() {
     }
   });
   const [helpOpen, setHelpOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const anonId = useAnonId();
   const [instrument, setInstrument] = useInstrument();
   // tunes already suggested this round; skipped on draw until the pool is
@@ -106,6 +135,25 @@ export default function App() {
     loadTunes();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // remember the slider settings (values + on/off) per device for next visit
+  useEffect(() => {
+    try {
+      localStorage.setItem(
+        FILTERS_KEY,
+        JSON.stringify({
+          obscurity: filters.obscurity,
+          difficulty: filters.difficulty,
+          hipness: filters.hipness,
+          obscurityOn: filters.obscurityOn,
+          difficultyOn: filters.difficultyOn,
+          hipnessOn: filters.hipnessOn,
+        }),
+      );
+    } catch {
+      /* private mode / storage disabled — fine, just won't persist */
+    }
+  }, [filters]);
 
   // new filters/mode ⇒ fresh round, forget what's been suggested
   useEffect(() => {
@@ -284,6 +332,29 @@ export default function App() {
         <div className="sel-group">
           <InstrumentSelector instrument={instrument} onChange={setInstrument} />
           <NoMinorToggle on={noMinor} onChange={setNoMinor} />
+          {tunes && (
+            <button
+              type="button"
+              className="search-btn"
+              onClick={() => setSearchOpen(true)}
+              aria-label="Search tunes"
+              title="Search tunes"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                width="26"
+                height="26"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                aria-hidden
+              >
+                <circle cx="10.5" cy="10.5" r="6.5" />
+                <line x1="15.5" y1="15.5" x2="20.5" y2="20.5" />
+              </svg>
+            </button>
+          )}
         </div>
         <ModeSelector mode={mode} onChange={setMode} />
       </div>
@@ -349,6 +420,10 @@ export default function App() {
       <footer className="app-footer">
         {current ? "swipe the card for another tune" : "tap the deck to begin"}
       </footer>
+
+      {searchOpen && tunes && (
+        <SearchPanel tunes={tunes} onClose={() => setSearchOpen(false)} />
+      )}
     </div>
   );
 }

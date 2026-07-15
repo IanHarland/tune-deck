@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { deleteTune, markPlayed, randomizeKey } from "../core/api";
+import { coverSlug } from "../core/covers";
 import { irealUrlFor } from "../core/irealLink";
 import type { Tune } from "../core/types";
 
@@ -9,14 +10,6 @@ interface Props {
   onUpdate: (t: Tune) => void;
   onDelete: (id: string) => void;
   onRandomized: (key: string) => void;
-}
-
-// must match scripts/build_covers.py slug()
-function coverSlug(book: string): string {
-  return book
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
 }
 
 // Obscurity/difficulty weigh-in now lives on the card (the draggable pills);
