@@ -794,6 +794,7 @@ body::after {
   flex-direction: column;
   gap: 4px;
 }
+/* one fake-book reference — the whole row is the tap target when openable */
 .chart-ref {
   display: flex;
   align-items: center;
@@ -816,6 +817,7 @@ body::after {
 .chart-book {
   color: var(--cream);
   flex: 1 1 auto;
+  min-width: 0;
 }
 .chart-page {
   color: var(--gold);
@@ -824,11 +826,13 @@ body::after {
   white-space: nowrap;
   margin-left: 10px;
 }
-/* a chart that can open in the private reader */
+/* a chart that can open the tune's PDF page (whole row tappable) */
 .chart-ref.chart-open {
   cursor: pointer;
   border-color: rgba(224, 178, 74, 0.35);
   transition: background 0.12s ease, border-color 0.12s ease;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 .chart-ref.chart-open:hover,
 .chart-ref.chart-open:focus-visible {
@@ -836,38 +840,36 @@ body::after {
   border-color: rgba(224, 178, 74, 0.55);
   outline: none;
 }
+.chart-ref.chart-open:active {
+  background: rgba(224, 178, 74, 0.2);
+}
 .chart-open-hint {
   color: var(--gold);
   font-size: 18px;
   line-height: 1;
   margin-left: 2px;
   flex: 0 0 auto;
+  width: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-/* hand this tune's page to forScore (Apple only) */
-.fs-btn {
-  flex: 0 0 auto;
-  margin-left: 2px;
-  padding: 4px 9px;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  color: var(--gold);
-  background: rgba(224, 178, 74, 0.12);
-  border: 1px solid rgba(224, 178, 74, 0.4);
-  border-radius: 999px;
-  cursor: pointer;
-  white-space: nowrap;
+/* shown in place of the "›" while the tune PDF is being fetched */
+.chart-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(224, 178, 74, 0.3);
+  border-top-color: var(--gold);
+  border-radius: 50%;
+  animation: chart-spin 0.7s linear infinite;
 }
-.fs-btn:hover,
-.fs-btn:focus-visible {
-  background: rgba(224, 178, 74, 0.22);
-  outline: none;
-}
-.fs-btn:active {
-  transform: scale(0.96);
+@keyframes chart-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
-/* Fake-book reader (private, password-gated) */
+/* Fake-book access — password prompt (one-time per device) */
 .fb-overlay {
   position: fixed;
   inset: 0;
@@ -878,92 +880,6 @@ body::after {
   align-items: center;
   justify-content: center;
 }
-.fb-bar {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: calc(env(safe-area-inset-top) + 10px) 14px 10px;
-  background: rgba(0, 0, 0, 0.4);
-  border-bottom: 1px solid rgba(246, 241, 227, 0.12);
-  flex: 0 0 auto;
-}
-.fb-close {
-  background: transparent;
-  border: none;
-  color: var(--cream);
-  font-size: 20px;
-  line-height: 1;
-  cursor: pointer;
-  padding: 4px 6px;
-  flex: 0 0 auto;
-}
-.fb-book {
-  color: var(--cream);
-  font-weight: 600;
-  font-size: 14px;
-  flex: 1 1 auto;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.fb-nav {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex: 0 0 auto;
-}
-.fb-nav button {
-  background: rgba(246, 241, 227, 0.08);
-  border: 1px solid rgba(246, 241, 227, 0.16);
-  color: var(--cream);
-  width: 34px;
-  height: 34px;
-  border-radius: 8px;
-  font-size: 20px;
-  line-height: 1;
-  cursor: pointer;
-}
-.fb-nav button:disabled {
-  opacity: 0.35;
-  cursor: default;
-}
-.fb-page {
-  color: var(--gold);
-  font-size: 13px;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  min-width: 84px;
-  text-align: center;
-}
-.fb-scroll {
-  flex: 1 1 auto;
-  width: 100%;
-  overflow: auto;
-  -webkit-overflow-scrolling: touch;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  padding: 10px 8px calc(env(safe-area-inset-bottom) + 16px);
-}
-.fb-scroll .react-pdf__Page {
-  background: #fff !important;
-  border-radius: 4px;
-  box-shadow: 0 6px 26px rgba(0, 0, 0, 0.6);
-}
-.fb-scroll .react-pdf__Page__canvas {
-  border-radius: 4px;
-  max-width: 100%;
-  height: auto !important;
-}
-.fb-msg {
-  color: rgba(246, 241, 227, 0.7);
-  font-size: 14px;
-  padding: 40px 16px;
-  text-align: center;
-}
-
-/* password prompt (one-time per device) */
 .fb-auth {
   z-index: 70;
   justify-content: center;

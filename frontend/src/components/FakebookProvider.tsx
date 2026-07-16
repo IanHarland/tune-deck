@@ -1,10 +1,9 @@
 import {
   createContext,
-  lazy,
-  Suspense,
   useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
   type FormEvent,
   type ReactNode,
@@ -16,30 +15,7 @@ import {
   type FakebookMeta,
 } from "../core/fakebooks";
 
-// pdf.js is heavy — only load the viewer when a book is actually opened.
-const FakebookViewer = lazy(() => import("./FakebookViewer"));
-
-// forScore is Apple-only; the single-page share needs the Web Share (files) API,
-// which on Apple platforms means iOS/iPadOS Safari (and macOS). Show the button
-// only where it can work.
-const IS_APPLE =
-  typeof navigator !== "undefined" &&
-  (/iPhone|iPad|iPod|Macintosh/.test(navigator.userAgent) ||
-    (navigator.platform === "MacIntel" && (navigator.maxTouchPoints || 0) > 1));
-const FORSCORE_SUPPORTED = IS_APPLE && typeof navigator !== "undefined" && !!navigator.share;
-
-interface ViewTarget {
-  slug: string;
-  page: number; // pdf page (offset-adjusted)
-  book: string;
-  label: string; // printed page
-}
-
-type Pending =
-  | ({ action: "read" } & ViewTarget)
-  | { action: "forscore"; slug: string; book: string; printed: number; title?: string };
-
-interface ForScoreParams {
+interface ChartParams {
   slug: string;
   book: string;
   printed: number;
@@ -48,34 +24,58 @@ interface ForScoreParams {
 
 interface Ctx {
   canOpen: (book: string) => boolean; // configured + PDF present
-  openChart: (book: string, printedPage: string | number) => void; // our reader
-  openInForScore: (book: string, printedPage: string | number, title?: string) => void;
-  forScoreSupported: boolean;
+  openChart: (book: string, printedPage: string | number, title?: string) => void;
+  // Warm the tune PDF on pointerdown so the tap opens it promptly.
+  prefetchChart: (book: string, printedPage: string | number) => void;
+  isOpening: (book: string, printedPage: string | number) => boolean;
 }
 
 const FakebookCtx = createContext<Ctx>({
   canOpen: () => false,
   openChart: () => {},
-  openInForScore: () => {},
-  forScoreSupported: false,
+  prefetchChart: () => {},
+  isOpening: () => false,
 });
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const useFakebook = () => useContext(FakebookCtx);
 
-const cleanName = (s: string) => (s || "").replace(/[/\\:*?"<>|]+/g, " ").replace(/\s+/g, " ").trim();
+const cleanName = (s: string) =>
+  (s || "").replace(/[/\\:*?"<>|]+/g, " ").replace(/\s+/g, " ").trim();
 
-// Owns fake-book auth + the reader + the forScore hand-off. Chart taps (search +
-// main card) call openChart()/openInForScore(); if the device isn't unlocked yet
-// it prompts for the password once (year-long cookie), then runs the pending
-// action. Invisible to anyone without the feature configured.
+const chartKey = (slug: string, printed: number) => `${slug}:${printed}`;
+
+// Open one tune's page(s) as its own PDF so the OS renders it in a Safari view
+// (SFSafariViewController on iOS). That view's Share button is a document-
+// interaction share on a real PDF, which offers "Copy to forScore" — the Web
+// Share sheet never does (forScore ships no share extension). We hand over the
+// already-fetched blob so the new view needs no re-auth.
+function openPdfBlob(blob: Blob, filename: string) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.rel = "noopener";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 60_000);
+}
+
+// Owns fake-book auth + opening a chart. Tapping a chart (search or main card)
+// calls openChart(); if the device isn't unlocked it prompts for the password
+// once (year-long cookie), then opens. The chart opens as a standalone PDF page
+// you can share straight into forScore. Invisible unless the feature is
+// configured and the book's PDF is present.
 export function FakebookProvider({ children }: { children: ReactNode }) {
   const [meta, setMeta] = useState<FakebookMeta | null>(null);
-  const [viewer, setViewer] = useState<ViewTarget | null>(null); // reader open
-  const [pending, setPending] = useState<Pending | null>(null); // awaiting password
+  const [pending, setPending] = useState<ChartParams | null>(null); // awaiting password
+  const [opening, setOpening] = useState<string | null>(null); // chartKey being fetched
   const [pw, setPw] = useState("");
   const [authErr, setAuthErr] = useState<string | null>(null);
   const [authBusy, setAuthBusy] = useState(false);
+  // in-flight/warmed tune-PDF fetches, keyed by `${slug}:${printed}`.
+  const fsCache = useRef<Map<string, Promise<Blob>>>(new Map());
 
   useEffect(() => {
     getFakebookMeta()
@@ -91,60 +91,79 @@ export function FakebookProvider({ children }: { children: ReactNode }) {
     [meta],
   );
 
-  // hand one tune's page(s) to forScore via the iOS share sheet
-  const shareToForScore = useCallback(async (p: ForScoreParams) => {
-    try {
-      const res = await fetch(fakebookTuneUrl(p.slug, p.printed));
-      if (res.status === 401) {
-        setMeta((m) => (m ? { ...m, authed: false } : m));
-        setPending({ action: "forscore", ...p });
-        return;
-      }
-      if (!res.ok) throw new Error(String(res.status));
-      const blob = await res.blob();
-      const fname = `${cleanName(p.title || p.book)} (${cleanName(p.book)} p${p.printed}).pdf`;
-      const file = new File([blob], fname, { type: "application/pdf" });
-      if (navigator.canShare && !navigator.canShare({ files: [file] })) {
-        throw new Error("cant-share-files");
-      }
-      await navigator.share({ files: [file], title: p.title || p.book });
-    } catch (e) {
-      if ((e as Error).name === "AbortError") return; // user dismissed the sheet
-      // fallback: open the page PDF so the user can share/save it manually
-      try {
-        window.open(fakebookTuneUrl(p.slug, p.printed), "_blank");
-      } catch {
-        /* popup blocked — nothing else to do */
-      }
+  // start (and cache) the tune-PDF fetch; a rejected fetch is evicted so a later
+  // tap can retry. 401 rejects too — the tap then falls into the password path.
+  const fetchTune = useCallback((slug: string, printed: number): Promise<Blob> => {
+    const key = chartKey(slug, printed);
+    let p = fsCache.current.get(key);
+    if (!p) {
+      p = fetch(fakebookTuneUrl(slug, printed)).then((res) => {
+        if (!res.ok) throw new Error(res.status === 401 ? "unauthorized" : String(res.status));
+        return res.blob();
+      });
+      p.catch(() => fsCache.current.delete(key));
+      fsCache.current.set(key, p);
     }
+    return p;
   }, []);
 
-  const openChart = useCallback(
+  const prefetchChart = useCallback(
     (book: string, printedPage: string | number) => {
       const info = meta?.books[book];
-      if (!meta?.configured || !info?.available) return;
+      if (!meta?.configured || !info?.available || !meta.authed) return;
       const printed =
         typeof printedPage === "number" ? printedPage : parseInt(printedPage, 10);
-      const pdfPage = Number.isFinite(printed) ? Math.max(1, printed + info.offset) : 1;
-      const t: ViewTarget = { slug: info.slug, page: pdfPage, book, label: String(printedPage) };
-      if (meta.authed) setViewer(t);
-      else setPending({ action: "read", ...t });
+      if (!Number.isFinite(printed)) return;
+      fetchTune(info.slug, printed).catch(() => {}); // swallow — real errors surface on tap
     },
-    [meta],
+    [meta, fetchTune],
   );
 
-  const openInForScore = useCallback(
+  const openTunePdf = useCallback(
+    async (p: ChartParams) => {
+      const key = chartKey(p.slug, p.printed);
+      setOpening(key);
+      let blob: Blob;
+      try {
+        blob = await fetchTune(p.slug, p.printed);
+      } catch (e) {
+        setOpening(null);
+        if ((e as Error).message === "unauthorized") {
+          setMeta((m) => (m ? { ...m, authed: false } : m));
+          setPending(p);
+        }
+        return; // couldn't fetch the page — nothing to open
+      }
+      const fname = `${cleanName(p.title || p.book)} (${cleanName(p.book)} p${p.printed}).pdf`;
+      openPdfBlob(blob, fname);
+      setOpening(null);
+    },
+    [fetchTune],
+  );
+
+  const openChart = useCallback(
     (book: string, printedPage: string | number, title?: string) => {
       const info = meta?.books[book];
       if (!meta?.configured || !info?.available) return;
       const printed =
         typeof printedPage === "number" ? printedPage : parseInt(printedPage, 10);
       if (!Number.isFinite(printed)) return;
-      const p: ForScoreParams = { slug: info.slug, book, printed, title };
-      if (meta.authed) shareToForScore(p);
-      else setPending({ action: "forscore", ...p });
+      const p: ChartParams = { slug: info.slug, book, printed, title };
+      if (meta.authed) openTunePdf(p);
+      else setPending(p);
     },
-    [meta, shareToForScore],
+    [meta, openTunePdf],
+  );
+
+  const isOpening = useCallback(
+    (book: string, printedPage: string | number) => {
+      const info = meta?.books[book];
+      if (!info || !opening) return false;
+      const printed =
+        typeof printedPage === "number" ? printedPage : parseInt(printedPage, 10);
+      return opening === chartKey(info.slug, printed);
+    },
+    [meta, opening],
   );
 
   async function submitPw(e: FormEvent) {
@@ -158,12 +177,7 @@ export function FakebookProvider({ children }: { children: ReactNode }) {
       const p = pending;
       setPending(null);
       setPw("");
-      if (p?.action === "forscore") shareToForScore(p);
-      else if (p) {
-        const { action, ...v } = p;
-        void action;
-        setViewer(v);
-      }
+      if (p) openTunePdf(p);
     } catch (err) {
       const msg = (err as Error).message;
       setAuthErr(
@@ -185,9 +199,7 @@ export function FakebookProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <FakebookCtx.Provider
-      value={{ canOpen, openChart, openInForScore, forScoreSupported: FORSCORE_SUPPORTED }}
-    >
+    <FakebookCtx.Provider value={{ canOpen, openChart, prefetchChart, isOpening }}>
       {children}
 
       {pending && (
@@ -221,18 +233,6 @@ export function FakebookProvider({ children }: { children: ReactNode }) {
             </div>
           </form>
         </div>
-      )}
-
-      {viewer && (
-        <Suspense
-          fallback={
-            <div className="fb-overlay">
-              <div className="fb-msg">Opening book…</div>
-            </div>
-          }
-        >
-          <FakebookViewer {...viewer} onClose={() => setViewer(null)} />
-        </Suspense>
       )}
     </FakebookCtx.Provider>
   );

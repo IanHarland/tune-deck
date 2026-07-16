@@ -33,12 +33,8 @@ export async function authFakebook(password: string): Promise<void> {
   if (!res.ok) throw new Error(`fakebook auth ${res.status}`);
 }
 
-export function fakebookPdfUrl(slug: string): string {
-  return `${API_BASE}/api/fakebook/${slug}.pdf`;
-}
-
-// One-tune PDF (the chart's page(s), offset + multi-page span applied server-side)
-// for handing to forScore via the share sheet.
+// One-tune PDF (the chart's page(s), offset + multi-page span applied server-side).
+// Opened as its own page so its native share can hand it to forScore.
 export function fakebookTuneUrl(slug: string, printedPage: string | number): string {
   return `${API_BASE}/api/fakebook/${slug}/tune-p${printedPage}.pdf`;
 }

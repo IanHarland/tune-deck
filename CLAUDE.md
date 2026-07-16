@@ -110,32 +110,41 @@ into `frontend/public/covers/<slug>.jpg` (small thumbnails, the owner's own
 files). The UI shows the cover next to each chart ref. The frontend recomputes
 the same `slug(book)` to find the image; a missing cover just hides via onError.
 
-### Fake-book reader (private, password-gated)
-Lets the owner open a chart to the tune's page in their own fake books — NOT
-public chart content, but a personal authenticated view of PDFs they own
-(`app/fakebooks.py`, `/api/fakebook/*` in `web.py`, frontend `FakebookProvider`
-+ `FakebookViewer`). Design:
+### Fake-book chart open (private, password-gated)
+Lets the owner open a chart straight to the tune's page(s) in their own fake
+books — NOT public chart content, but a personal authenticated PDF of pages they
+own (`app/fakebooks.py`, `/api/fakebook/*` in `web.py`, frontend
+`FakebookProvider` + `ChartRef`). Design:
 - The ~11 books the index references (~500 MB) are embedded in the image from a
   gitignored `books/` dir (`scripts/stage_books.sh` stages them from iCloud;
-  Dockerfile `COPY books`). Empty dir → reader stays dark (each `available:false`).
+  Dockerfile `COPY books`). Empty dir → charts stay dark (each `available:false`).
 - One shared password (`FAKEBOOK_PASSWORD` secret) → a year-long signed session
-  cookie (`SECRET_KEY` signs it). `GET /api/fakebook/<slug>.pdf` is 401 without
-  it and Range-capable, so pdf.js fetches only the viewed pages.
-- Frontend uses `react-pdf` (canvas render, so jump-to-page works on iOS). Chart
-  rows (search + main card, shared `ChartRef`) turn tappable only when the reader
-  is configured AND the book is present — invisible to everyone else.
+  cookie (`SECRET_KEY` signs it). The tune-PDF route is 401 without it.
+- **One tap = one action.** A chart row (search + main card, shared `ChartRef`)
+  is tappable only when configured AND the book is present — invisible to everyone
+  else. Tapping fetches just that tune's page(s) as a small PDF
+  (`GET /api/fakebook/<slug>/tune-p<printed>.pdf`, pypdf `extract_pages`) and
+  opens the blob as its own page so the OS PDF viewer's native Share button can
+  "Copy to forScore". The row shows a spinner while fetching (cold extract from a
+  500 MB PDF is a few seconds). There is NO in-app full-book reader — we removed
+  `FakebookViewer`/react-pdf (and its ~1.5 MB of bundle) deliberately.
+- **Why open-as-a-page, not `navigator.share`:** forScore ships no share
+  extension, so the Web Share sheet never lists it. Only a document-interaction
+  share (the browser PDF viewer's own Share button, on a real file) offers "Copy
+  to forScore". We hand over the already-fetched blob so the new view needs no
+  re-auth. Known rough edge: forScore imports it under the blob's junk name (fix
+  would be a signed tune URL with `Content-Disposition`).
+- A tune's page COUNT is inferred from the master index: the gap to the next
+  indexed tune in that book (`fakebooks.span_for`, from the complete charts.json,
+  capped at SPAN_CAP=4) — so 2–3-page New Real Book arrangements come across
+  whole. No OCR needed.
 - `BOOKS` in `app/fakebooks.py` maps display name → file + printed→PDF page
   `offset` (`PDF_page = printed + offset`); calibrate per book (scans have no
   page labels). Override offsets WITHOUT a 500 MB rebuild via the
   `FAKEBOOK_OFFSETS` secret (JSON `{slug: offset}`, fast restart). `slug()`
-  matches build_covers.py / `coverSlug`.
-- **forScore hand-off** (Apple only): a per-chart "forScore" button fetches just
-  that tune's page(s) as a one-page PDF (`/api/fakebook/<slug>/tune-p<printed>.pdf`,
-  pypdf) and shares it via `navigator.share({files})` → forScore imports it. A
-  tune's page COUNT is inferred from the master index: the gap to the next
-  indexed tune in that book (`fakebooks.span_for`, from the complete charts.json,
-  capped at SPAN_CAP=4) — so 2–3-page New Real Book arrangements come across
-  whole. No OCR needed.
+  matches build_covers.py / `coverSlug`. (`GET /api/fakebook/<slug>.pdf`, the
+  Range-capable full-book route, still exists server-side but is no longer used
+  by the UI.)
 
 ### Scores (obscurity / difficulty, 0–100)
 Not present in iReal data. Seeded by `scripts/canon.mjs` (tiered repertoire built
