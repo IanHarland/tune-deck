@@ -29,6 +29,7 @@ FILE_TO_BOOK = {
     "REALBK3.PDF": "The Real Book, Vol. 3",
     "NEWREAL1.PDF": "The New Real Book, Vol. 1",
     "NEWREAL2.PDF": "The New Real Book, Vol. 2",
+    "NEWREAL3.PDF": "The New Real Book, Vol. 3",
     "JAZZFAKE.PDF": "Jazz Fakebook",
     "JAZZLTD.PDF": "Jazz LTD",
     "LIBRARY.PDF": "Library of Musicians' Jazz",

@@ -27,17 +27,17 @@ BOOKS_DIR = Path(os.environ.get(
 
 # Display name (matches chart.book in the seed) -> source file + printed→PDF page
 # offset. offset means PDF_page = printed_page + offset (scanned front matter
-# shifts the numbering). Calibrated per book: 7 came from embedded PDF page
-# labels, the other 3 (RealBk1, NewReal1/2, which lack labels) were read off the
-# scans and cross-checked against the index. `file` names mirror build_covers.py.
-# Vol. 3 stays 0 (not staged — only a Bb edition exists locally).
+# shifts the numbering). Calibrated per book: 8 came from embedded PDF page
+# labels (incl. New Real Book Vol. 3 → offset 10, cross-checked by rendering
+# printed 1/55/423), the other 3 (RealBk1, NewReal1/2, which lack labels) were
+# read off the scans against the index. `file` names mirror build_covers.py.
 BOOKS: dict[str, dict] = {
     "The Real Book, Vol. 1":      {"file": "REALBK1.PDF",  "offset": 13},
     "The Real Book, Vol. 2":      {"file": "REALBK2.PDF",  "offset": 7},
     "The Real Book, Vol. 3":      {"file": "REALBK3.PDF",  "offset": 5},
     "The New Real Book, Vol. 1":  {"file": "NEWREAL1.PDF", "offset": 15},
     "The New Real Book, Vol. 2":  {"file": "NEWREAL2.PDF", "offset": 12},
-    "The New Real Book, Vol. 3":  {"file": "NEWREAL3.PDF", "offset": 0},
+    "The New Real Book, Vol. 3":  {"file": "NEWREAL3.PDF", "offset": 10},
     "Jazz Fakebook":              {"file": "JAZZFAKE.PDF", "offset": -1},
     "Jazz LTD":                   {"file": "JAZZLTD.PDF",  "offset": 7},
     "Library of Musicians' Jazz": {"file": "LIBRARY.PDF",  "offset": 4},
