@@ -14,7 +14,7 @@
 //   writes (POST/DELETE: votes, picks) → never touched, straight to network
 //
 // Bump CACHE on any change here to drop the old cache on activate.
-const CACHE = "tunedeck-v4";
+const CACHE = "tunedeck-v5";
 
 self.addEventListener("install", (event) => {
   // Warm the shell so the very first repeat-open paints instantly.
