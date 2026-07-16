@@ -55,6 +55,14 @@
         font-size: 12px; letter-spacing: 2px; text-transform: uppercase;
         color: rgba(246, 241, 227, 0.55);
       }
+      .td-splash__retry {
+        margin-top: 6px; padding: 9px 20px;
+        font: inherit; font-size: 13px; letter-spacing: 1px;
+        color: #f6f1e3; background: rgba(246, 241, 227, 0.1);
+        border: 1px solid rgba(246, 241, 227, 0.3); border-radius: 999px;
+        cursor: pointer; -webkit-tap-highlight-color: transparent;
+      }
+      .td-splash__retry:active { background: rgba(246, 241, 227, 0.2); }
       @keyframes td-spin { to { transform: rotate(360deg); } }
       @media (prefers-reduced-motion: reduce) { .td-splash__spinner { animation-duration: 2.4s; } }
     </style>
@@ -68,5 +76,25 @@
       </div>
     </div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      // React clears #root on mount, so a splash still standing this late means
+      // the boot is wedged — a bundle fetch dropped against the cold machine,
+      // say. Offer a way out instead of a spinner that never ends. Comfortably
+      // past a normal cold start (~20s to first byte), and moot once the worker
+      // has the bundle precached.
+      setTimeout(function () {
+        var splash = document.querySelector(".td-splash");
+        if (!splash || splash.querySelector(".td-splash__retry")) return;
+        var msg = splash.querySelector(".td-splash__msg");
+        if (msg) msg.textContent = "still waking up…";
+        var btn = document.createElement("button");
+        btn.className = "td-splash__retry";
+        btn.textContent = "Retry";
+        btn.addEventListener("click", function () {
+          location.reload();
+        });
+        splash.appendChild(btn);
+      }, 25000);
+    </script>
   </body>
 </html>
