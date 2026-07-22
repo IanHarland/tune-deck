@@ -11,6 +11,7 @@ server costs one warm round-trip (~70 ms) per key and nothing in the bundle.
 from __future__ import annotations
 
 import re
+import threading
 import xml.etree.ElementTree as ET
 from functools import lru_cache
 from pathlib import Path
@@ -160,15 +161,20 @@ def _harmony_xml(h: dict) -> str:
     return "\n".join(lines)
 
 
+# Every MusicXML file must carry this prolog — importers (Finale, Sibelius)
+# reject a file that starts at the bare <score-partwise> element.
+XML_PROLOG = """<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE score-partwise PUBLIC "-//Recordare//DTD MusicXML 4.0 Partwise//EN"
+  "http://www.musicxml.org/dtds/partwise.dtd">
+"""
+
+
 def build_musicxml(data: dict) -> str:
     """Transcription JSON -> MusicXML. See transcribe.SCHEMA for the shape."""
     fifths = max(-7, min(7, int(data.get("key_fifths", 0))))
     beats = int(data.get("beats") or 4)
     beat_type = int(data.get("beat_type") or 4)
-    head = f"""<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE score-partwise PUBLIC "-//Recordare//DTD MusicXML 4.0 Partwise//EN"
-  "http://www.musicxml.org/dtds/partwise.dtd">
-<score-partwise version="4.0">
+    head = XML_PROLOG + f"""<score-partwise version="4.0">
  <work><work-title>{_esc(data.get("title") or "")}</work-title></work>
  <identification><creator type="composer">{_esc(data.get("composer") or "")}</creator></identification>
  <part-list><score-part id="P1"><part-name></part-name></score-part></part-list>
@@ -329,12 +335,38 @@ def transpose_musicxml(musicxml: str, interval: str | None) -> str:
                 if child.tag == "alter":
                     child.tag = f"{prefix}-alter"
 
-    return ET.tostring(root, encoding="unicode")
+    # ET.tostring() emits the bare root element — no XML declaration and no
+    # DOCTYPE. Finale (and Sibelius) reject a MusicXML file without them, so
+    # put back the same prolog build_musicxml() writes.
+    return XML_PROLOG + ET.tostring(root, encoding="unicode")
 
 
-@lru_cache(maxsize=1)
+# Verovio's toolkit must be a true singleton AND used one-at-a-time.
+#
+# Two hazards, both bit us in production (2026-07-22):
+#  1. Font resources are process-global. Constructing a SECOND toolkit tears
+#     down the first one's fonts, after which every loadData() fails with
+#     "could not parse MusicXML" — permanently, until the process restarts.
+#     functools.lru_cache does NOT prevent this: concurrent cache misses each
+#     invoke the wrapped function, so two threads racing on a cold process both
+#     build one. With gunicorn --threads 4 on a scale-to-zero machine, the first
+#     burst of requests after a wake is exactly that race.
+#  2. The toolkit carries mutable state (loaded score + options), so two
+#     concurrent renders would interleave setOptions/loadData/renderToSVG and
+#     could return the wrong key's engraving rather than failing loudly.
+#
+# One lock covers construction and use. Renders are ~70 ms; serialising them is
+# far cheaper than either failure mode.
+_TOOLKIT_LOCK = threading.Lock()
+_TOOLKIT = None
+
+
 def _toolkit():
-    return verovio.toolkit()
+    """Caller MUST hold _TOOLKIT_LOCK."""
+    global _TOOLKIT
+    if _TOOLKIT is None:
+        _TOOLKIT = verovio.toolkit()
+    return _TOOLKIT
 
 
 @lru_cache(maxsize=1)
@@ -361,7 +393,6 @@ def render_svg(musicxml: str, transpose: str | None = None,
 
     Raises ValueError if the MusicXML won't load.
     """
-    tk = _toolkit()
     opts = {
         "pageWidth": width,
         "pageHeight": 60000,      # tall; adjustPageHeight trims to content
@@ -372,14 +403,18 @@ def render_svg(musicxml: str, transpose: str | None = None,
         "footer": "none",
         "spacingStaff": 8,
         "smuflTextFont": "linked",
+        # setOptions merges, so an absent transpose must be cleared explicitly
+        # or the previous render's interval silently persists.
+        "transpose": transpose or "",
     }
-    # setOptions merges, so an absent transpose must be cleared explicitly or it
-    # would persist from the previous render on this cached toolkit.
-    opts["transpose"] = transpose or ""
-    tk.setOptions(opts)
-    if not tk.loadData(musicxml):
-        raise ValueError("could not parse MusicXML")
-    return tk.renderToSVG(1)
+    # setOptions -> loadData -> renderToSVG is one indivisible transaction on
+    # shared mutable state; see the lock's comment above.
+    with _TOOLKIT_LOCK:
+        tk = _toolkit()
+        tk.setOptions(opts)
+        if not tk.loadData(musicxml):
+            raise ValueError("could not parse MusicXML")
+        return tk.renderToSVG(1)
 
 
 def keys_for(original_key: str | None) -> list[str]:
