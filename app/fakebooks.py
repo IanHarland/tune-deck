@@ -31,6 +31,10 @@ BOOKS_DIR = Path(os.environ.get(
 # labels (incl. New Real Book Vol. 3 → offset 10, cross-checked by rendering
 # printed 1/55/423), the other 3 (RealBk1, NewReal1/2, which lack labels) were
 # read off the scans against the index. `file` names mirror build_covers.py.
+# All 3 label-less books re-verified 2026-07-22 by rendering a known printed
+# page and reading the number off the scan: RealBk1 100→Crystal Silence and
+# NewReal2 100→Falling Grace confirmed; NewReal1 was wrong (15) and is now 13
+# (PDF 38 = printed 25, Blue Bossa; checked across PDF 38–41 = printed 25–28).
 #
 # `sections` covers books whose page numbering restarts with a letter prefix.
 # Real Book Vol. 1 has a 13-page unnumbered appendix (Alfie, Kelo, Valse Hot, …)
@@ -41,7 +45,7 @@ BOOKS: dict[str, dict] = {
                                    "sections": {"A": 497}},
     "The Real Book, Vol. 2":      {"file": "REALBK2.PDF",  "offset": 7},
     "The Real Book, Vol. 3":      {"file": "REALBK3.PDF",  "offset": 5},
-    "The New Real Book, Vol. 1":  {"file": "NEWREAL1.PDF", "offset": 15},
+    "The New Real Book, Vol. 1":  {"file": "NEWREAL1.PDF", "offset": 13},
     "The New Real Book, Vol. 2":  {"file": "NEWREAL2.PDF", "offset": 12},
     "The New Real Book, Vol. 3":  {"file": "NEWREAL3.PDF", "offset": 10},
     "Jazz Fakebook":              {"file": "JAZZFAKE.PDF", "offset": -1},
