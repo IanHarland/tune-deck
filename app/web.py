@@ -24,9 +24,9 @@ mimetypes.add_type("audio/mp4", ".m4a")
 # be served with a JS MIME type or the browser refuses to run it.
 mimetypes.add_type("text/javascript", ".mjs")
 
-from . import fakebooks
+from . import fakebooks, notation
 from .db import SessionLocal, init_db
-from .models import FEELS, Tune, TuneRating
+from .models import FEELS, Tune, TuneRating, TuneTranscription
 from .scoring import recompute
 
 # A tune is randomized within its OWN mode (major/minor), so the 24-key space is
@@ -87,6 +87,8 @@ def _cache_headers(resp):
     path = request.path
     if path.startswith("/api/fakebook/") and path.endswith(".pdf"):
         return resp  # keep the PDF route's own (private, cacheable) headers
+    if path.startswith("/api/notation/") or path.startswith("/api/chart/"):
+        return resp  # engraved SVG + music font set their own long-lived caching
     if path.startswith("/api/") or path == "/sw.js":
         # SW must revalidate every load so a new worker rolls out promptly.
         resp.headers["Cache-Control"] = "no-cache"
@@ -326,6 +328,199 @@ def fakebook_tune_page(slug: str, printed: str):
 # --------------------------------------------------------------------------- #
 # Static SPA (built by Vite into frontend/dist)
 # --------------------------------------------------------------------------- #
+# --- Transposable notation ---------------------------------------------- #
+# A chart is transcribed from the owner's fake-book scan ONCE (vision model, see
+# app/transcribe.py), cached as MusicXML, then transposed + engraved on demand.
+# Same gate as the fake-book reader: this is derived from the owner's own books,
+# so it never leaves the authed session.
+
+
+def _pick_chart(tune: Tune, book: str | None, page: str | None) -> tuple[str, str] | None:
+    """Which chart to transcribe: the requested one, else the first whose book
+    is actually present and whose page we can locate."""
+    charts = tune.charts or []
+    for c in charts:
+        if book and c.get("book") != book:
+            continue
+        if page and str(c.get("page")) != str(page):
+            continue
+        found = fakebooks.book_for_slug(fakebooks.slug(c.get("book") or ""))
+        if not found:
+            continue
+        name, cfg = found
+        if not fakebooks.book_path(cfg).exists():
+            continue
+        if fakebooks.pdf_page_for(name, cfg, c.get("page")) is None:
+            continue
+        return name, str(c.get("page"))
+    return None
+
+
+def _transcription_for(session, tune_id: str, book: str | None, page: str | None):
+    """(tune, transcription|None, (book,page)|None) for this tune.
+
+    With no explicit book/page, an EXISTING transcription wins over the
+    first-available chart. A tune is typically in several books, and
+    _pick_chart's order comes from the seed, not from preference — without this
+    a tune transcribed from one book would report "not transcribed" because the
+    picker happened to land on a different one.
+    """
+    tune = session.get(Tune, tune_id)
+    if tune is None:
+        return None, None, None
+
+    if not book and not page:
+        existing = session.execute(
+            select(TuneTranscription)
+            .where(TuneTranscription.tune_id == tune_id)
+            .order_by(TuneTranscription.verified.desc(),
+                      TuneTranscription.updated_at.desc())
+        ).scalars().first()
+        if existing is not None:
+            return tune, existing, (existing.book, existing.printed_page)
+
+    chart = _pick_chart(tune, book, page)
+    if chart is None:
+        return tune, None, None
+    row = session.execute(
+        select(TuneTranscription).where(
+            TuneTranscription.tune_id == tune_id,
+            TuneTranscription.book == chart[0],
+            TuneTranscription.printed_page == chart[1],
+        )
+    ).scalar_one_or_none()
+    return tune, row, chart
+
+
+@app.get("/api/notation/font.css")
+def notation_font():
+    """Verovio's Leipzig @font-face CSS. Engraved SVGs reference it by name
+    instead of inlining 58 KB of base64 font apiece, so this is fetched once and
+    cached; without it chord-symbol accidentals render as tofu boxes."""
+    return send_file(
+        notation.font_css_path(), mimetype="text/css", conditional=True,
+        max_age=31536000,
+    )
+
+
+@app.get("/api/chart/<tune_id>/notation")
+def notation_meta(tune_id: str):
+    """Has this tune been transcribed, and into which keys can it go?"""
+    with SessionLocal() as db:
+        tune, row, chart = _transcription_for(
+            db, tune_id, request.args.get("book"), request.args.get("page"))
+        if tune is None:
+            return jsonify(error="not found"), 404
+        return jsonify(
+            configured=fakebooks.password() is not None,
+            authed=bool(session.get("fb")),
+            chart={"book": chart[0], "page": chart[1]} if chart else None,
+            transcription=row.to_dict() if row else None,
+            keys=notation.keys_for(row.source_key if row else tune.original_key),
+        )
+
+
+@app.post("/api/chart/<tune_id>/notation")
+def notation_transcribe(tune_id: str):
+    """Transcribe this tune's chart from the scan and cache it. Expensive (a
+    vision call over the page images), so it's a no-op when one already exists
+    unless ?force=1."""
+    if not session.get("fb"):
+        return jsonify(error="unauthorized"), 401
+    with SessionLocal() as db:
+        tune, row, chart = _transcription_for(
+            db, tune_id, request.args.get("book"), request.args.get("page"))
+        if tune is None:
+            return jsonify(error="not found"), 404
+        if chart is None:
+            return jsonify(error="no readable chart for this tune"), 404
+        if row is not None and request.args.get("force") != "1":
+            return jsonify(transcription=row.to_dict(), cached=True)
+
+        from . import transcribe as tx  # heavy (anthropic + PyMuPDF); import on use
+
+        book, page = chart
+        _name, cfg = fakebooks.book_for_slug(fakebooks.slug(book))
+        try:
+            images = tx.render_pages(book, cfg, page)
+            data = tx.transcribe(images, tune.title, tune.composer)
+        except tx.NotConfigured as e:
+            return jsonify(error=str(e)), 503
+        except RuntimeError as e:
+            return jsonify(error=str(e)), 502
+        except (ValueError, KeyError) as e:
+            return jsonify(error=f"could not transcribe this chart: {e}"), 422
+
+        musicxml = notation.build_musicxml(data)
+        src = notation.key_name_from_fifths(data.get("key_fifths", 0),
+                                            minor=notation.is_minor(tune.original_key))
+        if row is None:
+            row = TuneTranscription(tune_id=tune_id, book=book, printed_page=page)
+            db.add(row)
+        row.musicxml = musicxml
+        row.source_key = src
+        row.model = tx.MODEL
+        row.verified = False  # a fresh machine reading is unverified by definition
+        db.commit()
+        return jsonify(transcription=row.to_dict(), cached=False)
+
+
+@app.get("/api/chart/<tune_id>/notation.svg")
+def notation_svg(tune_id: str):
+    """The chart engraved in `key` (defaults to the key it was printed in)."""
+    if not session.get("fb"):
+        return jsonify(error="unauthorized"), 401
+    try:
+        width = max(600, min(4000, int(request.args.get("width", 2100))))
+    except (TypeError, ValueError):
+        width = 2100
+    with SessionLocal() as db:
+        _tune, row, _chart = _transcription_for(
+            db, tune_id, request.args.get("book"), request.args.get("page"))
+        if row is None:
+            return jsonify(error="not transcribed yet"), 404
+        target = (request.args.get("key") or "").strip() or row.source_key
+        interval = notation.interval_name(row.source_key or "C", target or "C")
+        if interval is None:
+            return jsonify(error=f"cannot transpose {row.source_key} -> {target}"), 400
+        try:
+            svg = notation.render_svg(row.musicxml, transpose=interval or None, width=width)
+        except ValueError as e:
+            return jsonify(error=str(e)), 500
+        resp = app.response_class(svg, mimetype="image/svg+xml")
+        # Varies only with (transcription revision, key, width); a re-transcribe
+        # bumps updated_at, so the ETag tracks the content it describes.
+        stamp = int(row.updated_at.timestamp()) if row.updated_at else 0
+        resp.headers["ETag"] = f'W/"{row.id}-{stamp}-{target}-{width}"'
+        resp.headers["Cache-Control"] = "private, max-age=86400"
+        return resp
+
+
+@app.get("/api/chart/<tune_id>/notation.musicxml")
+def notation_musicxml(tune_id: str):
+    """The transposed MusicXML itself, for opening in MuseScore/Sibelius."""
+    if not session.get("fb"):
+        return jsonify(error="unauthorized"), 401
+    with SessionLocal() as db:
+        tune, row, _chart = _transcription_for(
+            db, tune_id, request.args.get("book"), request.args.get("page"))
+        if row is None:
+            return jsonify(error="not transcribed yet"), 404
+        target = (request.args.get("key") or "").strip() or row.source_key
+        interval = notation.interval_name(row.source_key or "C", target or "C")
+        if interval is None:
+            return jsonify(error=f"cannot transpose {row.source_key} -> {target}"), 400
+        try:
+            xml = notation.transpose_musicxml(row.musicxml, interval)
+        except ValueError as e:
+            return jsonify(error=str(e)), 500
+        resp = send_file(
+            io.BytesIO(xml.encode()), mimetype="application/vnd.recordare.musicxml+xml",
+            download_name=f"{tune.title} ({target}).musicxml", as_attachment=False)
+        resp.headers["Cache-Control"] = "private, max-age=86400"
+        return resp
+
+
 @app.get("/")
 def index():
     if (FRONTEND_DIST / "index.html").exists():

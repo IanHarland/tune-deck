@@ -3,6 +3,8 @@ import { deleteTune, markPlayed, randomizeKey } from "../core/api";
 import { irealUrlFor } from "../core/irealLink";
 import type { Tune } from "../core/types";
 import ChartRef from "./ChartRef";
+import NotationSheet from "./NotationSheet";
+import { useFakebook } from "./FakebookProvider";
 
 interface Props {
   tune: Tune;
@@ -25,6 +27,12 @@ export default function ResultControls({
   const [playedBusy, setPlayedBusy] = useState(false);
   const [played, setPlayed] = useState(false); // logged this card once already
   const [deleting, setDeleting] = useState(false);
+  const [sheetOpen, setSheetOpen] = useState(false);
+
+  // Notation comes from the owner's own scans, so it's offered only where the
+  // fake-book reader can actually open a chart — invisible to everyone else.
+  const { canOpen } = useFakebook();
+  const canOpenAny = tune.charts.some((c) => canOpen(c.book, c.page));
 
   // reset transient state when a new tune is drawn
   useEffect(() => {
@@ -32,6 +40,7 @@ export default function ResultControls({
     setBusyKey(false);
     setPlayedBusy(false);
     setPlayed(false);
+    setSheetOpen(false);
   }, [tune.id]);
 
   async function onPlayed() {
@@ -105,7 +114,26 @@ export default function ResultControls({
               <ChartRef key={i} chart={c} title={tune.title} />
             ))}
           </ul>
+          {/* Deliberately NOT on the chart rows — those stay one-tap-one-action
+              (tap = open the PDF). This is a separate control. */}
+          {canOpenAny && (
+            <button
+              className="btn btn-ghost btn-notation"
+              onClick={() => setSheetOpen((v) => !v)}
+              aria-expanded={sheetOpen}
+            >
+              {sheetOpen ? "Hide notation" : "🎼 Read in any key"}
+            </button>
+          )}
         </div>
+      )}
+
+      {sheetOpen && (
+        <NotationSheet
+          tune={tune}
+          currentKey={currentKey}
+          onClose={() => setSheetOpen(false)}
+        />
       )}
 
       <button className="btn-delete" onClick={onDeleteClick} disabled={deleting}>

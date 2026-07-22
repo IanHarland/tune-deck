@@ -182,6 +182,45 @@ own (`app/fakebooks.py`, `/api/fakebook/*` in `web.py`, frontend
   the Range-capable full-book route, still exists server-side but is no longer used
   by the UI.)
 
+### Transposable notation (read any chart in any key)
+Turns a fake-book scan into editable notation so a chart can be read in any key
+(`app/notation.py`, `app/transcribe.py`, `core/notation.ts`, `NotationSheet`).
+Same password gate as the reader — it's derived from the owner's own books.
+
+- **Classical OMR was tried and rejected.** Measured 2026-07-22 on the real
+  scans: `oemer` took ~4 min/page and returned the wrong key signature (1 sharp
+  for a 3-flat chart), no time signature, no chords, and garbage pitches;
+  Audiveris has **no chord-symbol support at all** (its issue #243, open since
+  2019), which disqualifies it for lead sheets. Don't re-litigate this without
+  new evidence — `books/*.PDF` are pure image scans (0 embedded text chars).
+- **A vision model does the transcription** (`transcribe.py`, Opus 4.8, adaptive
+  thinking). It returns a **constrained JSON note-list via structured outputs**,
+  never raw XML — a JSON schema is guaranteed well-formed; model-written XML is
+  not. `notation.build_musicxml()` turns that into MusicXML.
+- **Transcribe once, transpose forever.** The MusicXML is cached in
+  `tune_transcriptions` (unique per tune+book+page). Every key is a re-render of
+  that one row, so the expensive step happens once per chart.
+- **Rendering is server-side, deliberately.** Verovio also ships as WASM, but
+  it's several MB and we dropped react-pdf for being 1.5 MB while still
+  supporting iPadOS 14 Safari. The bundle is unchanged; a warm render is ~70 ms.
+- **The music font is served separately** (`/api/notation/font.css`, straight
+  from the installed verovio package — not vendored, so it can't drift).
+  Verovio otherwise inlines 58 KB of base64 WOFF2 into *every* SVG: 49 KB
+  gzipped per key vs **4.4 KB** linked. Without that stylesheet in the document,
+  chord-symbol accidentals render as tofu boxes.
+- Two transposition paths, and they agree: Verovio's `transpose` option for the
+  rendered SVG, and `notation.transpose_musicxml()` for the MusicXML export
+  (Verovio can only export MEI). Both are cross-checked in testing.
+- `verovio.toolkit().setOptions()` **merges** — an absent `transpose` must be
+  cleared explicitly or the previous render's interval silently persists.
+- A transcription is a machine reading of a scan: it starts `verified=False` and
+  the UI says so. Assume it needs checking against the book.
+- Needs the `ANTHROPIC_API_KEY` secret set on Fly. Without it, transcription
+  fails but everything else (including already-transcribed charts) still works.
+- **PyMuPDF (rasterises the page for the vision call) is AGPL-3.0.** Fine for a
+  private deployment; going public means a commercial licence or swapping to
+  pdftoppm.
+
 ### Scores (obscurity / difficulty, 0–100)
 Not present in iReal data. Seeded by `scripts/canon.mjs` (tiered repertoire built
 from jam-call-frequency data + must-know lists + domain knowledge):

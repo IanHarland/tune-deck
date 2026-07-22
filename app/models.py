@@ -15,6 +15,7 @@ from datetime import datetime, timezone
 
 from sqlalchemy import (
     Boolean, Column, DateTime, Float, ForeignKey, Integer, String, Text,
+    UniqueConstraint,
 )
 from sqlalchemy.orm import DeclarativeBase, relationship
 from sqlalchemy.types import JSON
@@ -119,6 +120,58 @@ class Tune(Base):
             "times_played": self.times_played,
             "last_picked_at": self.last_picked_at.isoformat() if self.last_picked_at else None,
             "last_played_at": self.last_played_at.isoformat() if self.last_played_at else None,
+        }
+
+
+class TuneTranscription(Base):
+    """A chart transcribed from a fake-book scan into MusicXML.
+
+    Cached because producing one is expensive (a vision API call, seconds and
+    real money) and immutable once verified — the printed page never changes.
+    Transposition is applied at render time from this single stored copy, so
+    all 12 keys come from one transcription.
+
+    Keyed by (tune, book, page) rather than by tune alone: the same tune is
+    often in several books with different arrangements, and the owner may
+    prefer one book's chart.
+    """
+    __tablename__ = "tune_transcriptions"
+    __table_args__ = (
+        UniqueConstraint("tune_id", "book", "printed_page", name="uq_transcription_chart"),
+    )
+
+    id = Column(String, primary_key=True, default=_uuid)
+    tune_id = Column(String, ForeignKey("tunes.id", ondelete="CASCADE"),
+                     nullable=False, index=True)
+
+    # which chart this came from — mirrors an entry in Tune.charts
+    book = Column(Text, nullable=False)
+    printed_page = Column(Text, nullable=False)
+
+    musicxml = Column(Text, nullable=False)
+    # concert key the chart is printed in, derived from the transcribed key
+    # signature. Transposition intervals are computed relative to this.
+    source_key = Column(Text, nullable=True)
+
+    # The transcription is a machine reading of a scan and can be wrong. Until
+    # a human has eyeballed it against the source page it stays unverified, and
+    # the UI says so. See CLAUDE.md.
+    verified = Column(Boolean, nullable=False, default=False)
+
+    model = Column(Text, nullable=True)  # which model produced it
+    created_at = Column(DateTime(timezone=True), default=_now)
+    updated_at = Column(DateTime(timezone=True), default=_now, onupdate=_now)
+
+    def to_dict(self) -> dict:
+        return {
+            "id": self.id,
+            "tune_id": self.tune_id,
+            "book": self.book,
+            "printed_page": self.printed_page,
+            "source_key": self.source_key,
+            "verified": self.verified,
+            "model": self.model,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
         }
 
 

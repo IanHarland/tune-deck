@@ -1281,3 +1281,118 @@ body::after {
 .instr-hint {
   margin-top: 2px;
 }
+
+/* --- Notation sheet: the fake-book chart re-engraved in any key ---------- */
+/* Verovio draws glyphs as filled paths and staff lines with
+   stroke:currentColor, so the sheet sets an explicit ink colour on a light
+   ground rather than inheriting the felt table. */
+.notation-sheet {
+  margin-top: 10px;
+  background: var(--cream);
+  color: var(--ink);
+  border-radius: 12px;
+  padding: 10px 12px 12px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
+}
+.notation-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 14px;
+}
+.notation-src {
+  color: var(--ink-soft);
+  font-size: 12px;
+}
+.notation-close {
+  background: none;
+  border: 0;
+  font-size: 22px;
+  line-height: 1;
+  color: var(--ink-soft);
+  cursor: pointer;
+  padding: 0 4px;
+}
+.notation-keys {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 10px 0;
+}
+.notation-key {
+  min-width: 34px;
+  padding: 5px 8px;
+  border: 1px solid rgba(0, 0, 0, 0.18);
+  border-radius: 999px;
+  background: var(--cream-2);
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.notation-key.is-active {
+  background: var(--burgundy);
+  border-color: var(--burgundy);
+  color: var(--cream);
+}
+/* Wide systems scroll inside the sheet — never let the page scroll sideways. */
+.notation-canvas {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  transition: opacity 0.15s ease;
+}
+.notation-canvas.is-busy {
+  opacity: 0.45;
+}
+.notation-canvas svg {
+  max-width: 100%;
+  height: auto;
+}
+.notation-empty {
+  text-align: center;
+  padding: 14px 4px 6px;
+}
+.notation-empty button {
+  padding: 9px 16px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--burgundy);
+  color: var(--cream);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.notation-empty button:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+.notation-note {
+  color: var(--ink-soft);
+  font-size: 12px;
+  margin: 8px 0 0;
+}
+.notation-error {
+  color: var(--burgundy);
+  font-size: 13px;
+  margin: 8px 0 0;
+}
+.notation-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 8px;
+  font-size: 11px;
+}
+.notation-warn {
+  color: var(--burgundy);
+}
+.notation-foot a {
+  color: var(--ink-soft);
+  text-decoration: underline;
+}
+.btn-notation {
+  margin-top: 8px;
+  width: 100%;
+}

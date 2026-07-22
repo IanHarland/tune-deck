@@ -5,3 +5,10 @@ psycopg2-binary>=2.9.0
 gunicorn>=21.2.0
 python-dotenv>=1.0.0
 pypdf>=4.0.0
+# Notation: engraves MusicXML -> SVG and transposes it (app/notation.py).
+verovio>=4.0.0
+# Rasterises fake-book pages to feed the vision transcriber (app/transcribe.py).
+# NOTE: PyMuPDF is AGPL-3.0 — fine for the owner's private deployment, but it
+# would need a commercial licence (or swapping to pdftoppm) to ship publicly.
+PyMuPDF>=1.24.0
+anthropic>=0.69.0
