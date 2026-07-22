@@ -10,3 +10,10 @@ frontend/dist/
 jazz_standard_picker_handoff.md
 CLAUDE.md
 README.md
+# Secrets never belong in the image — production reads Fly secrets from the
+# environment. A bare ".env.local" would only match the context root, and
+# `COPY frontend/ ./` would still carry frontend/.env.local into the build
+# stage, so match at any depth.
+**/.env
+**/.env.*
+!**/.env.example

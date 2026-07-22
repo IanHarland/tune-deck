@@ -86,13 +86,25 @@ def interval_name(src: str, dst: str) -> str | None:
 # Built from the transcription JSON (see transcribe.SCHEMA) rather than asking
 # the model for XML directly: a JSON schema is guaranteed well-formed.
 
-DIVISIONS = 4  # divisions per quarter note
+# 12 divisions per quarter, not 4, so triplets are exact: an eighth-note triplet
+# is 4 divisions. Jazz heads are full of them and the old 4-division grid could
+# not represent one at all, which forced the transcriber to round them into
+# straight eighths (or worse, halves) and wrecked the rhythms.
+DIVISIONS = 12
 
-# duration token -> (divisions, MusicXML <type>, dot count)
+# duration token -> (divisions, MusicXML <type>, dots, is_triplet)
 _DUR = {
-    "16": (1, "16th", 0), "8": (2, "eighth", 0), "8.": (3, "eighth", 1),
-    "4": (4, "quarter", 0), "4.": (6, "quarter", 1), "2": (8, "half", 0),
-    "2.": (12, "half", 1), "1": (16, "whole", 0),
+    "16":  (3,  "16th",    0, False),
+    "16t": (2,  "16th",    0, True),
+    "8":   (6,  "eighth",  0, False),
+    "8t":  (4,  "eighth",  0, True),
+    "8.":  (9,  "eighth",  1, False),
+    "4":   (12, "quarter", 0, False),
+    "4t":  (8,  "quarter", 0, True),
+    "4.":  (18, "quarter", 1, False),
+    "2":   (24, "half",    0, False),
+    "2.":  (36, "half",    1, False),
+    "1":   (48, "whole",   0, False),
 }
 
 # MusicXML kind -> the suffix jazz players actually read.
@@ -112,11 +124,12 @@ def _esc(s: str) -> str:
     return (s or "").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
 
-def _note_xml(n: dict) -> str:
+def _note_xml(n: dict, tuplet: str | None = None) -> str:
+    """One <note>. `tuplet` is "start"/"stop"/None for triplet bracketing."""
     dur = n.get("dur", "4")
     if dur not in _DUR:
         dur = "4"
-    divs, typ, dots = _DUR[dur]
+    divs, typ, dots, trip = _DUR[dur]
     pitch = (n.get("pitch") or "r").strip()
     tie = n.get("tie") or "none"
     stac = bool(n.get("staccato"))
@@ -137,10 +150,17 @@ def _note_xml(n: dict) -> str:
         out.append(f'    <tie type="{tie}"/>')
     out.append(f"    <type>{typ}</type>")
     out += ["    <dot/>"] * dots
-    if tie in ("start", "stop") or stac:
+    if trip:
+        # 3 in the time of 2 — without this the durations don't add up
+        out.append("    <time-modification>"
+                   "<actual-notes>3</actual-notes><normal-notes>2</normal-notes>"
+                   "</time-modification>")
+    if tie in ("start", "stop") or stac or tuplet:
         out.append("    <notations>")
         if tie in ("start", "stop"):
             out.append(f'      <tied type="{tie}"/>')
+        if tuplet:
+            out.append(f'      <tuplet type="{tuplet}"/>')
         if stac:
             out.append("      <articulations><staccato/></articulations>")
         out.append("    </notations>")
@@ -148,7 +168,33 @@ def _note_xml(n: dict) -> str:
     return "\n".join(out)
 
 
-def _harmony_xml(h: dict) -> str:
+def _tuplet_marks(notes: list[dict]) -> list[str | None]:
+    """Bracket runs of consecutive triplet notes, in groups of three."""
+    marks: list[str | None] = [None] * len(notes)
+    run: list[int] = []
+
+    def flush():
+        for i in range(0, len(run) - len(run) % 3, 3):
+            marks[run[i]] = "start"
+            marks[run[i + 2]] = "stop"
+        run.clear()
+
+    for i, n in enumerate(notes):
+        if _DUR.get(n.get("dur", ""), (0, "", 0, False))[3]:
+            run.append(i)
+        else:
+            flush()
+    flush()
+    return marks
+
+
+def _harmony_xml(h: dict, beat_divs: int) -> str:
+    """One chord symbol. `beat` (1-based) positions it within the bar.
+
+    Without an <offset> every harmony in a measure renders at the barline, so
+    two chords in one bar print on top of each other — which is exactly what
+    the first production transcriptions looked like.
+    """
     root = (h.get("root") or "C").strip()
     kind = h.get("kind") or "major"
     step, acc = root[0].upper(), root[1:]
@@ -156,8 +202,14 @@ def _harmony_xml(h: dict) -> str:
     if _ALTER.get(acc):
         lines.append(f"      <root-alter>{_ALTER[acc]}</root-alter>")
     lines += ["    </root>",
-              f'    <kind text="{_esc(_KIND_TEXT.get(kind, ""))}">{kind}</kind>',
-              "  </harmony>"]
+              f'    <kind text="{_esc(_KIND_TEXT.get(kind, ""))}">{kind}</kind>']
+    try:
+        beat = max(1, int(h.get("beat") or 1))
+    except (TypeError, ValueError):
+        beat = 1
+    if beat > 1:
+        lines.append(f"    <offset>{(beat - 1) * beat_divs}</offset>")
+    lines.append("  </harmony>")
     return "\n".join(lines)
 
 
@@ -179,10 +231,18 @@ def build_musicxml(data: dict) -> str:
  <identification><creator type="composer">{_esc(data.get("composer") or "")}</creator></identification>
  <part-list><score-part id="P1"><part-name></part-name></score-part></part-list>
  <part id="P1">"""
+    # A pickup/anacrusis is a short bar: mark it implicit and number from 0 so
+    # the bar numbering (and the engraver) treat it as an upbeat rather than a
+    # measure whose durations don't add up.
+    pickup = bool(data.get("pickup"))
+    beat_divs = int(DIVISIONS * 4 / beat_type) or DIVISIONS
+
     body = []
-    for i, m in enumerate(data.get("measures") or [], 1):
-        body.append(f'  <measure number="{i}">')
-        if i == 1:
+    for i, m in enumerate(data.get("measures") or []):
+        number = i if pickup else i + 1
+        implicit = ' implicit="yes"' if (pickup and i == 0) else ""
+        body.append(f'  <measure number="{number}"{implicit}>')
+        if i == 0:
             body.append(f"""   <attributes>
     <divisions>{DIVISIONS}</divisions>
     <key><fifths>{fifths}</fifths></key>
@@ -190,12 +250,13 @@ def build_musicxml(data: dict) -> str:
     <clef><sign>G</sign><line>2</line></clef>
    </attributes>""")
         for h in (m.get("harmony") or []):
-            body.append(_harmony_xml(h))
+            body.append(_harmony_xml(h, beat_divs))
         notes = m.get("notes") or []
         if not notes:  # never emit an empty measure — Verovio renders it as a gap
             notes = [{"pitch": "r", "dur": "1"}]
-        for n in notes:
-            body.append(_note_xml(n))
+        marks = _tuplet_marks(notes)
+        for n, mark in zip(notes, marks):
+            body.append(_note_xml(n, mark))
         body.append("  </measure>")
     return head + "\n" + "\n".join(body) + "\n </part>\n</score-partwise>\n"
 

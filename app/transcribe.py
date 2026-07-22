@@ -26,11 +26,15 @@ from . import fakebooks
 
 MODEL = "claude-opus-4-8"
 
-# Opus 4.8 reads images up to 2576px on the long edge; a US-Letter page at
-# 220 dpi lands just under that, so nothing is downscaled server-side.
-RENDER_DPI = 220
+# Opus 4.8 reads images up to 2576px on the long edge AND ~3.75 MP. 220 dpi
+# clears the first but is 4.8 MP, so the page got resampled server-side anyway;
+# 200 dpi lands a US-Letter page at ~3.75 MP, keeping the downscale under our
+# control (PyMuPDF's resampler) instead of theirs.
+RENDER_DPI = 200
 
-DURATIONS = ["16", "8", "8.", "4", "4.", "2", "2.", "1"]
+# "t" = triplet (three in the time of two). Without these the transcriber has to
+# round triplets into straight notes, which destroys the rhythm of most heads.
+DURATIONS = ["16", "16t", "8", "8t", "8.", "4", "4t", "4.", "2", "2.", "1"]
 KINDS = [
     "major", "minor", "dominant", "major-seventh", "minor-seventh",
     "half-diminished", "diminished", "augmented", "major-sixth",
@@ -65,7 +69,10 @@ SCHEMA = {
                 "properties": {
                     "harmony": {
                         "type": "array",
-                        "description": "Chord symbols printed over this measure, in order.",
+                        "description": "Chord symbols printed over this measure, in order. "
+                                       "Most bars have one. Skip chords printed in "
+                                       "parentheses — those are optional substitutions, "
+                                       "not the tune's changes.",
                         "items": {
                             "type": "object",
                             "properties": {
@@ -75,8 +82,17 @@ SCHEMA = {
                                                    "optional b or # (e.g. 'Bb', 'F#').",
                                 },
                                 "kind": {"type": "string", "enum": KINDS},
+                                "beat": {
+                                    "type": "integer",
+                                    "description": "Which beat of the measure the chord "
+                                                   "sits on, 1-based. A lone chord at the "
+                                                   "start of the bar is 1; a second chord "
+                                                   "halfway through a 4/4 bar is 3. Getting "
+                                                   "this right keeps two chords in one bar "
+                                                   "from printing on top of each other.",
+                                },
                             },
-                            "required": ["root", "kind"],
+                            "required": ["root", "kind", "beat"],
                             "additionalProperties": False,
                         },
                     },
@@ -121,30 +137,55 @@ SCHEMA = {
 }
 
 SYSTEM = """\
-You transcribe scanned jazz lead sheets into symbolic notation.
+You transcribe scanned jazz lead sheets into symbolic notation. A musician will
+read your output on a gig, so it has to match the printed page bar for bar.
 
-Transcribe exactly what is printed on the page — the melody line and the chord
-symbols above it. Work measure by measure, left to right and top to bottom.
+Work measure by measure, left to right and top to bottom. Before moving to the
+next measure, verify that measure: durations sum correctly, and the notes you
+wrote match the noteheads, stems, flags and beams actually on the page.
 
-Rules that matter most, in order:
-1. Read the key signature and time signature off the printed staff. These are
-   the most consequential fields: everything downstream is transposed relative
-   to the key, so a wrong key signature corrupts the whole chart.
-2. Spell pitches as they SOUND under the key signature. A note on the middle
-   line under three flats is Bb even though no flat is printed next to it.
-   Apply printed accidentals, and carry them for the rest of that measure.
-3. Note durations in each measure must sum to a full measure. If they don't,
-   you have misread a duration — recount that measure before moving on.
-4. Transcribe the melody staff only. Fake books often print a second staff of
-   rhythm slashes or a sample bass line; ignore it.
-5. Write out repeated sections as printed. Do NOT expand repeat signs, first
-   and second endings, D.S. or coda jumps into repeated measures — transcribe
-   the measures once, in the order they physically appear on the page.
-6. Ignore rehearsal letters, tempo marks, and performance notes.
+Rules, most consequential first:
 
-If the page is too degraded to read a passage confidently, transcribe your best
-reading rather than omitting the measure — a wrong note is easier for the user
-to spot and fix than a missing bar."""
+1. KEY AND TIME SIGNATURE. Read both off the printed staff, not from the
+   chords. Everything downstream is transposed relative to the key, so a wrong
+   key signature corrupts the entire chart.
+
+2. RHYTHM IS AS IMPORTANT AS PITCH. Read each note's actual duration from its
+   appearance — hollow notehead with no stem is a whole note, hollow with a
+   stem is a half, filled with a stem is a quarter, one flag or one beam is an
+   eighth, two is a sixteenth, a dot adds half again. Do not flatten a busy bar
+   into long notes: if the page shows a run of beamed eighth notes, write
+   eighth notes. Triplets (a bracketed or slurred 3) use the "t" durations —
+   three "8t" fill one beat.
+
+3. DURATIONS MUST SUM. Every measure totals a full bar, except a pickup. In 4/4
+   that is four quarter-beats: e.g. 4+4+4+4, or 2+4+4, or 8+8+4+4+4, or
+   8t+8t+8t+4+4+4. If your measure does not add up you have misread a duration
+   — recount it before moving on. Never pad with rests that are not printed.
+
+4. PITCH SPELLING. Spell pitches as they SOUND under the key signature: a note
+   on the middle line under three flats is Bb even with no accidental printed
+   beside it. Apply printed accidentals and carry them through the measure.
+
+5. CHORD SYMBOLS. Give each its beat within the bar. Most bars have one chord
+   on beat 1; when a bar has two, the second is usually beat 3 in 4/4.
+   IGNORE chords printed in parentheses — those are optional reharmonisations,
+   not the tune's changes. Also ignore chords belonging to a different staff.
+
+6. PICKUPS. If the tune opens with a partial bar before the first full measure,
+   set pickup=true and make that first measure only as long as it is printed.
+
+7. SCOPE. Melody staff only — ignore any second staff of rhythm slashes or a
+   sample bass line, and ignore lyrics, rehearsal letters, tempo marks and
+   performance notes. If several tunes share the page, transcribe only the one
+   you were asked for and stop at its final barline.
+
+8. REPEATS. Transcribe the measures once, in the order they physically appear.
+   Do not expand repeat signs, first/second endings, D.S. or coda jumps.
+
+If a passage is too degraded to read confidently, write your best reading rather
+than dropping the bar — a wrong note is easier to spot and fix than a missing
+one."""
 
 
 def render_pages(book_name: str, cfg: dict, printed_page: str) -> list[bytes]:
@@ -205,13 +246,23 @@ def transcribe(images: list[bytes], title: str, composer: str | None = None) -> 
 
     # Streaming: a dense chart can run long, and a non-streaming request at this
     # max_tokens risks an HTTP timeout.
+    # max_tokens covers thinking AND the answer. At 32k the model spent the
+    # whole budget reading the page and emitted nothing (stop_reason
+    # max_tokens, zero text blocks) — or, worse, rushed the melody to fit.
+    # A dense chart needs room for both; streaming keeps the long request alive.
     try:
         with client.messages.stream(
             model=MODEL,
-            max_tokens=32000,
+            max_tokens=64000,
             system=SYSTEM,
             thinking={"type": "adaptive"},
-            output_config={"effort": "high",
+            # Measured on New Real Book p.12 (Autumn Leaves), 64k budget:
+            #   high   — ran past 10 min, abandoned
+            #   medium — 680 s, $1.30, 33/33 measures, every bar sums  <- chosen
+            #   low    — 379 s, $0.76, only 20 measures (truncated)
+            # Low is not a cheaper version of the same answer; it silently drops
+            # bars, which is the failure that made the first charts unusable.
+            output_config={"effort": "medium",
                            "format": {"type": "json_schema", "schema": SCHEMA}},
             messages=[{"role": "user", "content": content}],
         ) as stream:
@@ -227,6 +278,14 @@ def transcribe(images: list[bytes], title: str, composer: str | None = None) -> 
 
     if message.stop_reason == "refusal":
         raise RuntimeError("model declined to transcribe this page")
+    if message.stop_reason == "max_tokens":
+        # Distinguish this loudly: it means the budget was too small for the
+        # page, not that the page was unreadable. Silently accepting a
+        # truncated answer is how you get a chart that's missing its last bars.
+        raise RuntimeError(
+            f"ran out of output budget on this chart "
+            f"({message.usage.output_tokens:,} tokens) — the transcription "
+            f"would be incomplete")
     text = next((b.text for b in message.content if b.type == "text"), None)
     if not text:
         raise ValueError("transcription returned no content")

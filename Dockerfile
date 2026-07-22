@@ -29,7 +29,14 @@ COPY --from=frontend /frontend/dist ./frontend/dist
 
 # init_db() runs on import (creates tables + idempotent seed). 1 worker +
 # threads keeps the footprint small on a shared-cpu-1x machine.
+#
+# --timeout 900 (was 120) for chart transcription: a vision pass over a dense
+# fake-book page measured 680 s, and at 120 s gunicorn killed the worker
+# mid-request. It blocks one of the four threads while it runs, which is fine at
+# one-user volume; if this ever gets busy — or if holding an 11-minute HTTP
+# request proves flaky over the Fly proxy — move transcription to a background
+# job and poll for the result instead.
 CMD ["gunicorn", "-b", "0.0.0.0:8080", "-w", "1", "--threads", "4", \
-     "--worker-class", "gthread", "--timeout", "120", "app.web:app"]
+     "--worker-class", "gthread", "--timeout", "900", "app.web:app"]
 
 EXPOSE 8080
