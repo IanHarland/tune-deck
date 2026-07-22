@@ -411,6 +411,10 @@
 {
 "book": "The New Real Book, Vol. 1",
 "page": "429"
+},
+{
+"book": "The Real Book, Vol. 3",
+"page": "4"
 }
 ],
 "allthethingsyouare": [
@@ -696,6 +700,12 @@
 }
 ],
 "aprilskids": [
+{
+"book": "The Real Book, Vol. 2",
+"page": "9"
+}
+],
+"aprilskies": [
 {
 "book": "The Real Book, Vol. 2",
 "page": "9"
@@ -1087,6 +1097,10 @@
 ],
 "barkforbarksdale": [
 {
+"book": "Jazz LTD",
+"page": "18"
+},
+{
 "book": "Library of Musicians' Jazz",
 "page": "9"
 }
@@ -1279,6 +1293,10 @@
 {
 "book": "The New Real Book, Vol. 1",
 "page": "17"
+},
+{
+"book": "The Real Book, Vol. 3",
+"page": "24"
 }
 ],
 "berriestune": [
@@ -1317,6 +1335,10 @@
 {
 "book": "Jazz Fakebook",
 "page": "56"
+},
+{
+"book": "The Real Book, Vol. 3",
+"page": "22"
 }
 ],
 "bessyouismywomannow": [
@@ -2247,8 +2269,16 @@
 ],
 "bouncinwithbud": [
 {
+"book": "Library of Musicians' Jazz",
+"page": "13"
+},
+{
 "book": "The New Real Book, Vol. 1",
 "page": "37"
+},
+{
+"book": "The Real Book, Vol. 2",
+"page": "40"
 }
 ],
 "boynextdoor": [
@@ -2304,6 +2334,12 @@
 }
 ],
 "breezeand1": [
+{
+"book": "Jazz Fakebook",
+"page": "72"
+}
+],
+"breezeandi": [
 {
 "book": "Jazz Fakebook",
 "page": "72"
@@ -2541,6 +2577,10 @@
 {
 "book": "The Colorado Cookbook",
 "page": "45"
+},
+{
+"book": "The Real Book, Vol. 2",
+"page": "50"
 }
 ],
 "butterfly": [
@@ -2658,6 +2698,10 @@
 }
 ],
 "cantaloupeisland": [
+{
+"book": "Jazz LTD",
+"page": "62"
+},
 {
 "book": "The Colorado Cookbook",
 "page": "47"
@@ -2968,6 +3012,12 @@
 }
 ],
 "chasinthetrain": [
+{
+"book": "The Real Book, Vol. 2",
+"page": "62"
+}
+],
+"chasinthetrane": [
 {
 "book": "The Real Book, Vol. 2",
 "page": "62"
@@ -3339,6 +3389,10 @@
 {
 "book": "Bill Evans Fake Book",
 "page": "14"
+},
+{
+"book": "Jazz LTD",
+"page": "65"
 }
 ],
 "conalma": [
@@ -3537,6 +3591,12 @@
 "page": "73"
 }
 ],
+"cottageforsale": [
+{
+"book": "Jazz Fakebook",
+"page": "90"
+}
+],
 "cottageforsalt": [
 {
 "book": "Jazz Fakebook",
@@ -3615,6 +3675,12 @@
 {
 "book": "Library of Musicians' Jazz",
 "page": "162"
+}
+],
+"crepusculewithnellie": [
+{
+"book": "Jazz LTD",
+"page": "62"
 }
 ],
 "crepusculewithnellis": [
@@ -4075,6 +4141,12 @@
 "page": "69"
 }
 ],
+"devilmaycare": [
+{
+"book": "The New Real Book, Vol. 2",
+"page": "69"
+}
+],
 "deweysquare": [
 {
 "book": "Jazz Fakebook",
@@ -4337,6 +4409,20 @@
 {
 "book": "Jazz Fakebook",
 "page": "99"
+}
+],
+"donothintilyouhearfromme": [
+{
+"book": "Jazz Fakebook",
+"page": "99"
+},
+{
+"book": "The New Real Book, Vol. 1",
+"page": "431"
+},
+{
+"book": "The Real Book, Vol. 2",
+"page": "77"
 }
 ],
 "dontargue": [
@@ -5075,6 +5161,10 @@
 ],
 "eternaltriangle": [
 {
+"book": "Jazz LTD",
+"page": "114"
+},
+{
 "book": "The Real Book, Vol. 3",
 "page": "79"
 }
@@ -5262,6 +5352,10 @@
 }
 ],
 "fallinginlovewithlove": [
+{
+"book": "Jazz Fakebook",
+"page": "114"
+},
 {
 "book": "The Real Book, Vol. 1",
 "page": "148"
@@ -5550,6 +5644,12 @@
 }
 ],
 "flowerisalonesomething": [
+{
+"book": "The Real Book, Vol. 2",
+"page": "101"
+}
+],
+"flowerisalovesomething": [
 {
 "book": "The Real Book, Vol. 2",
 "page": "101"
@@ -5859,6 +5959,12 @@
 "page": "50"
 }
 ],
+"freddiefreeloader": [
+{
+"book": "The Real Book, Vol. 1",
+"page": "164"
+}
+],
 "freddiefroo": [
 {
 "book": "The Real Book, Vol. 2",
@@ -5903,6 +6009,12 @@
 {
 "book": "Jazz LTD",
 "page": "130"
+}
+],
+"freighttrain": [
+{
+"book": "The Real Book, Vol. 3",
+"page": "88"
 }
 ],
 "freighttrane": [
@@ -6683,6 +6795,12 @@
 "page": "184"
 }
 ],
+"hallelujahijustlovehimso": [
+{
+"book": "Jazz Fakebook",
+"page": "141"
+}
+],
 "hallelujahilovehimherso": [
 {
 "book": "Jazz Fakebook",
@@ -7461,6 +7579,10 @@
 {
 "book": "Jazz LTD",
 "page": "158"
+},
+{
+"book": "The Colorado Cookbook",
+"page": "104"
 }
 ],
 "ihadntanyonetillyou": [
@@ -7665,6 +7787,12 @@
 "page": "215"
 }
 ],
+"imafooltowantyou": [
+{
+"book": "The Real Book, Vol. 2",
+"page": "161"
+}
+],
 "imafraid": [
 {
 "book": "The Real Book, Vol. 1",
@@ -7725,6 +7853,10 @@
 "page": "95"
 },
 {
+"book": "The New Real Book, Vol. 1",
+"page": "143"
+},
+{
 "book": "The Real Book, Vol. 1",
 "page": "219"
 }
@@ -7733,6 +7865,10 @@
 {
 "book": "The New Real Book, Vol. 3",
 "page": "162"
+},
+{
+"book": "The Real Book, Vol. 2",
+"page": "163"
 }
 ],
 "imgettinsentimentaloveryou": [
@@ -7781,6 +7917,10 @@
 {
 "book": "The Colorado Cookbook",
 "page": "102"
+},
+{
+"book": "The New Real Book, Vol. 1",
+"page": "155"
 },
 {
 "book": "The Real Book, Vol. 3",
@@ -8375,6 +8515,10 @@
 ],
 "ithoughtaboutyou": [
 {
+"book": "The New Real Book, Vol. 1",
+"page": "146"
+},
+{
 "book": "The New Real Book, Vol. 2",
 "page": "141"
 },
@@ -8416,6 +8560,10 @@
 }
 ],
 "itsallrightwithme": [
+{
+"book": "Jazz Fakebook",
+"page": "190"
+},
 {
 "book": "The Real Book, Vol. 3",
 "page": "152"
@@ -8555,6 +8703,10 @@
 {
 "book": "Jazz Fakebook",
 "page": "174"
+},
+{
+"book": "The Real Book, Vol. 3",
+"page": "140"
 }
 ],
 "ivegrownaccustomedtoyourface": [
@@ -8709,14 +8861,12 @@
 "page": "197"
 },
 {
+"book": "The Colorado Cookbook",
+"page": "113"
+},
+{
 "book": "The Real Book, Vol. 2",
 "page": "181"
-}
-],
-"jeepsblues": [
-{
-"book": "The Colorado Cookbook",
-"page": "315"
 }
 ],
 "jellyroll": [
@@ -9011,6 +9161,14 @@
 {
 "book": "Jazz Fakebook",
 "page": "204"
+},
+{
+"book": "Library of Musicians' Jazz",
+"page": "61"
+},
+{
+"book": "The Real Book, Vol. 2",
+"page": "188"
 }
 ],
 "jumpmonk": [
@@ -9144,6 +9302,12 @@
 }
 ],
 "karysfrance": [
+{
+"book": "The Real Book, Vol. 2",
+"page": "196"
+}
+],
+"karystrance": [
 {
 "book": "The Real Book, Vol. 2",
 "page": "196"
@@ -9595,6 +9759,12 @@
 "page": "210"
 }
 ],
+"letscoolone": [
+{
+"book": "The Real Book, Vol. 2",
+"page": "210"
+}
+],
 "letseat": [
 {
 "book": "The Colorado Cookbook",
@@ -9751,6 +9921,16 @@
 "page": "169"
 }
 ],
+"lildarling": [
+{
+"book": "Jazz Fakebook",
+"page": "209"
+},
+{
+"book": "The Real Book, Vol. 3",
+"page": "169"
+}
+],
 "lillie": [
 {
 "book": "Library of Musicians' Jazz",
@@ -9863,6 +10043,10 @@
 {
 "book": "The Colorado Cookbook",
 "page": "120"
+},
+{
+"book": "The Real Book, Vol. 1",
+"page": "309"
 }
 ],
 "littlebspoem": [
@@ -10507,6 +10691,12 @@
 "page": "228"
 }
 ],
+"makingwhoopee": [
+{
+"book": "The Real Book, Vol. 3",
+"page": "186"
+}
+],
 "makinwhoopee": [
 {
 "book": "The Real Book, Vol. 3",
@@ -10561,6 +10751,12 @@
 {
 "book": "The New Real Book, Vol. 3",
 "page": "235"
+}
+],
+"manhadecarnaval": [
+{
+"book": "The New Real Book, Vol. 2",
+"page": "197"
 }
 ],
 "manhadecarneval": [
@@ -10765,6 +10961,10 @@
 {
 "book": "Jazz Fakebook",
 "page": "244"
+},
+{
+"book": "The Colorado Cookbook",
+"page": "133"
 },
 {
 "book": "The Real Book, Vol. 1",
@@ -10985,6 +11185,12 @@
 "page": "193"
 }
 ],
+"mimhasaudade": [
+{
+"book": "Jazz LTD",
+"page": "228"
+}
+],
 "mineisyours": [
 {
 "book": "The New Real Book, Vol. 2",
@@ -11088,6 +11294,10 @@
 }
 ],
 "miyako": [
+{
+"book": "Jazz LTD",
+"page": "237"
+},
 {
 "book": "The Real Book, Vol. 1",
 "page": "297"
@@ -11457,6 +11667,10 @@
 {
 "book": "Jazz Fakebook",
 "page": "261"
+},
+{
+"book": "The Real Book, Vol. 2",
+"page": "249"
 }
 ],
 "motherofthedeadman": [
@@ -11959,6 +12173,10 @@
 "page": "269"
 },
 {
+"book": "The Colorado Cookbook",
+"page": "155"
+},
+{
 "book": "The New Real Book, Vol. 1",
 "page": "232"
 },
@@ -12177,6 +12395,10 @@
 {
 "book": "Jazz Fakebook",
 "page": "275"
+},
+{
+"book": "Library of Musicians' Jazz",
+"page": "3"
 },
 {
 "book": "The Colorado Cookbook",
@@ -12421,6 +12643,14 @@
 "page": "279"
 },
 {
+"book": "Library of Musicians' Jazz",
+"page": "90"
+},
+{
+"book": "The Colorado Cookbook",
+"page": "156"
+},
+{
 "book": "The Real Book, Vol. 2",
 "page": "265"
 }
@@ -12531,6 +12761,10 @@
 {
 "book": "The Colorado Cookbook",
 "page": "161"
+},
+{
+"book": "The Real Book, Vol. 2",
+"page": "271"
 }
 ],
 "ohlookatmenow": [
@@ -12625,6 +12859,12 @@
 "page": "328"
 }
 ],
+"oliloquivalley": [
+{
+"book": "The Real Book, Vol. 1",
+"page": "A8"
+}
+],
 "olinoquivalley": [
 {
 "book": "The Real Book, Vol. 1",
@@ -12673,6 +12913,10 @@
 {
 "book": "Jazz Fakebook",
 "page": "286"
+},
+{
+"book": "The Colorado Cookbook",
+"page": "200"
 }
 ],
 "onceiloved": [
@@ -12795,6 +13039,10 @@
 "page": "289"
 },
 {
+"book": "The Colorado Cookbook",
+"page": "170"
+},
+{
 "book": "The Real Book, Vol. 1",
 "page": "331"
 }
@@ -12819,6 +13067,10 @@
 {
 "book": "The New Real Book, Vol. 3",
 "page": "273"
+},
+{
+"book": "The Real Book, Vol. 1",
+"page": "179"
 }
 ],
 "onionbottom": [
@@ -13188,7 +13440,7 @@
 "paloalto": [
 {
 "book": "The Real Book, Vol. 2",
-"page": "82"
+"page": "282"
 }
 ],
 "pamelaspassion": [
@@ -13204,6 +13456,12 @@
 }
 ],
 "pannonic": [
+{
+"book": "The Real Book, Vol. 2",
+"page": "281"
+}
+],
+"pannonica": [
 {
 "book": "The Real Book, Vol. 2",
 "page": "281"
@@ -13300,7 +13558,7 @@
 "patterns": [
 {
 "book": "The Real Book, Vol. 2",
-"page": "84"
+"page": "284"
 }
 ],
 "patticake": [
@@ -13424,13 +13682,13 @@
 },
 {
 "book": "The Real Book, Vol. 2",
-"page": "86"
+"page": "286"
 }
 ],
 "pennyarcade": [
 {
 "book": "The Real Book, Vol. 2",
-"page": "87"
+"page": "287"
 }
 ],
 "pensativa": [
@@ -13474,7 +13732,7 @@
 },
 {
 "book": "The Real Book, Vol. 2",
-"page": "272"
+"page": "292"
 }
 ],
 "perdido": [
@@ -13492,13 +13750,13 @@
 },
 {
 "book": "The Real Book, Vol. 2",
-"page": "88"
+"page": "288"
 }
 ],
 "perdidoline": [
 {
 "book": "The Real Book, Vol. 2",
-"page": "90"
+"page": "290"
 }
 ],
 "peresina": [
@@ -13510,7 +13768,7 @@
 "perfectlovejamala": [
 {
 "book": "The Real Book, Vol. 1",
-"page": "A9"
+"page": "A10"
 }
 ],
 "perhaps": [
@@ -13558,13 +13816,19 @@
 "petitefleure": [
 {
 "book": "The Real Book, Vol. 2",
-"page": "93"
+"page": "293"
+}
+],
+"petitfleur": [
+{
+"book": "The Real Book, Vol. 2",
+"page": "293"
 }
 ],
 "petitsmachins": [
 {
 "book": "The Real Book, Vol. 2",
-"page": "94"
+"page": "294"
 }
 ],
 "pfrancing": [
@@ -13586,7 +13850,7 @@
 "phasedance": [
 {
 "book": "The Real Book, Vol. 2",
-"page": "96"
+"page": "296"
 }
 ],
 "phillymignon": [
@@ -13608,7 +13872,7 @@
 },
 {
 "book": "The Real Book, Vol. 2",
-"page": "95"
+"page": "295"
 }
 ],
 "pictureofhealth": [
@@ -13650,7 +13914,7 @@
 "plainjane": [
 {
 "book": "The Real Book, Vol. 1",
-"page": "A10"
+"page": "A9"
 }
 ],
 "playedtwice": [
@@ -13691,6 +13955,10 @@
 {
 "book": "Jazz Fakebook",
 "page": "302"
+},
+{
+"book": "The Real Book, Vol. 3",
+"page": "240"
 }
 ],
 "poincianasongofthetree": [
@@ -13861,6 +14129,12 @@
 {
 "book": "Library of Musicians' Jazz",
 "page": "100"
+}
+],
+"progression": [
+{
+"book": "The Real Book, Vol. 2",
+"page": "299"
 }
 ],
 "prologue": [
@@ -14267,6 +14541,12 @@
 "page": "179"
 }
 ],
+"relaxinatcamarillo": [
+{
+"book": "The Real Book, Vol. 3",
+"page": "249"
+}
+],
 "relaxinatcarmarillo": [
 {
 "book": "The Real Book, Vol. 3",
@@ -14383,6 +14663,10 @@
 {
 "book": "Jazz LTD",
 "page": "297"
+},
+{
+"book": "The Colorado Cookbook",
+"page": "180"
 },
 {
 "book": "The Real Book, Vol. 2",
@@ -14671,6 +14955,12 @@
 "page": "303"
 }
 ],
+"sagaofharrisoncrabfeathers": [
+{
+"book": "The Real Book, Vol. 1",
+"page": "365"
+}
+],
 "sagaofharrisoncrabpeathers": [
 {
 "book": "The Real Book, Vol. 1",
@@ -14881,6 +15171,12 @@
 "page": "304"
 }
 ],
+"scotchandsoda": [
+{
+"book": "The Real Book, Vol. 1",
+"page": "368"
+}
+],
 "scotchandwater": [
 {
 "book": "Jazz LTD",
@@ -15026,6 +15322,12 @@
 }
 ],
 "sentimentaljorney": [
+{
+"book": "Jazz Fakebook",
+"page": "329"
+}
+],
+"sentimentaljourney": [
 {
 "book": "Jazz Fakebook",
 "page": "329"
@@ -15501,6 +15803,10 @@
 "page": "322"
 },
 {
+"book": "The Real Book, Vol. 2",
+"page": "412"
+},
+{
 "book": "The Real Book, Vol. 3",
 "page": "268"
 }
@@ -15637,6 +15943,10 @@
 {
 "book": "The Colorado Cookbook",
 "page": "200"
+},
+{
+"book": "The Real Book, Vol. 2",
+"page": "330"
 }
 ],
 "softshoe": [
@@ -15948,6 +16258,12 @@
 }
 ],
 "sonicesumersumamba": [
+{
+"book": "Jazz Fakebook",
+"page": "344"
+}
+],
+"sonicesummersamba": [
 {
 "book": "Jazz Fakebook",
 "page": "344"
@@ -16393,6 +16709,10 @@
 {
 "book": "The New Real Book, Vol. 3",
 "page": "354"
+},
+{
+"book": "The Real Book, Vol. 3",
+"page": "285"
 }
 ],
 "stayassweetasyouare": [
@@ -16659,6 +16979,12 @@
 "page": "346"
 }
 ],
+"struttinwithsomebarbecue": [
+{
+"book": "Jazz Fakebook",
+"page": "366"
+}
+],
 "struttinwithsomebarbeque": [
 {
 "book": "Jazz Fakebook",
@@ -16853,6 +17179,12 @@
 "page": "123"
 }
 ],
+"surreywiththefringeonthetop": [
+{
+"book": "Jazz Fakebook",
+"page": "372"
+}
+],
 "surreywiththefringeontop": [
 {
 "book": "Jazz Fakebook",
@@ -16993,6 +17325,10 @@
 {
 "book": "Jazz Fakebook",
 "page": "374"
+},
+{
+"book": "The Real Book, Vol. 2",
+"page": "323"
 }
 ],
 "swingingtheblues": [
@@ -17469,6 +17805,10 @@
 "page": "386"
 },
 {
+"book": "The Colorado Cookbook",
+"page": "243"
+},
+{
 "book": "The New Real Book, Vol. 2",
 "page": "366"
 },
@@ -17609,6 +17949,10 @@
 {
 "book": "Jazz Fakebook",
 "page": "392"
+},
+{
+"book": "The Colorado Cookbook",
+"page": "241"
 }
 ],
 "thinkingofyou": [
@@ -17842,6 +18186,10 @@
 }
 ],
 "tilltherewasyou": [
+{
+"book": "The New Real Book, Vol. 2",
+"page": "374"
+},
 {
 "book": "The Real Book, Vol. 2",
 "page": "370"
@@ -18189,6 +18537,12 @@
 {
 "book": "Library of Musicians' Jazz",
 "page": "136"
+}
+],
+"tricotism": [
+{
+"book": "The Real Book, Vol. 3",
+"page": "325"
 }
 ],
 "tricrotism": [
@@ -18815,6 +19169,10 @@
 {
 "book": "The New Real Book, Vol. 1",
 "page": "387"
+},
+{
+"book": "The Real Book, Vol. 1",
+"page": "450"
 }
 ],
 "waltzforderby": [
@@ -19127,6 +19485,10 @@
 ],
 "whatadifferenceadaymade": [
 {
+"book": "Jazz Fakebook",
+"page": "422"
+},
+{
 "book": "The New Real Book, Vol. 2",
 "page": "410"
 },
@@ -19173,6 +19535,12 @@
 {
 "book": "Jazz LTD",
 "page": "375"
+}
+],
+"whatisthisthingcalledlove": [
+{
+"book": "The Colorado Cookbook",
+"page": "265"
 }
 ],
 "whatisthisthinglove": [
@@ -19521,6 +19889,10 @@
 {
 "book": "The New Real Book, Vol. 2",
 "page": "425"
+},
+{
+"book": "The Real Book, Vol. 3",
+"page": "345"
 }
 ],
 "wind": [
@@ -19934,6 +20306,10 @@
 }
 ],
 "yougotomyhead": [
+{
+"book": "The Colorado Cookbook",
+"page": "275"
+},
 {
 "book": "The Real Book, Vol. 3",
 "page": "352"

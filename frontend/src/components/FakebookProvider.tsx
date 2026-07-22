@@ -10,24 +10,31 @@ import {
 } from "react";
 import {
   authFakebook,
+  canOpenPage,
   fakebookTuneUrl,
   getFakebookMeta,
+  pageToken,
   type FakebookMeta,
 } from "../core/fakebooks";
 
 interface ChartParams {
   slug: string;
   book: string;
-  printed: number;
+  page: string; // printed page as the book prints it — "288" or "A1"
   title?: string;
 }
 
 interface Ctx {
-  canOpen: (book: string) => boolean; // configured + PDF present
+  // configured + PDF present + this page is one we can locate in that PDF
+  canOpen: (book: string, printedPage: string | number) => boolean;
   openChart: (book: string, printedPage: string | number, title?: string) => void;
   // Warm the tune PDF on pointerdown so the tap opens it promptly.
   prefetchChart: (book: string, printedPage: string | number) => void;
   isOpening: (book: string, printedPage: string | number) => boolean;
+  // the fetch came back with something other than the chart (e.g. the index
+  // points at a page the book doesn't have) — the row says so instead of
+  // swallowing it.
+  didFail: (book: string, printedPage: string | number) => boolean;
 }
 
 const FakebookCtx = createContext<Ctx>({
@@ -35,6 +42,7 @@ const FakebookCtx = createContext<Ctx>({
   openChart: () => {},
   prefetchChart: () => {},
   isOpening: () => false,
+  didFail: () => false,
 });
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -43,7 +51,7 @@ export const useFakebook = () => useContext(FakebookCtx);
 const cleanName = (s: string) =>
   (s || "").replace(/[/\\:*?"<>|]+/g, " ").replace(/\s+/g, " ").trim();
 
-const chartKey = (slug: string, printed: number) => `${slug}:${printed}`;
+const chartKey = (slug: string, page: string) => `${slug}:${page}`;
 
 // Open one tune's page(s) as its own PDF so the OS renders it in a Safari view
 // (SFSafariViewController on iOS). That view's Share button is a document-
@@ -71,10 +79,11 @@ export function FakebookProvider({ children }: { children: ReactNode }) {
   const [meta, setMeta] = useState<FakebookMeta | null>(null);
   const [pending, setPending] = useState<ChartParams | null>(null); // awaiting password
   const [opening, setOpening] = useState<string | null>(null); // chartKey being fetched
+  const [failed, setFailed] = useState<Set<string>>(new Set()); // chartKeys that errored
   const [pw, setPw] = useState("");
   const [authErr, setAuthErr] = useState<string | null>(null);
   const [authBusy, setAuthBusy] = useState(false);
-  // in-flight/warmed tune-PDF fetches, keyed by `${slug}:${printed}`.
+  // in-flight/warmed tune-PDF fetches, keyed by `${slug}:${page}`.
   const fsCache = useRef<Map<string, Promise<Blob>>>(new Map());
 
   useEffect(() => {
@@ -84,20 +93,18 @@ export function FakebookProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const canOpen = useCallback(
-    (book: string) => {
-      const info = meta?.books[book];
-      return !!(meta?.configured && info?.available);
-    },
+    (book: string, printedPage: string | number) =>
+      !!meta?.configured && canOpenPage(meta.books[book], printedPage),
     [meta],
   );
 
   // start (and cache) the tune-PDF fetch; a rejected fetch is evicted so a later
   // tap can retry. 401 rejects too — the tap then falls into the password path.
-  const fetchTune = useCallback((slug: string, printed: number): Promise<Blob> => {
-    const key = chartKey(slug, printed);
+  const fetchTune = useCallback((slug: string, page: string): Promise<Blob> => {
+    const key = chartKey(slug, page);
     let p = fsCache.current.get(key);
     if (!p) {
-      p = fetch(fakebookTuneUrl(slug, printed)).then((res) => {
+      p = fetch(fakebookTuneUrl(slug, page)).then((res) => {
         if (!res.ok) throw new Error(res.status === 401 ? "unauthorized" : String(res.status));
         return res.blob();
       });
@@ -107,34 +114,48 @@ export function FakebookProvider({ children }: { children: ReactNode }) {
     return p;
   }, []);
 
+  // resolve a (book, page) pair to everything the fetch needs, or null if this
+  // book can't open that page at all.
+  const resolve = useCallback(
+    (book: string, printedPage: string | number, title?: string): ChartParams | null => {
+      const info = meta?.books[book];
+      const page = pageToken(printedPage);
+      if (!meta?.configured || !info || !page || !canOpenPage(info, page)) return null;
+      return { slug: info.slug, book, page, title };
+    },
+    [meta],
+  );
+
   const prefetchChart = useCallback(
     (book: string, printedPage: string | number) => {
-      const info = meta?.books[book];
-      if (!meta?.configured || !info?.available || !meta.authed) return;
-      const printed =
-        typeof printedPage === "number" ? printedPage : parseInt(printedPage, 10);
-      if (!Number.isFinite(printed)) return;
-      fetchTune(info.slug, printed).catch(() => {}); // swallow — real errors surface on tap
+      const p = resolve(book, printedPage);
+      if (!p || !meta?.authed) return;
+      fetchTune(p.slug, p.page).catch(() => {}); // swallow — real errors surface on tap
     },
-    [meta, fetchTune],
+    [meta, resolve, fetchTune],
   );
 
   const openTunePdf = useCallback(
     async (p: ChartParams) => {
-      const key = chartKey(p.slug, p.printed);
+      const key = chartKey(p.slug, p.page);
       setOpening(key);
+      setFailed((f) => (f.has(key) ? new Set([...f].filter((k) => k !== key)) : f));
       let blob: Blob;
       try {
-        blob = await fetchTune(p.slug, p.printed);
+        blob = await fetchTune(p.slug, p.page);
       } catch (e) {
         setOpening(null);
         if ((e as Error).message === "unauthorized") {
           setMeta((m) => (m ? { ...m, authed: false } : m));
           setPending(p);
+        } else {
+          // e.g. 404 — the index cites a page this book doesn't have. Say so
+          // rather than leaving the tap looking like it did nothing.
+          setFailed((f) => new Set(f).add(key));
         }
         return; // couldn't fetch the page — nothing to open
       }
-      const fname = `${cleanName(p.title || p.book)} (${cleanName(p.book)} p${p.printed}).pdf`;
+      const fname = `${cleanName(p.title || p.book)} (${cleanName(p.book)} p${p.page}).pdf`;
       openPdfBlob(blob, fname);
       setOpening(null);
     },
@@ -143,27 +164,34 @@ export function FakebookProvider({ children }: { children: ReactNode }) {
 
   const openChart = useCallback(
     (book: string, printedPage: string | number, title?: string) => {
-      const info = meta?.books[book];
-      if (!meta?.configured || !info?.available) return;
-      const printed =
-        typeof printedPage === "number" ? printedPage : parseInt(printedPage, 10);
-      if (!Number.isFinite(printed)) return;
-      const p: ChartParams = { slug: info.slug, book, printed, title };
-      if (meta.authed) openTunePdf(p);
+      const p = resolve(book, printedPage, title);
+      if (!p) return;
+      if (meta?.authed) openTunePdf(p);
       else setPending(p);
     },
-    [meta, openTunePdf],
+    [meta, resolve, openTunePdf],
+  );
+
+  const keyOf = useCallback(
+    (book: string, printedPage: string | number) => {
+      const info = meta?.books[book];
+      const page = pageToken(printedPage);
+      return info && page ? chartKey(info.slug, page) : null;
+    },
+    [meta],
   );
 
   const isOpening = useCallback(
+    (book: string, printedPage: string | number) => !!opening && keyOf(book, printedPage) === opening,
+    [keyOf, opening],
+  );
+
+  const didFail = useCallback(
     (book: string, printedPage: string | number) => {
-      const info = meta?.books[book];
-      if (!info || !opening) return false;
-      const printed =
-        typeof printedPage === "number" ? printedPage : parseInt(printedPage, 10);
-      return opening === chartKey(info.slug, printed);
+      const key = keyOf(book, printedPage);
+      return !!key && failed.has(key);
     },
-    [meta, opening],
+    [keyOf, failed],
   );
 
   async function submitPw(e: FormEvent) {
@@ -199,7 +227,7 @@ export function FakebookProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <FakebookCtx.Provider value={{ canOpen, openChart, prefetchChart, isOpening }}>
+    <FakebookCtx.Provider value={{ canOpen, openChart, prefetchChart, isOpening, didFail }}>
       {children}
 
       {pending && (

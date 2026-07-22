@@ -95,7 +95,7 @@ the iReal library (e.g. Firm Roots, for Smalls mode).
 normalized title → `[{book, page}]`. Book codes map to **actual titles** (read
 off each PDF's cover) in `BOOK_NAMES`. Reference-only (book + printed page) — no
 chart content stored/shipped. `build_seed.mjs` merges them onto each tune as
-`charts`. ~898 of 1,678 tunes have a chart. Chart refs are **openable** via a
+`charts`. ~998 of 1,670 tunes have a chart. Chart refs are **openable** via a
 private, password-gated PDF reader — see "Fake-book reader" below.
 
 Matching tune titles to the index is spelling-tolerant and symmetric across
@@ -104,6 +104,31 @@ diacritics, `&`→`and`, `St.`→`Saint`, article-aware, and emit BOTH a
 kept-parenthetical and dropped-parenthetical key (so "Nancy (With The Laughing
 Face)" matches the index's inline spelling, and subtitles the index omits still
 match). Keep the two implementations identical (a cross-check test exists).
+
+**The master index is dirty, and its errors are invisible in the app** — a
+mis-typed title silently costs a tune its chart, a mis-typed page silently opens
+somebody else's. `build_charts.py` therefore carries three hand-verified fix
+tables applied at parse time, every entry checked by rendering the printed page
+out of the book and reading the title off the scan:
+- `TITLE_ALIASES` — the index's spelling vs. the library's. Some are index typos
+  (`What 15 This Thing Called Love` — an OCR'd "Is"), some are just a valid
+  alternate (`Green Dolphin Street` / `On Green Dolphin Street`). Registered
+  under BOTH spellings, so nothing that already matched can regress. This one
+  table is worth ~80 refs and 30 tunes that had no chart at all.
+- `PAGE_FIXES` — wrong printed page. Mostly one run through Real Book Vol. 2's
+  "P" section where the typist dropped the leading "2" (Perdido is on 288, and
+  88 is a different tune entirely), plus two swapped Vol. 1 appendix entries.
+- `DROPPED_REFS` — refs to a page the book doesn't have.
+
+The build warns if a fix no longer matches any index row. To find more, diff the
+index's titles against `data/tunes.json` and eyeball the near misses — a bare
+near-miss is NOT enough on its own ("Yesterday" and "Yesterdays" sit on adjacent
+pages of Real Book Vol. 1 and are different tunes).
+
+Coverage limit worth knowing: the index covers only the **11 old books** listed
+in `BOOK_NAMES`, not the ~40 PDFs in the owner's folder. A tune absent from
+`charts.json` may well be in a book we don't index (e.g. Ugly Beauty, which is in
+none of the 11 but is in the Thelonious Monk Fake Book).
 
 `scripts/build_covers.py` renders **page 1 (the front cover) of each book's PDF**
 into `frontend/public/covers/<slug>.jpg` (small thumbnails, the owner's own
@@ -121,12 +146,13 @@ own (`app/fakebooks.py`, `/api/fakebook/*` in `web.py`, frontend
 - One shared password (`FAKEBOOK_PASSWORD` secret) → a year-long signed session
   cookie (`SECRET_KEY` signs it). The tune-PDF route is 401 without it.
 - **One tap = one action.** A chart row (search + main card, shared `ChartRef`)
-  is tappable only when configured AND the book is present — invisible to everyone
-  else. Tapping fetches just that tune's page(s) as a small PDF
-  (`GET /api/fakebook/<slug>/tune-p<printed>.pdf`, pypdf `extract_pages`) and
-  opens the blob as its own page so the OS PDF viewer's native Share button can
-  "Copy to forScore". The row shows a spinner while fetching (cold extract from a
-  500 MB PDF is a few seconds). There is NO in-app full-book reader — we removed
+  is tappable only when configured AND the book is present AND the page is one we
+  can locate — invisible to everyone else. Tapping fetches just that tune's
+  page(s) as a small PDF (`GET /api/fakebook/<slug>/tune-p<printed>.pdf`, pypdf
+  `extract_pages`) and opens the blob as its own page so the OS PDF viewer's
+  native Share button can "Copy to forScore". The row shows a spinner while
+  fetching (cold extract from a 500 MB PDF is a few seconds), and a red `!` if the
+  fetch failed. There is NO in-app full-book reader — we removed
   `FakebookViewer`/react-pdf (and its ~1.5 MB of bundle) deliberately.
 - **Why open-as-a-page, not `navigator.share`:** forScore ships no share
   extension, so the Web Share sheet never lists it. Only a document-interaction
@@ -138,12 +164,22 @@ own (`app/fakebooks.py`, `/api/fakebook/*` in `web.py`, frontend
   indexed tune in that book (`fakebooks.span_for`, from the complete charts.json,
   capped at SPAN_CAP=4) — so 2–3-page New Real Book arrangements come across
   whole. No OCR needed.
+- **A printed page ref is not always a number.** It's `<optional section
+  letter><number>` — Real Book Vol. 1 has a 13-page unnumbered appendix the index
+  cites as A1–A13 (Alfie, Kelo, Reflections, Valse Hot, …). `parse_page` /
+  `pdf_page_for` (server) and `parsePageRef` / `canOpenPage` (`core/fakebooks.ts`)
+  handle both; keep them in step. Each section gets its own offset (A → 497, i.e.
+  PDF 498–510) and its own `span_for` neighbour list.
+- A page the book can't satisfy — unknown section, or past the end of the scan —
+  **404s rather than clamping**. Clamping is how a bad index page number turns
+  into quietly handing over the wrong chart.
 - `BOOKS` in `app/fakebooks.py` maps display name → file + printed→PDF page
-  `offset` (`PDF_page = printed + offset`); calibrate per book (scans have no
-  page labels). Override offsets WITHOUT a 500 MB rebuild via the
-  `FAKEBOOK_OFFSETS` secret (JSON `{slug: offset}`, fast restart). `slug()`
-  matches build_covers.py / `coverSlug`. (`GET /api/fakebook/<slug>.pdf`, the
-  Range-capable full-book route, still exists server-side but is no longer used
+  `offset` (`PDF_page = printed + offset`) + optional per-section `sections`;
+  calibrate per book (scans have no page labels). Override offsets WITHOUT a
+  500 MB rebuild via the `FAKEBOOK_OFFSETS` secret (fast restart): JSON
+  `{slug: offset}` or, for a book with sections, `{slug: {"": 13, "A": 497}}`.
+  `slug()` matches build_covers.py / `coverSlug`. (`GET /api/fakebook/<slug>.pdf`,
+  the Range-capable full-book route, still exists server-side but is no longer used
   by the UI.)
 
 ### Scores (obscurity / difficulty, 0–100)

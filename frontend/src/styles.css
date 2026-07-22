@@ -854,6 +854,11 @@ body::after {
   align-items: center;
   justify-content: center;
 }
+/* the fetch failed (e.g. the index cites a page the book doesn't have) */
+.chart-open-hint.chart-failed {
+  color: #d98b7a;
+  font-weight: 700;
+}
 /* shown in place of the "›" while the tune PDF is being fetched */
 .chart-spinner {
   width: 14px;

@@ -293,11 +293,12 @@ def fakebook_pdf(slug: str):
     return resp
 
 
-@app.get("/api/fakebook/<slug>/tune-p<int:printed>.pdf")
-def fakebook_tune_page(slug: str, printed: int):
+@app.get("/api/fakebook/<slug>/tune-p<printed>.pdf")
+def fakebook_tune_page(slug: str, printed: str):
     """A one-tune PDF: the pages starting at PRINTED page `printed` (offset +
     span both applied server-side), for handing a single chart to forScore. Small
-    enough to skip Range."""
+    enough to skip Range. `printed` is the page as the book prints it, so it may
+    carry a section letter ("A1" = Real Book Vol. 1's appendix)."""
     if not session.get("fb"):
         return jsonify(error="unauthorized"), 401
     found = fakebooks.book_for_slug(slug)
@@ -306,7 +307,11 @@ def fakebook_tune_page(slug: str, printed: int):
     name, cfg = found
     if not fakebooks.book_path(cfg).exists():
         return jsonify(error="book unavailable"), 404
-    start = printed + fakebooks.offset_for(name, cfg)
+    # 404 rather than clamp: a ref the book can't satisfy (bad index page number,
+    # unknown section) must fail visibly, not quietly hand over the wrong chart.
+    start = fakebooks.pdf_page_for(name, cfg, printed)
+    if start is None:
+        return jsonify(error="no such page in this book"), 404
     span = fakebooks.span_for(name, printed)
     data = fakebooks.extract_pages(cfg, start, span)
     resp = send_file(

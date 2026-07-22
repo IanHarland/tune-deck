@@ -8,9 +8,10 @@ import { useFakebook } from "./FakebookProvider";
 // into forScore. A spinner shows while the page is being fetched (the extract
 // can take a few seconds cold). Otherwise it's plain, non-interactive text.
 export default function ChartRef({ chart, title }: { chart: ChartRefT; title?: string }) {
-  const { canOpen, openChart, prefetchChart, isOpening } = useFakebook();
-  const openable = canOpen(chart.book);
+  const { canOpen, openChart, prefetchChart, isOpening, didFail } = useFakebook();
+  const openable = canOpen(chart.book, chart.page);
   const loading = openable && isOpening(chart.book, chart.page);
+  const failed = openable && !loading && didFail(chart.book, chart.page);
   const open = () => openChart(chart.book, chart.page, title);
 
   return (
@@ -32,7 +33,13 @@ export default function ChartRef({ chart, title }: { chart: ChartRefT; title?: s
             }
           : undefined
       }
-      title={openable ? `Open ${chart.book} at p.${chart.page}` : undefined}
+      title={
+        failed
+          ? `${chart.book} has no p.${chart.page} — the index reference looks wrong`
+          : openable
+            ? `Open ${chart.book} at p.${chart.page}`
+            : undefined
+      }
     >
       <img
         className="chart-cover"
@@ -46,8 +53,8 @@ export default function ChartRef({ chart, title }: { chart: ChartRefT; title?: s
       <span className="chart-book">{chart.book}</span>
       <span className="chart-page">p.{chart.page}</span>
       {openable && (
-        <span className="chart-open-hint" aria-hidden>
-          {loading ? <span className="chart-spinner" /> : "›"}
+        <span className={`chart-open-hint${failed ? " chart-failed" : ""}`} aria-hidden>
+          {loading ? <span className="chart-spinner" /> : failed ? "!" : "›"}
         </span>
       )}
     </li>

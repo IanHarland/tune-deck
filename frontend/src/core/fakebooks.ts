@@ -5,7 +5,10 @@ import { API_BASE } from "./api";
 
 export interface FakebookInfo {
   slug: string;
-  offset: number; // PDF_page = printed_page + offset
+  // page-section -> offset (PDF_page = number + offset). "" is the main run of
+  // pages; a letter key is a separately-numbered section, e.g. "A" for Real Book
+  // Vol. 1's appendix (p.A1 = Alfie).
+  offsets: Record<string, number>;
   available: boolean; // is the PDF actually uploaded
 }
 
@@ -33,8 +36,29 @@ export async function authFakebook(password: string): Promise<void> {
   if (!res.ok) throw new Error(`fakebook auth ${res.status}`);
 }
 
+// A printed page ref as the book prints it: a number, optionally prefixed by a
+// section letter ("288", "A1"). Mirrors parse_page() in app/fakebooks.py.
+export function parsePageRef(page: string | number): { section: string; number: number } | null {
+  const m = /^([A-Za-z]?)([0-9]{1,4})$/.exec(String(page).trim());
+  return m ? { section: m[1].toUpperCase(), number: parseInt(m[2], 10) } : null;
+}
+
+// Canonical token for the URL (uppercased section, no stray whitespace).
+export function pageToken(page: string | number): string | null {
+  const p = parsePageRef(page);
+  return p ? `${p.section}${p.number}` : null;
+}
+
+// Can this book actually open this page? Needs the PDF present and a known
+// offset for the page's section — a ref into a section we can't locate would
+// otherwise look tappable and do nothing.
+export function canOpenPage(info: FakebookInfo | undefined, page: string | number): boolean {
+  const p = parsePageRef(page);
+  return !!(info?.available && p && p.section in info.offsets);
+}
+
 // One-tune PDF (the chart's page(s), offset + multi-page span applied server-side).
 // Opened as its own page so its native share can hand it to forScore.
 export function fakebookTuneUrl(slug: string, printedPage: string | number): string {
-  return `${API_BASE}/api/fakebook/${slug}/tune-p${printedPage}.pdf`;
+  return `${API_BASE}/api/fakebook/${slug}/tune-p${pageToken(printedPage)}.pdf`;
 }
