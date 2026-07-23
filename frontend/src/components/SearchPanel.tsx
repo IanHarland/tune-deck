@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import type { Instrument } from "../core/keys";
 import { FEEL_LABELS, type ChartRef as ChartRefT, type Feel, type Tune } from "../core/types";
 import ChartRef from "./ChartRef";
 import { useFakebook } from "./FakebookProvider";
+import InstrumentSelector from "./InstrumentSelector";
 import NotationSheet from "./NotationSheet";
 import ScorePill from "./ScorePill";
 
@@ -14,6 +16,12 @@ interface Props {
   tunes: Tune[];
   onClose: () => void;
   onVote: VoteFn;
+  /** Shared with the main page rather than local: search is mostly a "which
+   *  book is this in?" tool, and a horn player shouldn't have to close it,
+   *  change instrument on the deck, and search again to get their edition.
+   *  Same state both places, so switching here sticks everywhere. */
+  instrument: Instrument;
+  onInstrumentChange: (id: string) => void;
 }
 
 const MAX_RESULTS = 60;
@@ -54,7 +62,13 @@ interface Hit {
 // Lookup panel — mostly a "which fake book is this tune in?" tool. Type a title
 // (or composer) and get matching tunes, each showing its fake-book refs and its
 // crowd obscurity/difficulty/hipness ratings, which you can vote on inline.
-export default function SearchPanel({ tunes, onClose, onVote }: Props) {
+export default function SearchPanel({
+  tunes,
+  onClose,
+  onVote,
+  instrument,
+  onInstrumentChange,
+}: Props) {
   const [q, setQ] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -151,6 +165,14 @@ export default function SearchPanel({ tunes, onClose, onVote }: Props) {
           <button className="search-close" onClick={onClose} aria-label="Close search">
             ✕
           </button>
+        </div>
+
+        {/* Picks which PRINTING a chart row opens, not just how keys are
+            displayed — tapping a ref with B♭ selected fetches the B♭ book.
+            Rows show a B♭/E♭ badge only where that edition really exists. */}
+        <div className="search-instrument">
+          <span className="search-instrument__label">Chart edition</span>
+          <InstrumentSelector instrument={instrument} onChange={onInstrumentChange} />
         </div>
 
         <div className="search-results">

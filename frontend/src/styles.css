@@ -1038,6 +1038,26 @@ body::after {
   padding: 6px 8px;
 }
 
+/* Instrument row under the search bar. Same chips as the deck header and the
+   same state, so switching here also switches there — it picks which PRINTING
+   a chart row opens, not just how keys read. Sits outside .search-results so
+   it stays put while the results scroll. */
+.search-instrument {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 0 0 auto;
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(246, 241, 227, 0.12);
+  background: rgba(0, 0, 0, 0.12);
+}
+.search-instrument__label {
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: rgba(246, 241, 227, 0.55);
+}
+
 .search-results {
   flex: 1 1 auto;
   overflow-y: auto;

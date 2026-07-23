@@ -442,6 +442,8 @@ export default function App() {
           tunes={tunes}
           onClose={() => setSearchOpen(false)}
           onVote={recordSearchVote}
+          instrument={instrument}
+          onInstrumentChange={setInstrument}
         />
       )}
     </div>
