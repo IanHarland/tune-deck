@@ -24,6 +24,9 @@ COPY data ./data
 # app/fakebooks.py reads them from /app/books; an empty dir just leaves the
 # reader dark (each book reports available:false).
 COPY books ./books
+# hand-made MusicXML charts (gitignored, like books/). init_db() imports them
+# on boot; an empty dir just means no chart is transposable yet.
+COPY charts ./charts
 # built frontend lands where app/web.py expects it (../frontend/dist)
 COPY --from=frontend /frontend/dist ./frontend/dist
 

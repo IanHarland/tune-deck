@@ -1,10 +1,8 @@
-import { useCallback, useEffect, useRef, useState, type ChangeEvent } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
-  deleteNotation,
   ensureNotationFont,
   fetchNotationSvg,
   getNotationMeta,
-  importMusicXml,
   notationMusicXmlUrl,
   type NotationMeta,
 } from "../core/notation";
@@ -15,9 +13,9 @@ import type { Tune } from "../core/types";
 // imported here ONCE; every key after that is a cheap re-render of that single
 // stored copy.
 //
-// Machine transcription used to live behind a button here. It was removed
-// 2026-07-23 — it got about half the melody right, which is worse than useless
-// on a stand.
+// Read-only: charts arrive by dropping a MusicXML file in the server's charts/
+// folder, not through the UI. Callers gate on hasNotation(), so the empty state
+// below is a fallback, not the normal path.
 export default function NotationSheet({
   tune,
   currentKey,
@@ -80,50 +78,6 @@ export default function NotationSheet({
     return () => ctrl.abort();
   }, [tune.id, key, meta?.transcription?.id]);
 
-  const onImport = useCallback(
-    async (e: ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0];
-      e.target.value = ""; // so picking the same file again still fires
-      if (!file) return;
-      setBusy(true);
-      setError(null);
-      try {
-        // Pin the import to the chart this panel told you to scan. Without it
-        // the server re-picks, and if the pick ever differs the file lands
-        // against a page you never opened.
-        await importMusicXml(tune.id, file, meta?.chart);
-        setSvg(null);
-        setMeta(await getNotationMeta(tune.id));
-      } catch (err) {
-        const msg = (err as Error).message;
-        setError(
-          msg === "unauthorized"
-            ? "Unlock the fake-book reader first."
-            : msg === "no-chart"
-              ? "This tune has no chart reference to attach it to."
-              : msg,
-        );
-      } finally {
-        setBusy(false);
-      }
-    },
-    [tune.id, meta?.chart],
-  );
-
-  const onDelete = useCallback(async () => {
-    setBusy(true);
-    setError(null);
-    try {
-      await deleteNotation(tune.id, meta?.chart);
-      setSvg(null);
-      setMeta(await getNotationMeta(tune.id));
-    } catch (err) {
-      setError(String((err as Error).message));
-    } finally {
-      setBusy(false);
-    }
-  }, [tune.id, meta?.chart]);
-
   return (
     <div className="notation-sheet" ref={wrap}>
       <header className="notation-head">
@@ -143,35 +97,19 @@ export default function NotationSheet({
 
       {error && <p className="notation-error">{error}</p>}
 
-      {meta && !meta.transcription && (
+      {meta && !meta.transcription && !error && (
         <div className="notation-empty">
-          <p>No notation imported for this chart yet.</p>
-          <ol className="notation-steps">
-            <li>
-              Scan{" "}
-              {meta.chart ? (
-                <strong>
-                  {meta.chart.book}, p.{meta.chart.page}
-                </strong>
-              ) : (
-                "the page"
-              )}{" "}
-              in Soundslice
-            </li>
-            <li>Fix whatever it misread, then export MusicXML</li>
-            <li>Drop the file in below</li>
-          </ol>
-          <label className={`notation-file${busy ? " is-busy" : ""}`}>
-            <input
-              type="file"
-              accept=".musicxml,.xml,.mxl,application/vnd.recordare.musicxml+xml"
-              onChange={onImport}
-              disabled={busy || !meta.chart}
-            />
-            <span>{busy ? "Checking it engraves…" : "Import MusicXML"}</span>
-          </label>
+          <p>No notation for this chart yet.</p>
           <p className="notation-note">
-            Imported once, then it transposes instantly — in every key.
+            Scan{" "}
+            {meta.chart ? (
+              <strong>
+                {meta.chart.book}, p.{meta.chart.page}
+              </strong>
+            ) : (
+              "the page"
+            )}{" "}
+            in Soundslice and drop the MusicXML into <code>charts/</code>.
           </p>
         </div>
       )}
@@ -212,18 +150,6 @@ export default function NotationSheet({
                 MusicXML
               </a>
             )}
-            <label className={`notation-file notation-file-sm${busy ? " is-busy" : ""}`}>
-              <input
-                type="file"
-                accept=".musicxml,.xml,.mxl,application/vnd.recordare.musicxml+xml"
-                onChange={onImport}
-                disabled={busy}
-              />
-              <span>{busy ? "…" : "Replace"}</span>
-            </label>
-            <button type="button" className="notation-drop" onClick={onDelete} disabled={busy}>
-              Remove
-            </button>
           </footer>
         </>
       )}

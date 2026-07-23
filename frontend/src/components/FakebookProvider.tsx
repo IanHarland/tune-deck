@@ -17,6 +17,7 @@ import {
   pageToken,
   type FakebookMeta,
 } from "../core/fakebooks";
+import { getNotationIndex } from "../core/notation";
 
 interface ChartParams {
   slug: string;
@@ -32,6 +33,10 @@ interface Ctx {
   // "" when this ref opens in concert pitch, else the transposed printing
   // ("Bb"/"Eb") the current instrument will actually get.
   editionOf: (book: string, printedPage: string | number) => string;
+  // does this tune have a stored chart — i.e. is "Read in any key" worth
+  // offering. Charts come from the server's charts/ folder, so this only ever
+  // changes on deploy (or on unlock, since the index is behind the password).
+  hasNotation: (tuneId: string) => boolean;
   openChart: (book: string, printedPage: string | number, title?: string) => void;
   // Warm the tune PDF on pointerdown so the tap opens it promptly.
   prefetchChart: (book: string, printedPage: string | number) => void;
@@ -45,6 +50,7 @@ interface Ctx {
 const FakebookCtx = createContext<Ctx>({
   canOpen: () => false,
   editionOf: () => "",
+  hasNotation: () => false,
   openChart: () => {},
   prefetchChart: () => {},
   isOpening: () => false,
@@ -97,6 +103,7 @@ export function FakebookProvider({
   const [pending, setPending] = useState<ChartParams | null>(null); // awaiting password
   const [opening, setOpening] = useState<string | null>(null); // chartKey being fetched
   const [failed, setFailed] = useState<Set<string>>(new Set()); // chartKeys that errored
+  const [notated, setNotated] = useState<Set<string>>(new Set());
   const [pw, setPw] = useState("");
   const [authErr, setAuthErr] = useState<string | null>(null);
   const [authBusy, setAuthBusy] = useState(false);
@@ -108,6 +115,25 @@ export function FakebookProvider({
       .then(setMeta)
       .catch(() => setMeta(null));
   }, []);
+
+  // The index is password-gated, so it comes back empty until unlocked — refetch
+  // when auth flips rather than leaving every transpose button hidden.
+  const authed = !!meta?.authed;
+  useEffect(() => {
+    if (!authed) {
+      setNotated(new Set());
+      return;
+    }
+    let live = true;
+    getNotationIndex()
+      .then((ids) => live && setNotated(ids))
+      .catch(() => {});
+    return () => {
+      live = false;
+    };
+  }, [authed]);
+
+  const hasNotation = useCallback((tuneId: string) => notated.has(tuneId), [notated]);
 
   const canOpen = useCallback(
     (book: string, printedPage: string | number) =>
@@ -252,7 +278,7 @@ export function FakebookProvider({
 
   return (
     <FakebookCtx.Provider
-      value={{ canOpen, editionOf, openChart, prefetchChart, isOpening, didFail }}
+      value={{ canOpen, editionOf, hasNotation, openChart, prefetchChart, isOpening, didFail }}
     >
       {children}
 

@@ -435,81 +435,24 @@ def notation_meta(tune_id: str):
         )
 
 
-MAX_MUSICXML_BYTES = 4 * 1024 * 1024  # a dense chart is ~40 KB; 4 MB is generous
+@app.get("/api/notation/tunes")
+def notation_index():
+    """Tune ids that have a chart stored, so the UI can show "Read in any key"
+    only where it will actually do something.
 
+    Charts are loaded from the charts/ folder at boot (app/chart_import.py) —
+    there is no upload endpoint. The folder is the interface: drop a corrected
+    MusicXML export in, deploy, and it appears. That also means there is nothing
+    to delete through the API; removing a chart means removing the file.
 
-@app.post("/api/chart/<tune_id>/notation")
-def notation_import(tune_id: str):
-    """Store a MusicXML chart for this tune (multipart, field `file`).
-
-    The file comes from scanning the page in Soundslice and fixing whatever the
-    scanner got wrong, so it lands `verified=True` — a human has already read it
-    against the book. Re-importing the same chart replaces it.
-
-    Machine transcription used to live here (a vision model read the scan). It
-    was removed 2026-07-23: measured against the page it got roughly half the
-    melody right, at ~$1.30 and ~11 minutes a chart, and "wrong in a way that
-    looks right" is the worst possible failure for something you read on a gig.
+    Behind the same gate as the rest of the reader, so an anonymous visitor
+    can't enumerate which charts exist.
     """
     if not session.get("fb"):
-        return jsonify(error="unauthorized"), 401
-
-    upload = request.files.get("file")
-    if upload is None:
-        return jsonify(error="no file uploaded"), 400
-    data = upload.read(MAX_MUSICXML_BYTES + 1)
-    if len(data) > MAX_MUSICXML_BYTES:
-        return jsonify(error="that file is too big to be a lead sheet"), 413
-    if not data:
-        return jsonify(error="that file is empty"), 400
-
+        return jsonify(tunes=[]), 401
     with SessionLocal() as db:
-        tune, row, chart = _transcription_for(
-            db, tune_id, request.args.get("book"), request.args.get("page"))
-        if tune is None:
-            return jsonify(error="not found"), 404
-        if chart is None:
-            return jsonify(error="no chart reference for this tune"), 404
-
-        try:
-            musicxml = notation.sanitize_musicxml(data)
-            src = notation.key_name_from_fifths(
-                notation.fifths_of(musicxml),
-                minor=notation.is_minor(tune.original_key))
-            # Prove it engraves in every key the UI will offer BEFORE storing it.
-            # Runs out-of-process: Verovio can segfault on input it dislikes, and
-            # in-process that would kill the worker mid-request.
-            notation.check_renderable(
-                musicxml,
-                [notation.interval_name(src, k) or "" for k in notation.keys_for(src)])
-        except notation.BadMusicXml as e:
-            return jsonify(error=str(e)), 422
-
-        book, page = chart
-        if row is None:
-            row = TuneTranscription(tune_id=tune_id, book=book, printed_page=page)
-            db.add(row)
-        row.musicxml = musicxml
-        row.source_key = src
-        row.model = (request.form.get("source") or "import").strip()[:64]
-        row.verified = True
-        db.commit()
-        return jsonify(transcription=row.to_dict(), cached=False)
-
-
-@app.delete("/api/chart/<tune_id>/notation")
-def notation_delete(tune_id: str):
-    """Drop a stored chart, so a better export can be imported in its place."""
-    if not session.get("fb"):
-        return jsonify(error="unauthorized"), 401
-    with SessionLocal() as db:
-        _tune, row, _chart = _transcription_for(
-            db, tune_id, request.args.get("book"), request.args.get("page"))
-        if row is None:
-            return jsonify(error="not imported yet"), 404
-        db.delete(row)
-        db.commit()
-        return jsonify(ok=True)
+        ids = db.execute(select(TuneTranscription.tune_id).distinct()).scalars().all()
+        return jsonify(tunes=list(ids))
 
 
 @app.get("/api/chart/<tune_id>/notation.svg")

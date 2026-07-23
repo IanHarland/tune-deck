@@ -209,10 +209,32 @@ Stores a chart as MusicXML so it can be read in any key (`app/notation.py`,
 `core/notation.ts`, `NotationSheet`). Same password gate as the reader — it's
 derived from the owner's own books.
 
-**Charts are imported, not generated.** The workflow is: scan the page in
-**Soundslice**, fix what the scanner misread *in their editor*, export MusicXML,
-import the file (`POST /api/chart/<id>/notation`, multipart `file`). It lands
-`verified=True` because a human already read it against the book.
+**Charts are imported from a folder, not generated and not uploaded.** Drop a
+MusicXML file in `charts/` and it becomes a transposable chart on the next
+deploy. There is deliberately **no upload UI and no write API** — the folder is
+the interface (`app/chart_import.py`, loaded idempotently from `init_db()`).
+
+The workflow: open the chart in the app (it downloads as
+`<Title> (<Book> p<Page>).pdf`) → scan that PDF in **Soundslice** → fix what the
+scanner misread *in their editor* → export MusicXML → drop it in `charts/`. The
+export keeps the base name, which is how the file finds its tune.
+- Files are matched on the **`(<Book> p<Page>)` reference, not the title** — the
+  reference is exact, whereas titles differ in spelling between index and
+  library. Title only breaks a tie. Exporter decoration (a leading timestamp, a
+  trailing `-1`) is stripped; a title with its own parens works because the
+  LAST reference in the name wins.
+- Imports land `verified=True` — the assumption is you corrected them in
+  Soundslice.
+- `charts/` is gitignored like `books/` (it holds copyrighted content) but is
+  `COPY`d into the image. `python -m app.chart_import` checks the folder locally;
+  a healthy re-run reports everything "unchanged".
+- A file whose contents already match the stored row is skipped without
+  re-vetting, so repeat boots are nearly free. A broken file is logged and
+  skipped — never fatal, because this runs during startup.
+- `GET /api/notation/tunes` (password-gated) lists which tunes have a chart, so
+  "Read in any key" appears **only where it does something** — on the result
+  card and in search. It used to be the control that STARTED a transcription, so
+  it showed everywhere; now it only reads one.
 
 - **Two automated paths were tried and both failed. Don't rebuild either
   without new evidence.**

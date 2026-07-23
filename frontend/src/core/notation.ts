@@ -1,6 +1,7 @@
-// Transposable notation client. A chart is transcribed from the owner's
-// fake-book scan once (server-side vision call), cached as MusicXML, then
-// transposed + engraved on demand — so all 12 keys come from one transcription.
+// Transposable notation client. Charts are MusicXML files the owner scanned in
+// Soundslice and corrected by hand; the server loads them from its charts/
+// folder at boot. Every key is a re-render of that one stored copy, so this
+// client only reads — there is no upload path.
 //
 // Rendering is server-side by design: Verovio's WASM build is several MB, and
 // the app deliberately dropped react-pdf for being 1.5 MB while still
@@ -15,7 +16,7 @@ export interface Transcription {
   book: string;
   printed_page: string;
   source_key: string | null; // concert key the chart is printed in
-  verified: boolean; // has a human checked it against the source page
+  verified: boolean; // has a human checked it against the printed page
   model: string | null;
   created_at: string | null;
 }
@@ -24,7 +25,7 @@ export interface NotationMeta {
   configured: boolean; // is the fake-book reader set up at all
   authed: boolean; // does the caller hold the session cookie
   chart: { book: string; page: string } | null; // which chart this would use
-  transcription: Transcription | null; // null = not transcribed yet
+  transcription: Transcription | null; // null = no chart imported for this tune
   keys: string[]; // the 12 targets, spelled for this tune's mode
 }
 
@@ -48,44 +49,15 @@ export async function getNotationMeta(
   return res.json();
 }
 
-/** Store a MusicXML export for this chart (scan the page in Soundslice, fix
- *  what it misread, export, drop the file here). The server vets it — a file it
- *  can't engrave in all 12 keys is rejected rather than stored — so a 422 here
- *  means the export is unusable, not that the upload failed.
- *  Throws "unauthorized" (401) or "no-chart" (404) for the UI to branch on. */
-export async function importMusicXml(
-  tuneId: string,
-  file: File,
-  chart?: { book: string; page: string } | null,
-  source = "soundslice",
-): Promise<{ transcription: Transcription }> {
-  const q = chartQuery(chart);
-  const body = new FormData();
-  body.append("file", file);
-  body.append("source", source);
-  const res = await fetch(`${API_BASE}/api/chart/${tuneId}/notation${q ? `?${q}` : ""}`, {
-    method: "POST",
-    body,
-  });
-  if (res.status === 401) throw new Error("unauthorized");
-  if (res.status === 404) throw new Error("no-chart");
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.error || `import failed (${res.status})`);
-  }
-  return res.json();
-}
-
-/** Drop the stored chart so a better export can replace it. */
-export async function deleteNotation(
-  tuneId: string,
-  chart?: { book: string; page: string } | null,
-): Promise<void> {
-  const q = chartQuery(chart);
-  const res = await fetch(`${API_BASE}/api/chart/${tuneId}/notation${q ? `?${q}` : ""}`, {
-    method: "DELETE",
-  });
-  if (!res.ok && res.status !== 404) throw new Error(`delete failed (${res.status})`);
+/** Tune ids that have a stored chart, so the UI shows "Read in any key" only
+ *  where it does something. Charts are loaded from the server's charts/ folder
+ *  at boot — there is no upload endpoint — so this is read-only.
+ *  Returns an empty set when the reader is locked (401). */
+export async function getNotationIndex(): Promise<Set<string>> {
+  const res = await fetch(`${API_BASE}/api/notation/tunes`);
+  if (!res.ok) return new Set();
+  const body = await res.json();
+  return new Set<string>(body.tunes ?? []);
 }
 
 /** Engraved SVG in `key`. Fetch and inline it — an <img> is an isolated

@@ -14,3 +14,8 @@ frontend/tsconfig.tsbuildinfo
 # build time (see Dockerfile). Never committed; the dir is kept via .gitkeep.
 /books/*
 !/books/.gitkeep
+
+# Hand-made MusicXML charts — copyrighted content, same as books/. Copied into
+# the image by the Dockerfile; see charts/README.md.
+charts/*
+!charts/README.md

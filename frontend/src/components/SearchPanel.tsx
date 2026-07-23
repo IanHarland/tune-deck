@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { FEEL_LABELS, type ChartRef as ChartRefT, type Feel, type Tune } from "../core/types";
 import ChartRef from "./ChartRef";
+import { useFakebook } from "./FakebookProvider";
+import NotationSheet from "./NotationSheet";
 import ScorePill from "./ScorePill";
 
 type VoteFn = (
@@ -173,6 +175,8 @@ export default function SearchPanel({ tunes, onClose, onVote }: Props) {
 // on inline (drag obscurity/difficulty; 👍/👎 for hipness).
 function SearchResult({ hit, onVote }: { hit: Hit; onVote: VoteFn }) {
   const t = hit.tune;
+  const { hasNotation } = useFakebook();
+  const [sheetOpen, setSheetOpen] = useState(false);
   const [obs, setObs] = useState(t.obscurity_score);
   const [dif, setDif] = useState(t.difficulty_score);
   // re-sync to the crowd value after a vote updates this tune
@@ -239,6 +243,25 @@ function SearchResult({ hit, onVote }: { hit: Hit; onVote: VoteFn }) {
         </ul>
       ) : (
         <span className="search-result__nochart">not in the indexed fake books</span>
+      )}
+
+      {/* Same rule as the result card: only where a chart has been imported.
+          Chart rows stay one-tap-one-action, so this is its own control. */}
+      {hasNotation(t.id) && (
+        <button
+          className="btn btn-ghost btn-notation"
+          onClick={() => setSheetOpen((v) => !v)}
+          aria-expanded={sheetOpen}
+        >
+          {sheetOpen ? "Hide notation" : "🎼 Read in any key"}
+        </button>
+      )}
+      {sheetOpen && (
+        <NotationSheet
+          tune={t}
+          currentKey={t.last_played_key ?? t.original_key ?? null}
+          onClose={() => setSheetOpen(false)}
+        />
       )}
     </li>
   );

@@ -70,6 +70,14 @@ def init_db() -> None:
         _prune_exercises(session)
         seed_hipness(session)
         _backfill_hipness(session)
+        # Hand-made MusicXML charts from charts/ (see app/chart_import.py).
+        # Imported here so the folder is the whole interface — drop a file in,
+        # deploy, and the chart is transposable. Idempotent and non-fatal:
+        # unchanged files are skipped, a broken one is logged and passed over.
+        # Local imports: chart_import pulls in verovio, which is only needed
+        # when there are charts to vet.
+        from .chart_import import load_charts
+        load_charts(session)
 
 
 def _run_migrations() -> None:

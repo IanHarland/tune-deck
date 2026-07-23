@@ -31,8 +31,11 @@ export default function ResultControls({
 
   // Notation comes from the owner's own scans, so it's offered only where the
   // fake-book reader can actually open a chart — invisible to everyone else.
-  const { canOpen } = useFakebook();
-  const canOpenAny = tune.charts.some((c) => canOpen(c.book, c.page));
+  const { hasNotation } = useFakebook();
+  // Only offered where a chart has actually been imported — the button used to
+  // be the way you STARTED a transcription, so it showed everywhere; now it
+  // just reads one, and showing it without one is a dead end.
+  const notated = hasNotation(tune.id);
 
   // reset transient state when a new tune is drawn
   useEffect(() => {
@@ -116,7 +119,7 @@ export default function ResultControls({
           </ul>
           {/* Deliberately NOT on the chart rows — those stay one-tap-one-action
               (tap = open the PDF). This is a separate control. */}
-          {canOpenAny && (
+          {notated && (
             <button
               className="btn btn-ghost btn-notation"
               onClick={() => setSheetOpen((v) => !v)}
