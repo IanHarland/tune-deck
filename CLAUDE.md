@@ -190,10 +190,24 @@ own (`app/fakebooks.py`, `/api/fakebook/*` in `web.py`, frontend
   - Verified aligned (two independent pages each, title read off the scan and
     cross-checked against charts.json): **Real Book Vol. 1** B♭ +9 / E♭ +10,
     **Vol. 2** B♭ +7 / E♭ +6, **Vol. 3** B♭ +8.
-  - **Deliberately excluded: the New Real Book B♭ editions.** They're separately
-    paginated and their offsets aren't even constant (NRB1 B♭ printed 113 = The
-    Goodbye Look, which is printed 125 in concert; NRB3 B♭ printed 297 = Smile
-    Please, printed 342 in concert). Adding them needs a B♭-specific index.
+  - **Deliberately excluded: the New Real Book B♭ editions.** Two independent
+    reasons, the second fatal:
+    1. They're separately paginated — 202 of 221 cross-checked Vol. 1 tunes sit
+       on a different printed page than in concert. A B♭ page index is required;
+       `data/newrealbook_bb_index.json` holds Vol. 1's (225 entries read off the
+       book's own alphabetical index at PDF pp.4–7, 98% cross-validated against
+       charts.json). Vols. 2–3 have the same index in the same place.
+    2. **The B♭ scans are incomplete**, which is what actually blocks this.
+       PDF→printed offset DRIFTS across each book, and an offset can only drift
+       if pages are absent. Proven directly in Vol. 1: `If I Were A Bell` starts
+       at printed 131 and the next tune is at 134, but PDF 130→printed 132 and
+       PDF 131→printed 134 — printed 133 simply isn't in the file. Measured
+       drift: Vol. 1 −12→+15, Vol. 2 −10→+25, Vol. 3 −10→+29, i.e. **at least
+       27/35/39 pages missing** (~11–13% of each book).
+    Because of (2) a constant `offset` cannot work; it needs a full
+    printed→PDF page map, and even then ~13% of charts would 404. The fix is
+    better B♭ scans, not more code. The Real Book B♭/E♭ scans do NOT have this
+    problem — their offsets are constant, which is why they shipped.
   - An edition inherits nothing from its parent — its own file and offset, and
     **no `sections`**, so Real Book Vol. 1's A1–A13 appendix resolves only in
     concert. An unstocked edition **404s rather than falling back**, and the UI
