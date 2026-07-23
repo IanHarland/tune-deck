@@ -18,15 +18,23 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 
-COPY app ./app
-COPY data ./data
+# ORDER MATTERS: least-frequently-changed first. Docker's build cache is
+# sequential, so a changed layer invalidates every layer BELOW it. books/ is
+# ~935 MB and never changes, but it used to sit after `COPY app ./app` — which
+# meant every single code deploy busted its cache and re-copied and re-hashed
+# the whole 935 MB. Keep the big immutable payload above the churn.
+#
 # private fake-book PDFs (gitignored; present only in the owner's build context).
 # app/fakebooks.py reads them from /app/books; an empty dir just leaves the
 # reader dark (each book reports available:false).
 COPY books ./books
+COPY data ./data
 # hand-made MusicXML charts (gitignored, like books/). init_db() imports them
-# on boot; an empty dir just means no chart is transposable yet.
+# on boot; an empty dir just means no chart is transposable yet. Small, but it
+# belongs above app/ so adding a chart doesn't rebuild anything expensive.
 COPY charts ./charts
+# --- everything below here changes on essentially every deploy ---
+COPY app ./app
 # built frontend lands where app/web.py expects it (../frontend/dist)
 COPY --from=frontend /frontend/dist ./frontend/dist
 
