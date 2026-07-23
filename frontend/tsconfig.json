@@ -17,5 +17,11 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src"]
+  "include": ["src"],
+  // Tests import vitest, which is a devDependency. The Dockerfile's build stage
+  // currently runs a plain `npm install` (devDeps included) so they'd resolve —
+  // but excluding them keeps `tsc -b` honest about what actually ships, and
+  // stops a future `--omit=dev` from breaking the image build. Vitest
+  // typechecks them itself via its own transform.
+  "exclude": ["src/**/__tests__/**", "src/**/*.test.ts"]
 }

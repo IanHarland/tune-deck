@@ -1,0 +1,7 @@
+# Test-only dependencies. Deliberately NOT in requirements.txt — the Dockerfile
+# installs that one, and pytest has no business in a 935 MB production image.
+#
+#   pip install -r requirements.txt -r requirements-dev.txt
+#   pytest
+-r requirements.txt
+pytest>=8.0.0

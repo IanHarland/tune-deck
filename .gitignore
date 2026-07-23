@@ -19,3 +19,7 @@ frontend/tsconfig.tsbuildinfo
 # the image by the Dockerfile; see charts/README.md.
 charts/*
 !charts/README.md
+
+# test noise
+.pytest_cache/
+tests/_sandbox/
