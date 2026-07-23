@@ -8,8 +8,11 @@ import { useFakebook } from "./FakebookProvider";
 // into forScore. A spinner shows while the page is being fetched (the extract
 // can take a few seconds cold). Otherwise it's plain, non-interactive text.
 export default function ChartRef({ chart, title }: { chart: ChartRefT; title?: string }) {
-  const { canOpen, openChart, prefetchChart, isOpening, didFail } = useFakebook();
+  const { canOpen, editionOf, openChart, prefetchChart, isOpening, didFail } = useFakebook();
   const openable = canOpen(chart.book, chart.page);
+  // "" when this opens in concert pitch. Shown as a badge so a horn player can
+  // see at a glance whether they're about to get their edition or the C one.
+  const edition = openable ? editionOf(chart.book, chart.page) : "";
   const loading = openable && isOpening(chart.book, chart.page);
   const failed = openable && !loading && didFail(chart.book, chart.page);
   const open = () => openChart(chart.book, chart.page, title);
@@ -37,7 +40,7 @@ export default function ChartRef({ chart, title }: { chart: ChartRefT; title?: s
         failed
           ? `${chart.book} has no p.${chart.page} — the index reference looks wrong`
           : openable
-            ? `Open ${chart.book} at p.${chart.page}`
+            ? `Open ${chart.book} at p.${chart.page}${edition ? ` (${edition} edition)` : ""}`
             : undefined
       }
     >
@@ -52,6 +55,9 @@ export default function ChartRef({ chart, title }: { chart: ChartRefT; title?: s
       />
       <span className="chart-book">{chart.book}</span>
       <span className="chart-page">p.{chart.page}</span>
+      {edition && (
+        <span className="chart-edition">{edition === "Bb" ? "B\u266d" : "E\u266d"}</span>
+      )}
       {openable && (
         <span className={`chart-open-hint${failed ? " chart-failed" : ""}`} aria-hidden>
           {loading ? <span className="chart-spinner" /> : failed ? "!" : "›"}

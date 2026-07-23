@@ -826,6 +826,19 @@ body::after {
   white-space: nowrap;
   margin-left: 10px;
 }
+/* which printing this row will open — only shown when it ISN'T concert pitch,
+   so its absence means "you're getting the C book". */
+.chart-edition {
+  margin-left: 6px;
+  padding: 1px 6px;
+  border: 1px solid rgba(224, 178, 74, 0.5);
+  border-radius: 999px;
+  color: var(--gold);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.5;
+  white-space: nowrap;
+}
 /* a chart that can open the tune's PDF page (whole row tappable) */
 .chart-ref.chart-open {
   cursor: pointer;
@@ -1367,6 +1380,63 @@ body::after {
   opacity: 0.55;
   cursor: default;
 }
+.notation-steps {
+  text-align: left;
+  max-width: 320px;
+  margin: 8px auto 12px;
+  padding-left: 20px;
+  color: var(--ink-soft);
+  font-size: 12px;
+  line-height: 1.7;
+}
+.notation-steps strong {
+  color: var(--cream);
+  font-weight: 600;
+}
+/* file inputs can't be styled, so the <input> is hidden inside its label */
+.notation-file {
+  display: inline-block;
+  padding: 9px 16px;
+  border-radius: 999px;
+  background: var(--burgundy);
+  color: var(--cream);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.notation-file input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+.notation-file.is-busy,
+.notation-file:has(input:disabled) {
+  opacity: 0.55;
+  cursor: default;
+}
+.notation-file-sm {
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 500;
+  background: transparent;
+  color: var(--ink-soft);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+.notation-drop {
+  padding: 3px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink-soft);
+  font-size: 11px;
+  cursor: pointer;
+}
+.notation-drop:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
 .notation-note {
   color: var(--ink-soft);
   font-size: 12px;
@@ -1380,10 +1450,14 @@ body::after {
 .notation-foot {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
+  flex-wrap: wrap;
   gap: 10px;
   margin-top: 8px;
   font-size: 11px;
+}
+.notation-warn {
+  margin-right: auto;
 }
 .notation-warn {
   color: var(--burgundy);

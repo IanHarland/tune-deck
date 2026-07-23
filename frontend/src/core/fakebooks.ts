@@ -10,6 +10,10 @@ export interface FakebookInfo {
   // Vol. 1's appendix (p.A1 = Alfie).
   offsets: Record<string, number>;
   available: boolean; // is the PDF actually uploaded
+  // Transposed printings of this same book that are on disk, keyed "Bb"/"Eb".
+  // Only present where the printing is page-aligned with the concert edition,
+  // so the concert chart index still points at the right tune.
+  editions: Record<string, { offsets: Record<string, number> }>;
 }
 
 export interface FakebookMeta {
@@ -57,8 +61,30 @@ export function canOpenPage(info: FakebookInfo | undefined, page: string | numbe
   return !!(info?.available && p && p.section in info.offsets);
 }
 
+// Which printing this ref will actually open for a player on `instrument`.
+// "" means concert pitch — either the instrument is in C (or F, for which we
+// stock no books), this book has no transposed printing, or it has one that
+// doesn't cover this page's section (Real Book Vol. 1's A-appendix). Falling
+// back is fine; silently *claiming* to be transposed would not be, so callers
+// show a badge only for a non-empty result.
+export function editionFor(
+  info: FakebookInfo | undefined,
+  page: string | number,
+  instrument: string | null | undefined,
+): string {
+  if (!info || !instrument || instrument === "C") return "";
+  const ed = info.editions?.[instrument];
+  const p = parsePageRef(page);
+  return ed && p && p.section in ed.offsets ? instrument : "";
+}
+
 // One-tune PDF (the chart's page(s), offset + multi-page span applied server-side).
 // Opened as its own page so its native share can hand it to forScore.
-export function fakebookTuneUrl(slug: string, printedPage: string | number): string {
-  return `${API_BASE}/api/fakebook/${slug}/tune-p${pageToken(printedPage)}.pdf`;
+export function fakebookTuneUrl(
+  slug: string,
+  printedPage: string | number,
+  edition = "",
+): string {
+  const q = edition ? `?edition=${encodeURIComponent(edition)}` : "";
+  return `${API_BASE}/api/fakebook/${slug}/tune-p${pageToken(printedPage)}.pdf${q}`;
 }

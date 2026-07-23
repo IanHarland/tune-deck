@@ -7,8 +7,7 @@ python-dotenv>=1.0.0
 pypdf>=4.0.0
 # Notation: engraves MusicXML -> SVG and transposes it (app/notation.py).
 verovio>=4.0.0
-# Rasterises fake-book pages to feed the vision transcriber (app/transcribe.py).
-# NOTE: PyMuPDF is AGPL-3.0 — fine for the owner's private deployment, but it
-# would need a commercial licence (or swapping to pdftoppm) to ship publicly.
-PyMuPDF>=1.24.0
-anthropic>=0.69.0
+# PyMuPDF and anthropic were dropped 2026-07-23 with the vision transcriber.
+# Charts are now imported as MusicXML from Soundslice, so nothing here
+# rasterises pages or calls an LLM — which also retires PyMuPDF's AGPL-3.0
+# licence problem (it would have needed a commercial licence to ship publicly).

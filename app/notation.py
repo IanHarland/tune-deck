@@ -1,7 +1,8 @@
 """Transpose + engrave a lead sheet.
 
-Takes the MusicXML transcription of a chart (see transcribe.py), transposes it
-to any key, and engraves it to SVG with Verovio.
+Takes a chart's MusicXML — imported from a human-reviewed Soundslice scan, see
+web.py's notation routes — transposes it to any key, and engraves it to SVG with
+Verovio.
 
 Rendering is server-side on purpose. Verovio also ships as WASM, but the browser
 build is several MB — the app deliberately dropped react-pdf for being 1.5 MB
@@ -10,9 +11,13 @@ server costs one warm round-trip (~70 ms) per key and nothing in the bundle.
 """
 from __future__ import annotations
 
+import io
 import re
+import subprocess
+import sys
 import threading
 import xml.etree.ElementTree as ET
+import zipfile
 from functools import lru_cache
 from pathlib import Path
 
@@ -82,136 +87,10 @@ def interval_name(src: str, dst: str) -> str | None:
     return f"{qual}{size}"
 
 
-# --- MusicXML assembly ------------------------------------------------- #
-# Built from the transcription JSON (see transcribe.SCHEMA) rather than asking
-# the model for XML directly: a JSON schema is guaranteed well-formed.
-
-# 12 divisions per quarter, not 4, so triplets are exact: an eighth-note triplet
-# is 4 divisions. Jazz heads are full of them and the old 4-division grid could
-# not represent one at all, which forced the transcriber to round them into
-# straight eighths (or worse, halves) and wrecked the rhythms.
-DIVISIONS = 12
-
-# duration token -> (divisions, MusicXML <type>, dots, is_triplet)
-_DUR = {
-    "16":  (3,  "16th",    0, False),
-    "16t": (2,  "16th",    0, True),
-    "8":   (6,  "eighth",  0, False),
-    "8t":  (4,  "eighth",  0, True),
-    "8.":  (9,  "eighth",  1, False),
-    "4":   (12, "quarter", 0, False),
-    "4t":  (8,  "quarter", 0, True),
-    "4.":  (18, "quarter", 1, False),
-    "2":   (24, "half",    0, False),
-    "2.":  (36, "half",    1, False),
-    "1":   (48, "whole",   0, False),
-}
-
-# MusicXML kind -> the suffix jazz players actually read.
-_KIND_TEXT = {
-    "major": "", "minor": "mi", "dominant": "7", "major-seventh": "Ma7",
-    "minor-seventh": "mi7", "half-diminished": "mi7(b5)", "diminished": "dim",
-    "augmented": "+", "major-sixth": "6", "minor-sixth": "mi6",
-    "minor-major": "mi(Ma7)", "suspended-fourth": "sus4",
-    "dominant-ninth": "9", "major-ninth": "Ma9", "minor-ninth": "mi9",
-    "dominant-13th": "13", "power": "5",
-}
-
-_ALTER = {"b": -1, "#": 1, "bb": -2, "##": 2, "": 0}
-
-
-def _esc(s: str) -> str:
-    return (s or "").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-
-
-def _note_xml(n: dict, tuplet: str | None = None) -> str:
-    """One <note>. `tuplet` is "start"/"stop"/None for triplet bracketing."""
-    dur = n.get("dur", "4")
-    if dur not in _DUR:
-        dur = "4"
-    divs, typ, dots, trip = _DUR[dur]
-    pitch = (n.get("pitch") or "r").strip()
-    tie = n.get("tie") or "none"
-    stac = bool(n.get("staccato"))
-
-    out = ["  <note>"]
-    if pitch == "r":
-        out.append("    <rest/>")
-    else:
-        step, acc, octv = pitch[0].upper(), pitch[1:-1], pitch[-1]
-        out.append("    <pitch>")
-        out.append(f"      <step>{step}</step>")
-        if _ALTER.get(acc):
-            out.append(f"      <alter>{_ALTER[acc]}</alter>")
-        out.append(f"      <octave>{octv}</octave>")
-        out.append("    </pitch>")
-    out.append(f"    <duration>{divs}</duration>")
-    if tie in ("start", "stop"):
-        out.append(f'    <tie type="{tie}"/>')
-    out.append(f"    <type>{typ}</type>")
-    out += ["    <dot/>"] * dots
-    if trip:
-        # 3 in the time of 2 — without this the durations don't add up
-        out.append("    <time-modification>"
-                   "<actual-notes>3</actual-notes><normal-notes>2</normal-notes>"
-                   "</time-modification>")
-    if tie in ("start", "stop") or stac or tuplet:
-        out.append("    <notations>")
-        if tie in ("start", "stop"):
-            out.append(f'      <tied type="{tie}"/>')
-        if tuplet:
-            out.append(f'      <tuplet type="{tuplet}"/>')
-        if stac:
-            out.append("      <articulations><staccato/></articulations>")
-        out.append("    </notations>")
-    out.append("  </note>")
-    return "\n".join(out)
-
-
-def _tuplet_marks(notes: list[dict]) -> list[str | None]:
-    """Bracket runs of consecutive triplet notes, in groups of three."""
-    marks: list[str | None] = [None] * len(notes)
-    run: list[int] = []
-
-    def flush():
-        for i in range(0, len(run) - len(run) % 3, 3):
-            marks[run[i]] = "start"
-            marks[run[i + 2]] = "stop"
-        run.clear()
-
-    for i, n in enumerate(notes):
-        if _DUR.get(n.get("dur", ""), (0, "", 0, False))[3]:
-            run.append(i)
-        else:
-            flush()
-    flush()
-    return marks
-
-
-def _harmony_xml(h: dict, beat_divs: int) -> str:
-    """One chord symbol. `beat` (1-based) positions it within the bar.
-
-    Without an <offset> every harmony in a measure renders at the barline, so
-    two chords in one bar print on top of each other — which is exactly what
-    the first production transcriptions looked like.
-    """
-    root = (h.get("root") or "C").strip()
-    kind = h.get("kind") or "major"
-    step, acc = root[0].upper(), root[1:]
-    lines = ["  <harmony>", "    <root>", f"      <root-step>{step}</root-step>"]
-    if _ALTER.get(acc):
-        lines.append(f"      <root-alter>{_ALTER[acc]}</root-alter>")
-    lines += ["    </root>",
-              f'    <kind text="{_esc(_KIND_TEXT.get(kind, ""))}">{kind}</kind>']
-    try:
-        beat = max(1, int(h.get("beat") or 1))
-    except (TypeError, ValueError):
-        beat = 1
-    if beat > 1:
-        lines.append(f"    <offset>{(beat - 1) * beat_divs}</offset>")
-    lines.append("  </harmony>")
-    return "\n".join(lines)
-
+# --- Importing a MusicXML file ------------------------------------------ #
+# Charts come from a human-reviewed scan in Soundslice, exported as MusicXML.
+# Nothing here generates notation; it only accepts, sanitises and vets a file
+# somebody else produced.
 
 # Every MusicXML file must carry this prolog — importers (Finale, Sibelius)
 # reject a file that starts at the bare <score-partwise> element.
@@ -221,44 +100,89 @@ XML_PROLOG = """<?xml version="1.0" encoding="UTF-8"?>
 """
 
 
-def build_musicxml(data: dict) -> str:
-    """Transcription JSON -> MusicXML. See transcribe.SCHEMA for the shape."""
-    fifths = max(-7, min(7, int(data.get("key_fifths", 0))))
-    beats = int(data.get("beats") or 4)
-    beat_type = int(data.get("beat_type") or 4)
-    head = XML_PROLOG + f"""<score-partwise version="4.0">
- <work><work-title>{_esc(data.get("title") or "")}</work-title></work>
- <identification><creator type="composer">{_esc(data.get("composer") or "")}</creator></identification>
- <part-list><score-part id="P1"><part-name></part-name></score-part></part-list>
- <part id="P1">"""
-    # A pickup/anacrusis is a short bar: mark it implicit and number from 0 so
-    # the bar numbering (and the engraver) treat it as an upbeat rather than a
-    # measure whose durations don't add up.
-    pickup = bool(data.get("pickup"))
-    beat_divs = int(DIVISIONS * 4 / beat_type) or DIVISIONS
+class BadMusicXml(ValueError):
+    """The upload isn't MusicXML we can use. The message is shown to the user."""
 
-    body = []
-    for i, m in enumerate(data.get("measures") or []):
-        number = i if pickup else i + 1
-        implicit = ' implicit="yes"' if (pickup and i == 0) else ""
-        body.append(f'  <measure number="{number}"{implicit}>')
-        if i == 0:
-            body.append(f"""   <attributes>
-    <divisions>{DIVISIONS}</divisions>
-    <key><fifths>{fifths}</fifths></key>
-    <time><beats>{beats}</beats><beat-type>{beat_type}</beat-type></time>
-    <clef><sign>G</sign><line>2</line></clef>
-   </attributes>""")
-        for h in (m.get("harmony") or []):
-            body.append(_harmony_xml(h, beat_divs))
-        notes = m.get("notes") or []
-        if not notes:  # never emit an empty measure — Verovio renders it as a gap
-            notes = [{"pitch": "r", "dur": "1"}]
-        marks = _tuplet_marks(notes)
-        for n, mark in zip(notes, marks):
-            body.append(_note_xml(n, mark))
-        body.append("  </measure>")
-    return head + "\n" + "\n".join(body) + "\n </part>\n</score-partwise>\n"
+
+def _unwrap_mxl(data: bytes) -> bytes:
+    """Pull the score out of a compressed .mxl (a zip). Plain XML passes through."""
+    if not data[:2] == b"PK":
+        return data
+    try:
+        with zipfile.ZipFile(io.BytesIO(data)) as z:
+            # META-INF/container.xml names the real score; fall back to the first
+            # .xml outside META-INF, which is where every exporter puts it anyway.
+            target = None
+            try:
+                container = ET.fromstring(z.read("META-INF/container.xml"))
+                el = container.find(".//rootfile")
+                if el is not None:
+                    target = el.get("full-path")
+            except (KeyError, ET.ParseError):
+                pass
+            if target is None:
+                target = next((n for n in z.namelist()
+                               if n.lower().endswith((".xml", ".musicxml"))
+                               and not n.startswith("META-INF/")), None)
+            if target is None:
+                raise BadMusicXml("that .mxl has no score inside it")
+            return z.read(target)
+    except (zipfile.BadZipFile, KeyError) as e:
+        raise BadMusicXml("couldn't read that compressed MusicXML file") from e
+
+
+def sanitize_musicxml(data: bytes) -> str:
+    """Validate an uploaded MusicXML file and return it ready to store.
+
+    Raises BadMusicXml with a message worth showing the user. Beyond the obvious
+    checks this strips clef declarations for staves the part doesn't have:
+    Opuscan emits `<clef number="2">` on a one-staff part, and that SEGFAULTS
+    Verovio's importer (measured 2026-07-22). A crash in the render path takes
+    down the whole gunicorn worker, so a malformed clef must never reach it.
+    """
+    text = _unwrap_mxl(data)
+    try:
+        root = ET.fromstring(text)
+    except ET.ParseError as e:
+        raise BadMusicXml(f"that isn't valid XML ({e})") from e
+
+    tag = root.tag.rsplit("}", 1)[-1]
+    if tag == "score-timewise":
+        raise BadMusicXml("timewise MusicXML isn't supported — export partwise")
+    if tag != "score-partwise":
+        raise BadMusicXml("that doesn't look like a MusicXML score")
+
+    for part in root.iter("part"):
+        staves = 1
+        for att in part.iter("attributes"):
+            n = att.findtext("staves")
+            if n and n.strip().isdigit():
+                staves = max(1, int(n.strip()))
+            for clef in list(att.findall("clef")):
+                num = clef.get("number")
+                if num and num.isdigit() and int(num) > staves:
+                    att.remove(clef)
+
+    if not any(True for _ in root.iter("measure")):
+        raise BadMusicXml("that file has no measures in it")
+    if not any(True for _ in root.iter("note")):
+        raise BadMusicXml("that file has no notes in it")
+
+    return XML_PROLOG + ET.tostring(root, encoding="unicode")
+
+
+def fifths_of(musicxml: str) -> int:
+    """The score's opening key signature, as a count of accidentals."""
+    try:
+        root = ET.fromstring(musicxml)
+    except ET.ParseError:
+        return 0
+    for el in root.iter("fifths"):
+        try:
+            return max(-7, min(7, int((el.text or "0").strip())))
+        except ValueError:
+            return 0
+    return 0
 
 
 # --- Transposing the MusicXML itself ------------------------------------ #
@@ -478,6 +402,55 @@ def render_svg(musicxml: str, transpose: str | None = None,
         return tk.renderToSVG(1)
 
 
+# --- Vetting an import out-of-process ----------------------------------- #
+# Verovio is a C++ extension and it CAN segfault on input it doesn't like — a
+# `<clef number="2">` on a one-staff part does it. In-process that kills the
+# gunicorn worker outright, which with -w 1 drops every concurrent request and
+# leaves the browser waiting forever on a response that will never come. That is
+# exactly the "Engraving…" hang.
+#
+# So the first render of a file we've never seen happens in a CHILD process. If
+# it dies, we learn that from an exit code instead of from an outage, and the
+# upload is rejected. Everything stored has therefore already engraved cleanly
+# in every key the UI offers, so the in-process render path only ever sees input
+# that has been proven safe.
+
+CHECK_TIMEOUT = 60  # seconds; a whole-chart render is ~10 ms per key
+
+
+def check_renderable(musicxml: str, intervals: list[str]) -> None:
+    """Render `musicxml` in every one of `intervals` in a child process.
+
+    Raises BadMusicXml if the child fails, crashes, or hangs.
+    """
+    args = [sys.executable, "-m", "app.notation", *[i or "-" for i in intervals]]
+    try:
+        proc = subprocess.run(
+            args, input=musicxml.encode(), capture_output=True,
+            timeout=CHECK_TIMEOUT,
+            cwd=str(Path(__file__).resolve().parent.parent),
+        )
+    except subprocess.TimeoutExpired as e:
+        raise BadMusicXml("that chart took too long to engrave") from e
+    if proc.returncode == 0:
+        return
+    if proc.returncode < 0:  # died on a signal — Verovio crashed on it
+        raise BadMusicXml(
+            "that file crashes the music engraver, so it can't be stored. "
+            "Re-export it (MusicXML, partwise) and try again")
+    detail = (proc.stderr or b"").decode(errors="replace").strip().splitlines()
+    raise BadMusicXml(detail[-1] if detail else "that chart couldn't be engraved")
+
+
+def _check_main(argv: list[str]) -> int:
+    """Child entry point: `python -m app.notation <interval>...`, MusicXML on
+    stdin. Deliberately does the risky work where a crash is survivable."""
+    musicxml = sys.stdin.read()
+    for arg in argv or ["-"]:
+        render_svg(musicxml, transpose=None if arg == "-" else arg)
+    return 0
+
+
 def keys_for(original_key: str | None) -> list[str]:
     """The 12 keys this tune can be transposed into, spelled per its mode.
     Matches MAJOR_KEYS / MINOR_KEYS in core/keys.ts and web.py."""
@@ -486,3 +459,7 @@ def keys_for(original_key: str | None) -> list[str]:
     if minor:
         return ["C", "C#", "D", "Eb", "E", "F", "F#", "G", "G#", "A", "Bb", "B"]
     return ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"]
+
+
+if __name__ == "__main__":  # child process for check_renderable()
+    sys.exit(_check_main(sys.argv[1:]))

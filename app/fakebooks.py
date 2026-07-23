@@ -40,11 +40,46 @@ BOOKS_DIR = Path(os.environ.get(
 # Real Book Vol. 1 has a 13-page unnumbered appendix (Alfie, Kelo, Valse Hot, …)
 # the master index cites as A1–A13; those sit at PDF 498–510, hence offset 497.
 # Same rule as the base offset: PDF_page = number + offset for that section.
+#
+# `editions` holds the B♭/E♭ transposed printings of the same book, so a horn
+# player taps the same chart ref and gets it in their key. This ONLY works
+# because those printings are page-aligned with the concert edition — the index
+# is keyed to concert printed pages, so a differently-paginated edition would
+# hand over somebody else's tune. Verified 2026-07-22, two independent pages per
+# edition (printed page rendered, title read off the scan, cross-checked against
+# charts.json):
+#     RealBk1  Bb p100 Crystal Silence, p200 Sweeping Up   -> offset 9
+#     RealBk1  Eb p100 Crystal Silence, p200 Sweeping Up   -> offset 10
+#     RealBk2  Bb p300 The Preacher,    p150 I Believe In You -> offset 7
+#     RealBk2  Eb p301 Quicksilver,     p150 I Believe In You -> offset 6
+#     RealBk3  Bb p264 Shaw Nuff,       p150 Isfahan       -> offset 8
+# The New Real Book B♭ editions exist in the library but are DELIBERATELY absent
+# here: they are separately paginated and their offsets aren't even constant
+# (NRB1 Bb printed 113 = The Goodbye Look, which is printed 125 in concert;
+# NRB3 Bb printed 297 = Smile Please, printed 342 in concert). Adding them
+# without a Bb-specific index would silently open the wrong chart.
+#
+# An edition inherits nothing from its parent: it carries its own file+offset and
+# has no `sections`, so a sectioned ref (Real Book Vol. 1's A1–A13 appendix)
+# resolves only in the concert book. Whether the transposed printings even carry
+# that appendix is unverified, and guessing an offset for it is how you hand a
+# horn player a random page.
 BOOKS: dict[str, dict] = {
     "The Real Book, Vol. 1":      {"file": "REALBK1.PDF",  "offset": 13,
-                                   "sections": {"A": 497}},
-    "The Real Book, Vol. 2":      {"file": "REALBK2.PDF",  "offset": 7},
-    "The Real Book, Vol. 3":      {"file": "REALBK3.PDF",  "offset": 5},
+                                   "sections": {"A": 497},
+                                   "editions": {
+                                       "Bb": {"file": "REALBK1_BB.PDF", "offset": 9},
+                                       "Eb": {"file": "REALBK1_EB.PDF", "offset": 10},
+                                   }},
+    "The Real Book, Vol. 2":      {"file": "REALBK2.PDF",  "offset": 7,
+                                   "editions": {
+                                       "Bb": {"file": "REALBK2_BB.PDF", "offset": 7},
+                                       "Eb": {"file": "REALBK2_EB.PDF", "offset": 6},
+                                   }},
+    "The Real Book, Vol. 3":      {"file": "REALBK3.PDF",  "offset": 5,
+                                   "editions": {
+                                       "Bb": {"file": "REALBK3_BB.PDF", "offset": 8},
+                                   }},
     "The New Real Book, Vol. 1":  {"file": "NEWREAL1.PDF", "offset": 13},
     "The New Real Book, Vol. 2":  {"file": "NEWREAL2.PDF", "offset": 12},
     "The New Real Book, Vol. 3":  {"file": "NEWREAL3.PDF", "offset": 10},
@@ -54,6 +89,17 @@ BOOKS: dict[str, dict] = {
     "The Colorado Cookbook":      {"file": "COLOBK.PDF",   "offset": 3},
     "Bill Evans Fake Book":       {"file": "EVANSBK.PDF",  "offset": 3},
 }
+
+# Instrument transpositions we stock books for. "C" means the concert edition.
+EDITIONS = ("Bb", "Eb")
+
+
+def edition_cfg(cfg: dict, edition: str | None) -> dict | None:
+    """The file+offset config for `edition`, or None if this book has no such
+    printing. Falsy / "C" gives the concert config back unchanged."""
+    if not edition or edition.upper() == "C":
+        return cfg
+    return (cfg.get("editions") or {}).get(edition)
 
 
 def slug(name: str) -> str:
@@ -74,10 +120,23 @@ def _offset_overrides() -> dict:
         return {}
 
 
-def offsets_for(name: str, cfg: dict) -> dict[str, int]:
-    """section -> page offset. "" is the main, plainly-numbered run of pages."""
-    out = {"": cfg["offset"], **cfg.get("sections", {})}
-    ov = _offset_overrides().get(slug(name))
+def offsets_for(name: str, cfg: dict, edition: str | None = None) -> dict[str, int]:
+    """section -> page offset. "" is the main, plainly-numbered run of pages.
+
+    A transposed edition is overridden under "<slug>@<edition>" (e.g.
+    "the-real-book-vol-1@Bb"), keeping its key distinct from the concert book's
+    and from the section-map shape. Empty dict if this book has no such edition.
+    """
+    ed = edition_cfg(cfg, edition)
+    if ed is None:
+        return {}
+    if ed is cfg:
+        out = {"": cfg["offset"], **cfg.get("sections", {})}
+        key = slug(name)
+    else:
+        out = {"": ed["offset"]}  # transposed printings carry no sections
+        key = f"{slug(name)}@{edition}"
+    ov = _offset_overrides().get(key)
     if isinstance(ov, (int, float)):
         out[""] = int(ov)
     elif isinstance(ov, dict):
@@ -97,19 +156,24 @@ def parse_page(token: str | int) -> tuple[str, int] | None:
     return (m.group(1).upper(), int(m.group(2))) if m else None
 
 
-def pdf_page_for(name: str, cfg: dict, token: str | int) -> int | None:
+def pdf_page_for(name: str, cfg: dict, token: str | int,
+                 edition: str | None = None) -> int | None:
     """Physical PDF page for a printed page ref, or None if this book has no
-    such page — an unknown section, or a page past the end of the scan (the
-    master index has a few refs to pages that simply aren't in the book)."""
+    such page — an unknown section, a page past the end of the scan (the master
+    index has a few refs to pages that simply aren't in the book), or no such
+    transposed edition."""
     parsed = parse_page(token)
     if not parsed:
         return None
     section, number = parsed
-    offsets = offsets_for(name, cfg)
+    ed = edition_cfg(cfg, edition)
+    if ed is None:
+        return None
+    offsets = offsets_for(name, cfg, edition)
     if section not in offsets:
         return None
     page = number + offsets[section]
-    return page if 1 <= page <= page_count(cfg) else None
+    return page if 1 <= page <= page_count(ed) else None
 
 
 # slug -> (display name, config), for the PDF route to resolve a request.
@@ -220,6 +284,13 @@ def meta() -> dict:
             "slug": slug(name),
             "offsets": offsets_for(name, cfg),
             "available": book_path(cfg).exists(),
+            # Transposed printings that are actually on disk. The client only
+            # asks for an edition listed here; everyone else gets concert pitch.
+            "editions": {
+                ed: {"offsets": offsets_for(name, cfg, ed)}
+                for ed in EDITIONS
+                if (c := edition_cfg(cfg, ed)) is not None and book_path(c).exists()
+            },
         }
         for name, cfg in BOOKS.items()
     }

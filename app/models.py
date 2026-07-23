@@ -124,12 +124,12 @@ class Tune(Base):
 
 
 class TuneTranscription(Base):
-    """A chart transcribed from a fake-book scan into MusicXML.
+    """A chart imported as MusicXML, scanned from a fake-book page.
 
-    Cached because producing one is expensive (a vision API call, seconds and
-    real money) and immutable once verified — the printed page never changes.
-    Transposition is applied at render time from this single stored copy, so
-    all 12 keys come from one transcription.
+    Stored because producing one is manual work (scan the page in Soundslice,
+    correct what the scanner misread, export) and immutable afterwards — the
+    printed page never changes. Transposition is applied at render time from
+    this single stored copy, so all 12 keys come from one import.
 
     Keyed by (tune, book, page) rather than by tune alone: the same tune is
     often in several books with different arrangements, and the owner may
@@ -153,12 +153,15 @@ class TuneTranscription(Base):
     # signature. Transposition intervals are computed relative to this.
     source_key = Column(Text, nullable=True)
 
-    # The transcription is a machine reading of a scan and can be wrong. Until
-    # a human has eyeballed it against the source page it stays unverified, and
-    # the UI says so. See CLAUDE.md.
+    # An import is corrected by hand in Soundslice before it's exported, so it
+    # arrives verified. Kept as a column because the flag is what the UI trusts:
+    # anything that ever lands here unchecked must say so. See CLAUDE.md.
     verified = Column(Boolean, nullable=False, default=False)
 
-    model = Column(Text, nullable=True)  # which model produced it
+    # What produced the file — "soundslice", "opuscan", … Named `model` from the
+    # days when a vision model wrote it; kept rather than renamed because the
+    # column is free-text either way and a rename buys nothing.
+    model = Column(Text, nullable=True)
     created_at = Column(DateTime(timezone=True), default=_now)
     updated_at = Column(DateTime(timezone=True), default=_now, onupdate=_now)
 

@@ -300,26 +300,40 @@ def fakebook_tune_page(slug: str, printed: str):
     """A one-tune PDF: the pages starting at PRINTED page `printed` (offset +
     span both applied server-side), for handing a single chart to forScore. Small
     enough to skip Range. `printed` is the page as the book prints it, so it may
-    carry a section letter ("A1" = Real Book Vol. 1's appendix)."""
+    carry a section letter ("A1" = Real Book Vol. 1's appendix).
+
+    ?edition=Bb|Eb serves the transposed printing of the same book instead. The
+    printed page ref is unchanged — those editions are page-aligned with the
+    concert one, which is the only reason this is safe (see fakebooks.BOOKS).
+    An edition this book doesn't stock 404s rather than falling back, so a horn
+    player never gets concert pitch while believing they asked for B♭.
+    """
     if not session.get("fb"):
         return jsonify(error="unauthorized"), 401
     found = fakebooks.book_for_slug(slug)
     if not found:
         return jsonify(error="unknown book"), 404
     name, cfg = found
-    if not fakebooks.book_path(cfg).exists():
+    edition = (request.args.get("edition") or "").strip() or None
+    ed_cfg = fakebooks.edition_cfg(cfg, edition)
+    if ed_cfg is None:
+        return jsonify(error=f"no {edition} edition of this book"), 404
+    if not fakebooks.book_path(ed_cfg).exists():
         return jsonify(error="book unavailable"), 404
     # 404 rather than clamp: a ref the book can't satisfy (bad index page number,
     # unknown section) must fail visibly, not quietly hand over the wrong chart.
-    start = fakebooks.pdf_page_for(name, cfg, printed)
+    start = fakebooks.pdf_page_for(name, cfg, printed, edition)
     if start is None:
         return jsonify(error="no such page in this book"), 404
+    # Span comes from the concert index; the transposed printings share its
+    # pagination, so the same tune occupies the same run of printed pages.
     span = fakebooks.span_for(name, printed)
-    data = fakebooks.extract_pages(cfg, start, span)
+    data = fakebooks.extract_pages(ed_cfg, start, span)
+    suffix = f"-{edition}" if ed_cfg is not cfg else ""
     resp = send_file(
         io.BytesIO(data),
         mimetype="application/pdf",
-        download_name=f"{fakebooks.slug(name)}-p{printed}.pdf",
+        download_name=f"{fakebooks.slug(name)}-p{printed}{suffix}.pdf",
     )
     resp.headers["Cache-Control"] = "private, max-age=3600"
     return resp
@@ -329,14 +343,15 @@ def fakebook_tune_page(slug: str, printed: str):
 # Static SPA (built by Vite into frontend/dist)
 # --------------------------------------------------------------------------- #
 # --- Transposable notation ---------------------------------------------- #
-# A chart is transcribed from the owner's fake-book scan ONCE (vision model, see
-# app/transcribe.py), cached as MusicXML, then transposed + engraved on demand.
-# Same gate as the fake-book reader: this is derived from the owner's own books,
-# so it never leaves the authed session.
+# A chart is imported ONCE as MusicXML (scanned in Soundslice and corrected by
+# hand, see notation_import), then transposed + engraved on demand — so all 12
+# keys come from that single stored copy. Same gate as the fake-book reader:
+# this is derived from the owner's own books, so it never leaves the authed
+# session.
 
 
 def _pick_chart(tune: Tune, book: str | None, page: str | None) -> tuple[str, str] | None:
-    """Which chart to transcribe: the requested one, else the first whose book
+    """Which chart this is notation for: the requested one, else the first whose book
     is actually present and whose page we can locate."""
     charts = tune.charts or []
     for c in charts:
@@ -362,7 +377,7 @@ def _transcription_for(session, tune_id: str, book: str | None, page: str | None
     With no explicit book/page, an EXISTING transcription wins over the
     first-available chart. A tune is typically in several books, and
     _pick_chart's order comes from the seed, not from preference — without this
-    a tune transcribed from one book would report "not transcribed" because the
+    a tune imported from one book would report "not imported" because the
     picker happened to land on a different one.
     """
     tune = session.get(Tune, tune_id)
@@ -405,7 +420,7 @@ def notation_font():
 
 @app.get("/api/chart/<tune_id>/notation")
 def notation_meta(tune_id: str):
-    """Has this tune been transcribed, and into which keys can it go?"""
+    """Has a chart been imported for this tune, and into which keys can it go?"""
     with SessionLocal() as db:
         tune, row, chart = _transcription_for(
             db, tune_id, request.args.get("book"), request.args.get("page"))
@@ -420,49 +435,81 @@ def notation_meta(tune_id: str):
         )
 
 
+MAX_MUSICXML_BYTES = 4 * 1024 * 1024  # a dense chart is ~40 KB; 4 MB is generous
+
+
 @app.post("/api/chart/<tune_id>/notation")
-def notation_transcribe(tune_id: str):
-    """Transcribe this tune's chart from the scan and cache it. Expensive (a
-    vision call over the page images), so it's a no-op when one already exists
-    unless ?force=1."""
+def notation_import(tune_id: str):
+    """Store a MusicXML chart for this tune (multipart, field `file`).
+
+    The file comes from scanning the page in Soundslice and fixing whatever the
+    scanner got wrong, so it lands `verified=True` — a human has already read it
+    against the book. Re-importing the same chart replaces it.
+
+    Machine transcription used to live here (a vision model read the scan). It
+    was removed 2026-07-23: measured against the page it got roughly half the
+    melody right, at ~$1.30 and ~11 minutes a chart, and "wrong in a way that
+    looks right" is the worst possible failure for something you read on a gig.
+    """
     if not session.get("fb"):
         return jsonify(error="unauthorized"), 401
+
+    upload = request.files.get("file")
+    if upload is None:
+        return jsonify(error="no file uploaded"), 400
+    data = upload.read(MAX_MUSICXML_BYTES + 1)
+    if len(data) > MAX_MUSICXML_BYTES:
+        return jsonify(error="that file is too big to be a lead sheet"), 413
+    if not data:
+        return jsonify(error="that file is empty"), 400
+
     with SessionLocal() as db:
         tune, row, chart = _transcription_for(
             db, tune_id, request.args.get("book"), request.args.get("page"))
         if tune is None:
             return jsonify(error="not found"), 404
         if chart is None:
-            return jsonify(error="no readable chart for this tune"), 404
-        if row is not None and request.args.get("force") != "1":
-            return jsonify(transcription=row.to_dict(), cached=True)
+            return jsonify(error="no chart reference for this tune"), 404
 
-        from . import transcribe as tx  # heavy (anthropic + PyMuPDF); import on use
+        try:
+            musicxml = notation.sanitize_musicxml(data)
+            src = notation.key_name_from_fifths(
+                notation.fifths_of(musicxml),
+                minor=notation.is_minor(tune.original_key))
+            # Prove it engraves in every key the UI will offer BEFORE storing it.
+            # Runs out-of-process: Verovio can segfault on input it dislikes, and
+            # in-process that would kill the worker mid-request.
+            notation.check_renderable(
+                musicxml,
+                [notation.interval_name(src, k) or "" for k in notation.keys_for(src)])
+        except notation.BadMusicXml as e:
+            return jsonify(error=str(e)), 422
 
         book, page = chart
-        _name, cfg = fakebooks.book_for_slug(fakebooks.slug(book))
-        try:
-            images = tx.render_pages(book, cfg, page)
-            data = tx.transcribe(images, tune.title, tune.composer)
-        except tx.NotConfigured as e:
-            return jsonify(error=str(e)), 503
-        except RuntimeError as e:
-            return jsonify(error=str(e)), 502
-        except (ValueError, KeyError) as e:
-            return jsonify(error=f"could not transcribe this chart: {e}"), 422
-
-        musicxml = notation.build_musicxml(data)
-        src = notation.key_name_from_fifths(data.get("key_fifths", 0),
-                                            minor=notation.is_minor(tune.original_key))
         if row is None:
             row = TuneTranscription(tune_id=tune_id, book=book, printed_page=page)
             db.add(row)
         row.musicxml = musicxml
         row.source_key = src
-        row.model = tx.MODEL
-        row.verified = False  # a fresh machine reading is unverified by definition
+        row.model = (request.form.get("source") or "import").strip()[:64]
+        row.verified = True
         db.commit()
         return jsonify(transcription=row.to_dict(), cached=False)
+
+
+@app.delete("/api/chart/<tune_id>/notation")
+def notation_delete(tune_id: str):
+    """Drop a stored chart, so a better export can be imported in its place."""
+    if not session.get("fb"):
+        return jsonify(error="unauthorized"), 401
+    with SessionLocal() as db:
+        _tune, row, _chart = _transcription_for(
+            db, tune_id, request.args.get("book"), request.args.get("page"))
+        if row is None:
+            return jsonify(error="not imported yet"), 404
+        db.delete(row)
+        db.commit()
+        return jsonify(ok=True)
 
 
 @app.get("/api/chart/<tune_id>/notation.svg")
@@ -478,7 +525,7 @@ def notation_svg(tune_id: str):
         _tune, row, _chart = _transcription_for(
             db, tune_id, request.args.get("book"), request.args.get("page"))
         if row is None:
-            return jsonify(error="not transcribed yet"), 404
+            return jsonify(error="not imported yet"), 404
         target = (request.args.get("key") or "").strip() or row.source_key
         interval = notation.interval_name(row.source_key or "C", target or "C")
         if interval is None:
@@ -488,8 +535,8 @@ def notation_svg(tune_id: str):
         except ValueError as e:
             return jsonify(error=str(e)), 500
         resp = app.response_class(svg, mimetype="image/svg+xml")
-        # Varies only with (transcription revision, key, width); a re-transcribe
-        # bumps updated_at, so the ETag tracks the content it describes.
+        # Varies only with (stored revision, key, width); a re-import bumps
+        # updated_at, so the ETag tracks the content it describes.
         stamp = int(row.updated_at.timestamp()) if row.updated_at else 0
         resp.headers["ETag"] = f'W/"{row.id}-{stamp}-{target}-{width}"'
         resp.headers["Cache-Control"] = "private, max-age=86400"
@@ -505,7 +552,7 @@ def notation_musicxml(tune_id: str):
         tune, row, _chart = _transcription_for(
             db, tune_id, request.args.get("book"), request.args.get("page"))
         if row is None:
-            return jsonify(error="not transcribed yet"), 404
+            return jsonify(error="not imported yet"), 404
         target = (request.args.get("key") or "").strip() or row.source_key
         interval = notation.interval_name(row.source_key or "C", target or "C")
         if interval is None:

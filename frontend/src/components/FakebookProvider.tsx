@@ -11,6 +11,7 @@ import {
 import {
   authFakebook,
   canOpenPage,
+  editionFor,
   fakebookTuneUrl,
   getFakebookMeta,
   pageToken,
@@ -21,12 +22,16 @@ interface ChartParams {
   slug: string;
   book: string;
   page: string; // printed page as the book prints it — "288" or "A1"
+  edition: string; // "" = concert, else "Bb"/"Eb" — the printing to open
   title?: string;
 }
 
 interface Ctx {
   // configured + PDF present + this page is one we can locate in that PDF
   canOpen: (book: string, printedPage: string | number) => boolean;
+  // "" when this ref opens in concert pitch, else the transposed printing
+  // ("Bb"/"Eb") the current instrument will actually get.
+  editionOf: (book: string, printedPage: string | number) => string;
   openChart: (book: string, printedPage: string | number, title?: string) => void;
   // Warm the tune PDF on pointerdown so the tap opens it promptly.
   prefetchChart: (book: string, printedPage: string | number) => void;
@@ -39,6 +44,7 @@ interface Ctx {
 
 const FakebookCtx = createContext<Ctx>({
   canOpen: () => false,
+  editionOf: () => "",
   openChart: () => {},
   prefetchChart: () => {},
   isOpening: () => false,
@@ -51,7 +57,10 @@ export const useFakebook = () => useContext(FakebookCtx);
 const cleanName = (s: string) =>
   (s || "").replace(/[/\\:*?"<>|]+/g, " ").replace(/\s+/g, " ").trim();
 
-const chartKey = (slug: string, page: string) => `${slug}:${page}`;
+// The edition belongs in the key: the same book+page in B♭ and in concert are
+// different PDFs, and without it the first one fetched would be served for both.
+const chartKey = (slug: string, page: string, edition = "") =>
+  `${slug}:${page}${edition ? `:${edition}` : ""}`;
 
 // Open one tune's page(s) as its own PDF so the OS renders it in a Safari view
 // (SFSafariViewController on iOS). That view's Share button is a document-
@@ -75,7 +84,15 @@ function openPdfBlob(blob: Blob, filename: string) {
 // once (year-long cookie), then opens. The chart opens as a standalone PDF page
 // you can share straight into forScore. Invisible unless the feature is
 // configured and the book's PDF is present.
-export function FakebookProvider({ children }: { children: ReactNode }) {
+export function FakebookProvider({
+  children,
+  edition = "C",
+}: {
+  children: ReactNode;
+  /** The player's instrument ("C" | "Bb" | "Eb" | "F"). Books exist only for
+   *  some of these on some titles; anything unstocked opens in concert. */
+  edition?: string;
+}) {
   const [meta, setMeta] = useState<FakebookMeta | null>(null);
   const [pending, setPending] = useState<ChartParams | null>(null); // awaiting password
   const [opening, setOpening] = useState<string | null>(null); // chartKey being fetched
@@ -98,13 +115,19 @@ export function FakebookProvider({ children }: { children: ReactNode }) {
     [meta],
   );
 
+  const editionOf = useCallback(
+    (book: string, printedPage: string | number) =>
+      editionFor(meta?.books[book], printedPage, edition),
+    [meta, edition],
+  );
+
   // start (and cache) the tune-PDF fetch; a rejected fetch is evicted so a later
   // tap can retry. 401 rejects too — the tap then falls into the password path.
-  const fetchTune = useCallback((slug: string, page: string): Promise<Blob> => {
-    const key = chartKey(slug, page);
+  const fetchTune = useCallback((slug: string, page: string, ed: string): Promise<Blob> => {
+    const key = chartKey(slug, page, ed);
     let p = fsCache.current.get(key);
     if (!p) {
-      p = fetch(fakebookTuneUrl(slug, page)).then((res) => {
+      p = fetch(fakebookTuneUrl(slug, page, ed)).then((res) => {
         if (!res.ok) throw new Error(res.status === 401 ? "unauthorized" : String(res.status));
         return res.blob();
       });
@@ -121,28 +144,28 @@ export function FakebookProvider({ children }: { children: ReactNode }) {
       const info = meta?.books[book];
       const page = pageToken(printedPage);
       if (!meta?.configured || !info || !page || !canOpenPage(info, page)) return null;
-      return { slug: info.slug, book, page, title };
+      return { slug: info.slug, book, page, edition: editionFor(info, page, edition), title };
     },
-    [meta],
+    [meta, edition],
   );
 
   const prefetchChart = useCallback(
     (book: string, printedPage: string | number) => {
       const p = resolve(book, printedPage);
       if (!p || !meta?.authed) return;
-      fetchTune(p.slug, p.page).catch(() => {}); // swallow — real errors surface on tap
+      fetchTune(p.slug, p.page, p.edition).catch(() => {}); // swallow — real errors surface on tap
     },
     [meta, resolve, fetchTune],
   );
 
   const openTunePdf = useCallback(
     async (p: ChartParams) => {
-      const key = chartKey(p.slug, p.page);
+      const key = chartKey(p.slug, p.page, p.edition);
       setOpening(key);
       setFailed((f) => (f.has(key) ? new Set([...f].filter((k) => k !== key)) : f));
       let blob: Blob;
       try {
-        blob = await fetchTune(p.slug, p.page);
+        blob = await fetchTune(p.slug, p.page, p.edition);
       } catch (e) {
         setOpening(null);
         if ((e as Error).message === "unauthorized") {
@@ -155,7 +178,8 @@ export function FakebookProvider({ children }: { children: ReactNode }) {
         }
         return; // couldn't fetch the page — nothing to open
       }
-      const fname = `${cleanName(p.title || p.book)} (${cleanName(p.book)} p${p.page}).pdf`;
+      const suffix = p.edition ? ` ${p.edition}` : "";
+      const fname = `${cleanName(p.title || p.book)} (${cleanName(p.book)} p${p.page}${suffix}).pdf`;
       openPdfBlob(blob, fname);
       setOpening(null);
     },
@@ -176,9 +200,9 @@ export function FakebookProvider({ children }: { children: ReactNode }) {
     (book: string, printedPage: string | number) => {
       const info = meta?.books[book];
       const page = pageToken(printedPage);
-      return info && page ? chartKey(info.slug, page) : null;
+      return info && page ? chartKey(info.slug, page, editionFor(info, page, edition)) : null;
     },
-    [meta],
+    [meta, edition],
   );
 
   const isOpening = useCallback(
@@ -227,7 +251,9 @@ export function FakebookProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <FakebookCtx.Provider value={{ canOpen, openChart, prefetchChart, isOpening, didFail }}>
+    <FakebookCtx.Provider
+      value={{ canOpen, editionOf, openChart, prefetchChart, isOpening, didFail }}
+    >
       {children}
 
       {pending && (

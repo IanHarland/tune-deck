@@ -48,24 +48,44 @@ export async function getNotationMeta(
   return res.json();
 }
 
-/** Transcribe the chart and cache it. Slow — a vision call over the page
- *  images — so callers should show progress. Throws "unauthorized" (401) or
- *  "no-chart" (404) for the UI to branch on. */
-export async function transcribeChart(
+/** Store a MusicXML export for this chart (scan the page in Soundslice, fix
+ *  what it misread, export, drop the file here). The server vets it — a file it
+ *  can't engrave in all 12 keys is rejected rather than stored — so a 422 here
+ *  means the export is unusable, not that the upload failed.
+ *  Throws "unauthorized" (401) or "no-chart" (404) for the UI to branch on. */
+export async function importMusicXml(
   tuneId: string,
+  file: File,
   chart?: { book: string; page: string } | null,
-): Promise<{ transcription: Transcription; cached: boolean }> {
+  source = "soundslice",
+): Promise<{ transcription: Transcription }> {
   const q = chartQuery(chart);
+  const body = new FormData();
+  body.append("file", file);
+  body.append("source", source);
   const res = await fetch(`${API_BASE}/api/chart/${tuneId}/notation${q ? `?${q}` : ""}`, {
     method: "POST",
+    body,
   });
   if (res.status === 401) throw new Error("unauthorized");
   if (res.status === 404) throw new Error("no-chart");
   if (!res.ok) {
-    const body = await res.json().catch(() => ({}));
-    throw new Error(body.error || `transcribe ${res.status}`);
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || `import failed (${res.status})`);
   }
   return res.json();
+}
+
+/** Drop the stored chart so a better export can replace it. */
+export async function deleteNotation(
+  tuneId: string,
+  chart?: { book: string; page: string } | null,
+): Promise<void> {
+  const q = chartQuery(chart);
+  const res = await fetch(`${API_BASE}/api/chart/${tuneId}/notation${q ? `?${q}` : ""}`, {
+    method: "DELETE",
+  });
+  if (!res.ok && res.status !== 404) throw new Error(`delete failed (${res.status})`);
 }
 
 /** Engraved SVG in `key`. Fetch and inline it — an <img> is an isolated
@@ -79,14 +99,38 @@ export function notationMusicXmlUrl(tuneId: string, key: string): string {
   return `${API_BASE}/api/chart/${tuneId}/notation.musicxml?key=${encodeURIComponent(key)}`;
 }
 
+/** A render is ~70 ms warm and a few seconds on a cold machine; anything past
+ *  this is a request that is never coming back. Without a deadline the UI sat
+ *  on "Engraving…" indefinitely — which is precisely what a server-side crash
+ *  looked like from the outside, with nothing on screen to say so. */
+export const SVG_TIMEOUT_MS = 30_000;
+
 export async function fetchNotationSvg(
   tuneId: string,
   key: string,
   width = 2100,
+  signal?: AbortSignal,
 ): Promise<string> {
-  const res = await fetch(notationSvgUrl(tuneId, key, width));
-  if (!res.ok) throw new Error(`notation svg ${res.status}`);
-  return res.text();
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), SVG_TIMEOUT_MS);
+  const onAbort = () => ctrl.abort();
+  signal?.addEventListener("abort", onAbort);
+  try {
+    const res = await fetch(notationSvgUrl(tuneId, key, width), { signal: ctrl.signal });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || `couldn't engrave this key (${res.status})`);
+    }
+    return await res.text();
+  } catch (e) {
+    if ((e as Error).name === "AbortError" && !signal?.aborted) {
+      throw new Error("the server didn't come back — try again");
+    }
+    throw e;
+  } finally {
+    clearTimeout(timer);
+    signal?.removeEventListener("abort", onAbort);
+  }
 }
 
 /** Inject the music font stylesheet once per document. */

@@ -329,7 +329,7 @@ export default function App() {
   }
 
   return (
-    <FakebookProvider>
+    <FakebookProvider edition={instrument.id}>
     <div className="app">
       <header className="app-header">
         <h1 className="logo">

@@ -181,25 +181,74 @@ own (`app/fakebooks.py`, `/api/fakebook/*` in `web.py`, frontend
   `slug()` matches build_covers.py / `coverSlug`. (`GET /api/fakebook/<slug>.pdf`,
   the Range-capable full-book route, still exists server-side but is no longer used
   by the UI.)
+- **B♭/E♭ editions** (`BOOKS[...]["editions"]`, `?edition=Bb`): the instrument
+  selector in the header now picks which *printing* a chart ref opens, so a horn
+  player taps the same row and gets their transposition. This works **only
+  because those printings are page-aligned with the concert edition** — the
+  chart index is keyed to concert printed pages, so a differently-paginated
+  edition would hand over a different tune entirely.
+  - Verified aligned (two independent pages each, title read off the scan and
+    cross-checked against charts.json): **Real Book Vol. 1** B♭ +9 / E♭ +10,
+    **Vol. 2** B♭ +7 / E♭ +6, **Vol. 3** B♭ +8.
+  - **Deliberately excluded: the New Real Book B♭ editions.** They're separately
+    paginated and their offsets aren't even constant (NRB1 B♭ printed 113 = The
+    Goodbye Look, which is printed 125 in concert; NRB3 B♭ printed 297 = Smile
+    Please, printed 342 in concert). Adding them needs a B♭-specific index.
+  - An edition inherits nothing from its parent — its own file and offset, and
+    **no `sections`**, so Real Book Vol. 1's A1–A13 appendix resolves only in
+    concert. An unstocked edition **404s rather than falling back**, and the UI
+    shows a B♭/E♭ badge on the row only when it will really open transposed; no
+    badge means concert pitch.
+  - Offsets override via `FAKEBOOK_OFFSETS` under `"<slug>@Bb"` — a separate key
+    from the concert book's, so it can't collide with the section-map shape.
+  - Costs ~340 MB of image (books/ went 598 MB → 935 MB); the B♭ Real Book Vol. 1
+    scan alone is 172 MB.
 
 ### Transposable notation (read any chart in any key)
-Turns a fake-book scan into editable notation so a chart can be read in any key
-(`app/notation.py`, `app/transcribe.py`, `core/notation.ts`, `NotationSheet`).
-Same password gate as the reader — it's derived from the owner's own books.
+Stores a chart as MusicXML so it can be read in any key (`app/notation.py`,
+`core/notation.ts`, `NotationSheet`). Same password gate as the reader — it's
+derived from the owner's own books.
 
-- **Classical OMR was tried and rejected.** Measured 2026-07-22 on the real
-  scans: `oemer` took ~4 min/page and returned the wrong key signature (1 sharp
-  for a 3-flat chart), no time signature, no chords, and garbage pitches;
-  Audiveris has **no chord-symbol support at all** (its issue #243, open since
-  2019), which disqualifies it for lead sheets. Don't re-litigate this without
-  new evidence — `books/*.PDF` are pure image scans (0 embedded text chars).
-- **A vision model does the transcription** (`transcribe.py`, Opus 4.8, adaptive
-  thinking). It returns a **constrained JSON note-list via structured outputs**,
-  never raw XML — a JSON schema is guaranteed well-formed; model-written XML is
-  not. `notation.build_musicxml()` turns that into MusicXML.
-- **Transcribe once, transpose forever.** The MusicXML is cached in
+**Charts are imported, not generated.** The workflow is: scan the page in
+**Soundslice**, fix what the scanner misread *in their editor*, export MusicXML,
+import the file (`POST /api/chart/<id>/notation`, multipart `file`). It lands
+`verified=True` because a human already read it against the book.
+
+- **Two automated paths were tried and both failed. Don't rebuild either
+  without new evidence.**
+  - *Classical OMR* (2026-07-22): `oemer` took ~4 min/page and got the key
+    signature wrong (1 sharp for a 3-flat chart), no time signature, no chords,
+    garbage pitches. Audiveris has **no chord-symbol support at all** (issue
+    #243, open since 2019) — disqualifying for lead sheets. `books/*.PDF` are
+    pure image scans (0 embedded text chars), so there's no text to shortcut to.
+  - *Vision-model transcription* (2026-07-23, removed): got the chords right and
+    roughly **half the melody**, at ~$1.30 and ~11 min per chart. Chords are ~30
+    printed strings; a melody is ~400 notes that must each be right, and at 95%
+    per-note accuracy that's still ~20 wrong notes a chart. Its failure mode was
+    the dangerous one — plausible-looking notation that isn't the tune.
+  - Soundslice's scanner is purpose-built ML and lands ~99%, but it has **no
+    scanning API** (their data API only accepts MusicXML *uploads*), so the scan
+    step is manual by necessity. At $5/mo for 100 pages that's ~5¢ a chart
+    against $1.30, so manual is also the cheap option.
+  - Flat/Opuscan *does* have an OMR API (~€0.33/page) if an automated path is
+    ever wanted, but its export was measurably worse: on Autumn Leaves it
+    dropped 8 of 33 bars and picked up parenthesised reharms as real changes.
+- **Import once, transpose forever.** The MusicXML is stored in
   `tune_transcriptions` (unique per tune+book+page). Every key is a re-render of
-  that one row, so the expensive step happens once per chart.
+  that one row. The client pins the import to the chart the panel displayed
+  (`?book=&page=`) so the file can't attach to a page you never opened.
+- **Verovio can SEGFAULT on MusicXML it dislikes** — a `<clef number="2">` on a
+  one-staff part does it (Opuscan emits exactly that). In-process that kills the
+  gunicorn worker, and with `-w 1` every in-flight request dies with it: the
+  browser then waits forever on a response that never comes, which is what the
+  endless "Engraving…" was. So:
+  - `sanitize_musicxml()` strips clefs for staves the part doesn't declare, and
+  - `check_renderable()` renders the file **in a child process, in all 12 keys**,
+    before anything is stored. A crash there is an exit code, not an outage.
+  - Anything in the DB has therefore already engraved cleanly in every key, so
+    the in-process render path only ever sees input proven safe. Keep it that way.
+  - The client also puts a 30 s deadline on the SVG fetch, so a hang shows an
+    error rather than an eternal spinner.
 - **Rendering is server-side, deliberately.** Verovio also ships as WASM, but
   it's several MB and we dropped react-pdf for being 1.5 MB while still
   supporting iPadOS 14 Safari. The bundle is unchanged; a warm render is ~70 ms.
@@ -213,13 +262,8 @@ Same password gate as the reader — it's derived from the owner's own books.
   (Verovio can only export MEI). Both are cross-checked in testing.
 - `verovio.toolkit().setOptions()` **merges** — an absent `transpose` must be
   cleared explicitly or the previous render's interval silently persists.
-- A transcription is a machine reading of a scan: it starts `verified=False` and
-  the UI says so. Assume it needs checking against the book.
-- Needs the `ANTHROPIC_API_KEY` secret set on Fly. Without it, transcription
-  fails but everything else (including already-transcribed charts) still works.
-- **PyMuPDF (rasterises the page for the vision call) is AGPL-3.0.** Fine for a
-  private deployment; going public means a commercial licence or swapping to
-  pdftoppm.
+- `source_key` is derived from the file's own key signature plus the tune's
+  mode, so a G-minor chart with a 2-flat signature stores `G-`, not `Bb`.
 
 ### Scores (obscurity / difficulty, 0–100)
 Not present in iReal data. Seeded by `scripts/canon.mjs` (tiered repertoire built
