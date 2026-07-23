@@ -16,6 +16,7 @@ import io
 import json
 import os
 import re
+from contextlib import contextmanager
 from pathlib import Path
 
 from pypdf import PdfReader, PdfWriter
@@ -248,12 +249,32 @@ def span_for(book_name: str, token: str | int) -> int:
 _PAGE_COUNTS: dict[str, int] = {}
 
 
+@contextmanager
+def _open_book(cfg: dict):
+    """A PdfReader that reads the scan lazily.
+
+    ALWAYS hand pypdf an open file object, never a path. Given a path,
+    `PdfReader._initialize_stream` does `BytesIO(fh.read())` — it slurps the
+    ENTIRE book into memory. On the 180 MB B♭ Real Book Vol. 1 that cost 208 MB
+    of RSS to emit a 0.7 MB chart, which OOM-killed the 512 MB machine
+    (`Killed process ... (gunicorn)`) and reached the browser as a 502 after ~44 s
+    of thrashing. Given a file object pypdf seeks on demand instead: same bytes
+    out, 37 MB peak.
+
+    The handle has to stay open for as long as the reader is used — that's what
+    lazy means — hence the context manager rather than a bare helper.
+    """
+    with open(book_path(cfg), "rb") as fh:
+        yield PdfReader(fh)
+
+
 def page_count(cfg: dict) -> int:
     """Physical pages in the scan (cached — reopening a 500 MB PDF isn't free)."""
     key = cfg["file"]
     if key not in _PAGE_COUNTS:
         try:
-            _PAGE_COUNTS[key] = len(PdfReader(str(book_path(cfg))).pages)
+            with _open_book(cfg) as reader:
+                _PAGE_COUNTS[key] = len(reader.pages)
         except (OSError, ValueError):
             return 0
     return _PAGE_COUNTS[key]
@@ -262,16 +283,16 @@ def page_count(cfg: dict) -> int:
 def extract_pages(cfg: dict, start_1based: int, count: int) -> bytes:
     """A small PDF of `count` physical pages starting at `start_1based` — one
     tune's chart, for handing to forScore etc."""
-    reader = PdfReader(str(book_path(cfg)))
-    n = len(reader.pages)
-    start = max(0, min(n - 1, start_1based - 1))
-    end = min(n, start + max(1, count))
-    writer = PdfWriter()
-    for i in range(start, end):
-        writer.add_page(reader.pages[i])
-    buf = io.BytesIO()
-    writer.write(buf)
-    return buf.getvalue()
+    with _open_book(cfg) as reader:
+        n = len(reader.pages)
+        start = max(0, min(n - 1, start_1based - 1))
+        end = min(n, start + max(1, count))
+        writer = PdfWriter()
+        for i in range(start, end):
+            writer.add_page(reader.pages[i])
+        buf = io.BytesIO()
+        writer.write(buf)
+        return buf.getvalue()
 
 
 def meta() -> dict:
