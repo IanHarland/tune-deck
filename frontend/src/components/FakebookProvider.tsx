@@ -68,6 +68,48 @@ const cleanName = (s: string) =>
 const chartKey = (slug: string, page: string, edition = "") =>
   `${slug}:${page}${edition ? `:${edition}` : ""}`;
 
+// Key for a tap taken before meta arrived — keyed by book NAME (meta is what
+// maps name -> slug), so it can't collide with a real chartKey.
+const pendingKey = (book: string, page: string | number) => `pending:${book}:${page}`;
+
+const META_CACHE = "tunedeck.fbmeta";
+
+// Last known meta, used ONLY to decide whether a chart row LOOKS tappable
+// before the live meta lands. Never used to open anything: `authed` reflects a
+// cookie the server owns, so a tap always waits for the real answer.
+function loadCachedMeta(): FakebookMeta | null {
+  try {
+    const m = JSON.parse(localStorage.getItem(META_CACHE) || "null");
+    return m && m.books ? ({ ...m, authed: false } as FakebookMeta) : null;
+  } catch {
+    return null;
+  }
+}
+
+function cacheMeta(m: FakebookMeta) {
+  try {
+    localStorage.setItem(META_CACHE, JSON.stringify({ configured: m.configured, books: m.books }));
+  } catch {
+    /* private mode — just means no optimistic hint next cold start */
+  }
+}
+
+// Resolve a (book, page) against a KNOWN meta. Pulled out of the component so
+// the cold-start path can resolve against a freshly awaited meta rather than
+// the stale one captured in its closure.
+function resolveWith(
+  m: FakebookMeta | null,
+  book: string,
+  printedPage: string | number,
+  edition: string,
+  title?: string,
+): ChartParams | null {
+  const info = m?.books[book];
+  const page = pageToken(printedPage);
+  if (!m?.configured || !info || !page || !canOpenPage(info, page)) return null;
+  return { slug: info.slug, book, page, edition: editionFor(info, page, edition), title };
+}
+
 // Open one tune's page(s) as its own PDF so the OS renders it in a Safari view
 // (SFSafariViewController on iOS). That view's Share button is a document-
 // interaction share on a real PDF, which offers "Copy to forScore" — the Web
@@ -100,6 +142,10 @@ export function FakebookProvider({
   edition?: string;
 }) {
   const [meta, setMeta] = useState<FakebookMeta | null>(null);
+  // Last session's answer, so rows can look right immediately on a cold start.
+  const [hint] = useState<FakebookMeta | null>(loadCachedMeta);
+  const [loading, setLoading] = useState(true); // meta fetch still in flight
+  const metaPromise = useRef<Promise<FakebookMeta | null> | null>(null);
   const [pending, setPending] = useState<ChartParams | null>(null); // awaiting password
   const [opening, setOpening] = useState<string | null>(null); // chartKey being fetched
   const [failed, setFailed] = useState<Set<string>>(new Set()); // chartKeys that errored
@@ -111,9 +157,19 @@ export function FakebookProvider({
   const fsCache = useRef<Map<string, Promise<Blob>>>(new Map());
 
   useEffect(() => {
-    getFakebookMeta()
-      .then(setMeta)
-      .catch(() => setMeta(null));
+    metaPromise.current = getFakebookMeta()
+      .then(
+        (m) => {
+          setMeta(m);
+          cacheMeta(m);
+          return m;
+        },
+        () => {
+          setMeta(null);
+          return null;
+        },
+      )
+      .finally(() => setLoading(false));
   }, []);
 
   // The index is password-gated, so it comes back empty until unlocked — refetch
@@ -135,16 +191,25 @@ export function FakebookProvider({
 
   const hasNotation = useCallback((tuneId: string) => notated.has(tuneId), [notated]);
 
+  // Optimistic while the meta request is in flight. The API scales to zero, so
+  // a cold wake takes 15–20 s, and rows that will plainly be buttons a moment
+  // later shouldn't read as dead text until then — a tap during the wake is
+  // held and opened when meta arrives (see openChart), not dropped. Prefer
+  // last session's cached answer; with no cache, assume openable. Once the real
+  // meta lands it wins, so a book that isn't stocked settles back to plain text.
   const canOpen = useCallback(
-    (book: string, printedPage: string | number) =>
-      !!meta?.configured && canOpenPage(meta.books[book], printedPage),
-    [meta],
+    (book: string, printedPage: string | number) => {
+      if (meta) return !!meta.configured && canOpenPage(meta.books[book], printedPage);
+      if (hint) return !!hint.configured && canOpenPage(hint.books[book], printedPage);
+      return loading;
+    },
+    [meta, hint, loading],
   );
 
   const editionOf = useCallback(
     (book: string, printedPage: string | number) =>
-      editionFor(meta?.books[book], printedPage, edition),
-    [meta, edition],
+      editionFor((meta ?? hint)?.books[book], printedPage, edition),
+    [meta, hint, edition],
   );
 
   // start (and cache) the tune-PDF fetch; a rejected fetch is evicted so a later
@@ -166,12 +231,8 @@ export function FakebookProvider({
   // resolve a (book, page) pair to everything the fetch needs, or null if this
   // book can't open that page at all.
   const resolve = useCallback(
-    (book: string, printedPage: string | number, title?: string): ChartParams | null => {
-      const info = meta?.books[book];
-      const page = pageToken(printedPage);
-      if (!meta?.configured || !info || !page || !canOpenPage(info, page)) return null;
-      return { slug: info.slug, book, page, edition: editionFor(info, page, edition), title };
-    },
+    (book: string, printedPage: string | number, title?: string): ChartParams | null =>
+      resolveWith(meta, book, printedPage, edition, title),
     [meta, edition],
   );
 
@@ -214,18 +275,50 @@ export function FakebookProvider({
 
   const openChart = useCallback(
     (book: string, printedPage: string | number, title?: string) => {
-      const p = resolve(book, printedPage, title);
-      if (!p) return;
-      if (meta?.authed) openTunePdf(p);
-      else setPending(p);
+      if (meta) {
+        const p = resolve(book, printedPage, title);
+        if (!p) return;
+        if (meta.authed) openTunePdf(p);
+        else setPending(p);
+        return;
+      }
+      // Tapped during the cold-start wake. Spin on this row and open the moment
+      // meta lands — the tap is queued, not lost. Once meta is set, keyOf()
+      // computes the real chartKey and openTunePdf re-keys the spinner to it.
+      const key = pendingKey(book, printedPage);
+      setOpening(key);
+      setFailed((f) => (f.has(key) ? new Set([...f].filter((k) => k !== key)) : f));
+      const wait = metaPromise.current ?? Promise.resolve(null);
+      wait
+        .then((m) => {
+          const p = resolveWith(m, book, printedPage, edition, title);
+          if (!p) {
+            // Either the reader isn't configured or this book isn't stocked —
+            // the row is about to become plain text, so just stop spinning.
+            setOpening(null);
+            return;
+          }
+          if (m?.authed) openTunePdf(p);
+          else {
+            setOpening(null);
+            setPending(p);
+          }
+        })
+        .catch(() => {
+          setOpening(null);
+          setFailed((f) => new Set(f).add(key));
+        });
     },
-    [meta, resolve, openTunePdf],
+    [meta, edition, resolve, openTunePdf],
   );
 
   const keyOf = useCallback(
     (book: string, printedPage: string | number) => {
-      const info = meta?.books[book];
       const page = pageToken(printedPage);
+      // Before meta arrives there's no slug to key by — match the provisional
+      // key openChart used, so the spinner shows on the row that was tapped.
+      if (!meta) return pendingKey(book, printedPage);
+      const info = meta.books[book];
       return info && page ? chartKey(info.slug, page, editionFor(info, page, edition)) : null;
     },
     [meta, edition],
