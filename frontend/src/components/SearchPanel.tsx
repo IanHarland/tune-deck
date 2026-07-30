@@ -150,18 +150,36 @@ export default function SearchPanel({
     >
       <div className="search-panel" onClick={(e) => e.stopPropagation()}>
         <div className="search-bar">
-          <input
-            ref={inputRef}
-            className="search-input"
-            type="search"
-            placeholder="Search a tune or composer…"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            autoComplete="off"
-            autoCorrect="off"
-            autoCapitalize="off"
-            spellCheck={false}
-          />
+          {/* Two different X's, so they're kept visually distinct: the one INSIDE
+              the field clears the query (and keeps you here, focused); the one
+              outside closes the panel. */}
+          <div className="search-field">
+            <input
+              ref={inputRef}
+              className="search-input"
+              type="search"
+              placeholder="Search a tune or composer…"
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="off"
+              spellCheck={false}
+            />
+            {q !== "" && (
+              <button
+                className="search-clear"
+                onClick={() => {
+                  setQ("");
+                  inputRef.current?.focus();
+                }}
+                aria-label="Clear search"
+                title="Clear"
+              >
+                ✕
+              </button>
+            )}
+          </div>
           <button className="search-close" onClick={onClose} aria-label="Close search">
             ✕
           </button>

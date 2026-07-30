@@ -1014,18 +1014,56 @@ body::after {
   background: rgba(0, 0, 0, 0.2);
 }
 
+/* Wraps the input so the clear button can sit inside the field — the bar's
+   other ✕ closes the panel, and the two must not read as the same control. */
+.search-field {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+}
+
 .search-input {
   flex: 1 1 auto;
   min-width: 0;
   background: rgba(0, 0, 0, 0.28);
   border: 1px solid rgba(246, 241, 227, 0.18);
   border-radius: 10px;
-  padding: 10px 12px;
+  padding: 10px 36px 10px 12px; /* right pad leaves room for the clear button */
   color: var(--cream);
   font-size: 16px; /* 16px keeps iOS from zooming on focus */
 }
 .search-input::placeholder {
   color: rgba(246, 241, 227, 0.4);
+}
+/* WebKit's own clear affordance for type=search — hidden so desktop Safari and
+   Chrome don't stack a second ✕ on top of ours. */
+.search-input::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.search-clear {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: rgba(246, 241, 227, 0.16);
+  color: var(--cream);
+  font-size: 11px;
+  line-height: 1;
+  cursor: pointer;
+}
+.search-clear:hover {
+  background: rgba(246, 241, 227, 0.28);
 }
 
 .search-close {
