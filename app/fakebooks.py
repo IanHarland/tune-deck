@@ -147,6 +147,74 @@ def offsets_for(name: str, cfg: dict, edition: str | None = None) -> dict[str, i
     return out
 
 
+# --------------------------------------------------------------------------- #
+# Page maps
+#
+# A single `offset` per book assumes the scan holds every printed page exactly
+# once. Several don't. The New Real Book Vol. 1 scan is missing printed pages
+# 3–4 and has 28–29 twice, so its offset is 15, then 13, then 15 again — and a
+# constant 13 meant "All The Things You Are" (printed 4) opened Airegin
+# (printed 2). That is the worst kind of bug this feature can have: you get a
+# chart, it just isn't yours.
+#
+# data/pagemaps.json is therefore the real answer, built by
+# scripts/build_pagemaps.py from the page numbers printed on the scans
+# themselves. Keyed by PDF file stem -> {"segments": [[printed_from, printed_to,
+# offset], …]}. A printed page in no segment is not in the scan and 404s, which
+# is the same never-clamp rule as before.
+#
+# `offset` in BOOKS stays as the fallback for anything the map doesn't cover:
+# a book whose map failed to build, and the lettered sections (Real Book Vol. 1's
+# unnumbered A1–A13 appendix prints no folio for the OCR to read).
+# --------------------------------------------------------------------------- #
+_PAGEMAPS_PATH = Path(__file__).resolve().parent.parent / "data" / "pagemaps.json"
+
+
+def _load_pagemaps() -> dict[str, list[tuple[int, int, int]]]:
+    """Parsed defensively: this runs at import, so a malformed file must cost the
+    reader its page maps (falling back to the flat offsets), not take the app
+    down on boot."""
+    try:
+        raw = json.loads(_PAGEMAPS_PATH.read_text())
+    except (OSError, ValueError):
+        return {}
+    if not isinstance(raw, dict):
+        return {}
+    out: dict[str, list[tuple[int, int, int]]] = {}
+    for stem, entry in raw.items():
+        if not isinstance(entry, dict):
+            continue
+        segs = [tuple(s) for s in entry.get("segments") or []
+                if isinstance(s, list) and len(s) == 3
+                and all(isinstance(v, int) for v in s)]
+        if segs:
+            out[stem] = segs
+    return out
+
+
+_PAGEMAPS = _load_pagemaps()
+
+
+def segments_for(cfg: dict) -> list[tuple[int, int, int]]:
+    """The printed→PDF segments for one physical file (a book or an edition)."""
+    return _PAGEMAPS.get(Path(cfg["file"]).stem, [])
+
+
+def resolve_segments(segments: list[tuple[int, int, int]],
+                     printed: int) -> int | None:
+    """PDF page for a printed page, or None if the scan hasn't got it.
+
+    MUST match resolve() in scripts/build_pagemaps.py and resolveSegments() in
+    core/fakebooks.ts. Where a scan double-fed a page the longer (better
+    attested) run wins; both copies are the same page, so this only has to be
+    deterministic."""
+    hits = [s for s in segments if s[0] <= printed <= s[1]]
+    if not hits:
+        return None
+    best = max(hits, key=lambda s: s[1] - s[0])
+    return printed + best[2]
+
+
 # A printed page ref is a number, optionally prefixed by a section letter —
 # "288" or "A1" (Real Book Vol. 1's appendix). Anything else is not a page.
 _PAGE_RE = re.compile(r"^([A-Za-z]?)([0-9]{1,4})$")
@@ -157,12 +225,23 @@ def parse_page(token: str | int) -> tuple[str, int] | None:
     return (m.group(1).upper(), int(m.group(2))) if m else None
 
 
+def has_offset_override(name: str, cfg: dict, edition: str | None = None) -> bool:
+    """Did FAKEBOOK_OFFSETS speak for this book? The secret is the escape hatch
+    for fixing calibration without a 500 MB rebuild, so it outranks the page map
+    — otherwise the map would quietly ignore the one lever available in prod."""
+    ed = edition_cfg(cfg, edition)
+    if ed is None:
+        return False
+    key = slug(name) if ed is cfg else f"{slug(name)}@{edition}"
+    return key in _offset_overrides()
+
+
 def pdf_page_for(name: str, cfg: dict, token: str | int,
                  edition: str | None = None) -> int | None:
     """Physical PDF page for a printed page ref, or None if this book has no
-    such page — an unknown section, a page past the end of the scan (the master
-    index has a few refs to pages that simply aren't in the book), or no such
-    transposed edition."""
+    such page — an unknown section, a page the scan is missing, a page past the
+    end of it (the master index has a few refs to pages that simply aren't in
+    the book), or no such transposed edition."""
     parsed = parse_page(token)
     if not parsed:
         return None
@@ -170,10 +249,16 @@ def pdf_page_for(name: str, cfg: dict, token: str | int,
     ed = edition_cfg(cfg, edition)
     if ed is None:
         return None
-    offsets = offsets_for(name, cfg, edition)
-    if section not in offsets:
-        return None
-    page = number + offsets[section]
+    segments = [] if has_offset_override(name, cfg, edition) else segments_for(ed)
+    if section == "" and segments:
+        page = resolve_segments(segments, number)
+        if page is None:
+            return None
+    else:
+        offsets = offsets_for(name, cfg, edition)
+        if section not in offsets:
+            return None
+        page = number + offsets[section]
     return page if 1 <= page <= page_count(ed) else None
 
 
@@ -300,15 +385,27 @@ def meta() -> dict:
     links (and hide books whose PDF isn't uploaded, or refs whose page section
     this book doesn't have). `configured` is whether a password is set at all —
     if not, the feature stays dark."""
+    def entry(name: str, cfg: dict, ed: str | None = None) -> dict:
+        target = edition_cfg(cfg, ed)
+        assert target is not None
+        return {
+            "offsets": offsets_for(name, cfg, ed),
+            # Which printed pages this scan actually contains. Sent so the client
+            # can grey out a ref to a page the book is missing instead of showing
+            # a tappable row that 404s. Empty = fall back to the flat offset.
+            "segments": [] if has_offset_override(name, cfg, ed) else
+                        [list(s) for s in segments_for(target)],
+        }
+
     books = {
         name: {
             "slug": slug(name),
-            "offsets": offsets_for(name, cfg),
             "available": book_path(cfg).exists(),
+            **entry(name, cfg),
             # Transposed printings that are actually on disk. The client only
             # asks for an edition listed here; everyone else gets concert pitch.
             "editions": {
-                ed: {"offsets": offsets_for(name, cfg, ed)}
+                ed: entry(name, cfg, ed)
                 for ed in EDITIONS
                 if (c := edition_cfg(cfg, ed)) is not None and book_path(c).exists()
             },

@@ -184,8 +184,15 @@ def test_new_real_books_stock_no_editions():
 # --------------------------------------------------------------------------- #
 @pytest.fixture
 def fake_page_count(monkeypatch):
-    """page_count() needs a real PDF; tests run with an empty books dir."""
+    """page_count() needs a real PDF; tests run with an empty books dir.
+
+    Also clears the page maps, so the tests below exercise the flat-offset
+    arithmetic rather than whatever data/pagemaps.json currently says. The map is
+    the authority in production, but pinning these tests to it would mean every
+    re-scan of a book breaks unrelated tests; what the shipped map claims is
+    asserted separately (see the page-map section)."""
     monkeypatch.setattr(fakebooks, "page_count", lambda cfg: 600)
+    monkeypatch.setattr(fakebooks, "_PAGEMAPS", {})
 
 
 def test_pdf_page_applies_the_offset(fake_page_count):
@@ -236,6 +243,7 @@ def test_pdf_page_past_end_of_scan_is_none(monkeypatch):
 def test_pdf_page_before_start_is_none(monkeypatch):
     """Jazz Fakebook's offset is -1, so printed page 1 would be PDF page 0."""
     monkeypatch.setattr(fakebooks, "page_count", lambda cfg: 448)
+    monkeypatch.setattr(fakebooks, "_PAGEMAPS", {})
     name, cfg = "Jazz Fakebook", fakebooks.BOOKS["Jazz Fakebook"]
     assert fakebooks.pdf_page_for(name, cfg, "1") is None
     assert fakebooks.pdf_page_for(name, cfg, "2") == 1
@@ -249,6 +257,75 @@ def test_pdf_page_unparseable_token_is_none(fake_page_count):
 def test_pdf_page_unstocked_edition_is_none(fake_page_count):
     name, cfg = "The Real Book, Vol. 3", fakebooks.BOOKS["The Real Book, Vol. 3"]
     assert fakebooks.pdf_page_for(name, cfg, "150", "Eb") is None
+
+
+# --------------------------------------------------------------------------- #
+# Page maps — the scans are not clean runs of pages
+#
+# A constant offset assumes every printed page is in the scan exactly once. The
+# New Real Book Vol. 1 scan is missing printed 3–4 and holds 28–29 twice, which
+# is how "All The Things You Are" (printed 4) came to open Airegin (printed 2).
+# data/pagemaps.json records what each scan actually contains.
+# --------------------------------------------------------------------------- #
+@pytest.fixture
+def mapped(monkeypatch, fake_page_count):
+    """Install a page map for a book, as build_pagemaps.py would."""
+    def install(cfg, segments):
+        monkeypatch.setitem(fakebooks._PAGEMAPS,
+                            os.path.splitext(cfg["file"])[0], segments)
+    return install
+
+
+def test_page_map_beats_the_flat_offset(mapped):
+    name, cfg = "The Real Book, Vol. 1", fakebooks.BOOKS["The Real Book, Vol. 1"]
+    mapped(cfg, [(1, 500, 20)])
+    assert fakebooks.pdf_page_for(name, cfg, "100") == 120  # not 100 + 13
+
+
+def test_a_printed_page_the_scan_lacks_is_none(mapped):
+    """The whole point. Printed 3–4 aren't in the New Real Book Vol. 1 scan, so
+    they must 404 — clamping to a neighbour is how you hand over Airegin."""
+    name, cfg = "The New Real Book, Vol. 1", fakebooks.BOOKS["The New Real Book, Vol. 1"]
+    mapped(cfg, [(1, 2, 15), (5, 29, 13), (28, 438, 15)])
+    assert fakebooks.pdf_page_for(name, cfg, "3") is None
+    assert fakebooks.pdf_page_for(name, cfg, "4") is None
+    assert fakebooks.pdf_page_for(name, cfg, "2") == 17
+    assert fakebooks.pdf_page_for(name, cfg, "5") == 18
+
+
+def test_a_double_fed_page_resolves_to_the_longer_run(mapped):
+    """Printed 28–29 are scanned twice. Both copies are the same page, so this
+    only has to be deterministic — and it must match the client and the builder."""
+    name, cfg = "The New Real Book, Vol. 1", fakebooks.BOOKS["The New Real Book, Vol. 1"]
+    mapped(cfg, [(1, 2, 15), (5, 29, 13), (28, 438, 15)])
+    assert fakebooks.pdf_page_for(name, cfg, "28") == 43  # the 411-page run wins
+
+
+def test_sections_still_use_offsets_when_a_map_exists(mapped):
+    """Real Book Vol. 1's A1–A13 appendix prints no page numbers, so no OCR can
+    map it; the hand-calibrated section offset stays the authority."""
+    name, cfg = "The Real Book, Vol. 1", fakebooks.BOOKS["The Real Book, Vol. 1"]
+    mapped(cfg, [(1, 500, 20)])
+    assert fakebooks.pdf_page_for(name, cfg, "A1") == 498
+
+
+def test_an_offsets_override_outranks_the_map(mapped, offsets_env):
+    """FAKEBOOK_OFFSETS is the only lever that works without a 500 MB rebuild.
+    If the map could ignore it, a bad map would be unfixable in production."""
+    name, cfg = "The Real Book, Vol. 1", fakebooks.BOOKS["The Real Book, Vol. 1"]
+    mapped(cfg, [(1, 500, 20)])
+    offsets_env({"the-real-book-vol-1": 30})
+    assert fakebooks.pdf_page_for(name, cfg, "100") == 130
+
+
+def test_the_shipped_map_fixes_the_reported_bug():
+    """Regression: with data/pagemaps.json as committed, the New Real Book Vol. 1
+    refs from the bug report resolve correctly or not at all."""
+    segments = fakebooks.segments_for(fakebooks.BOOKS["The New Real Book, Vol. 1"])
+    assert segments, "NEWREAL1 lost its page map"
+    assert fakebooks.resolve_segments(segments, 2) == 17    # Airegin
+    assert fakebooks.resolve_segments(segments, 4) is None  # All The Things You Are
+    assert fakebooks.resolve_segments(segments, 25) == 38   # Blue Bossa
 
 
 # --------------------------------------------------------------------------- #

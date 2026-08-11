@@ -23,3 +23,6 @@ charts/*
 # test noise
 .pytest_cache/
 tests/_sandbox/
+
+# OCR cache for scripts/build_pagemaps.py — derived, large, and rebuildable
+data/.pagemap_ocr.json

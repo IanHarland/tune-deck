@@ -1,0 +1,156 @@
+{
+ "COLOBK": {
+  "segments": [
+   [
+    1,
+    280,
+    3
+   ]
+  ]
+ },
+ "EVANSBK": {
+  "segments": [
+   [
+    2,
+    101,
+    3
+   ]
+  ]
+ },
+ "JAZZFAKE": {
+  "segments": [
+   [
+    4,
+    447,
+    -1
+   ]
+  ]
+ },
+ "JAZZLTD": {
+  "segments": [
+   [
+    1,
+    392,
+    7
+   ]
+  ]
+ },
+ "LIBRARY": {
+  "segments": [
+   [
+    1,
+    212,
+    4
+   ]
+  ]
+ },
+ "NEWREAL1": {
+  "segments": [
+   [
+    1,
+    2,
+    15
+   ],
+   [
+    5,
+    29,
+    13
+   ],
+   [
+    28,
+    438,
+    15
+   ]
+  ]
+ },
+ "NEWREAL2": {
+  "segments": [
+   [
+    1,
+    484,
+    12
+   ]
+  ]
+ },
+ "NEWREAL3": {
+  "segments": [
+   [
+    1,
+    437,
+    10
+   ]
+  ]
+ },
+ "REALBK1": {
+  "segments": [
+   [
+    1,
+    483,
+    13
+   ]
+  ]
+ },
+ "REALBK1_BB": {
+  "segments": [
+   [
+    1,
+    484,
+    9
+   ]
+  ]
+ },
+ "REALBK1_EB": {
+  "segments": [
+   [
+    2,
+    484,
+    10
+   ]
+  ]
+ },
+ "REALBK2": {
+  "segments": [
+   [
+    1,
+    414,
+    7
+   ]
+  ]
+ },
+ "REALBK2_BB": {
+  "segments": [
+   [
+    3,
+    414,
+    7
+   ]
+  ]
+ },
+ "REALBK2_EB": {
+  "segments": [
+   [
+    1,
+    414,
+    6
+   ]
+  ]
+ },
+ "REALBK3": {
+  "segments": [
+   [
+    1,
+    360,
+    5
+   ]
+  ]
+ },
+ "REALBK3_BB": {
+  "segments": [
+   [
+    1,
+    360,
+    8
+   ]
+  ]
+ }
+}

@@ -114,6 +114,41 @@ def test_parse_page_matches_the_frontend():
 
 
 # --------------------------------------------------------------------------- #
+# resolve_segments — app/fakebooks.py vs core/fakebooks.ts resolveSegments
+#
+# Three implementations read data/pagemaps.json: the builder, the server (which
+# decides which page to hand over) and the client (which decides whether the row
+# is even tappable). Drift means a row you can tap that 404s, or — where a scan
+# double-fed a page and the two sides break the tie differently — a row that
+# opens a different physical page than the one the UI thinks it opened.
+# --------------------------------------------------------------------------- #
+# NRB1's real shape: printed 3–4 missing, 28–29 scanned twice.
+PARITY_SEGMENTS = [[1, 2, 15], [5, 29, 13], [28, 438, 15]]
+PARITY_PAGES = [0, 1, 2, 3, 4, 5, 27, 28, 29, 30, 438, 439, 1000]
+
+
+@requires_node
+def test_resolve_segments_matches_the_frontend():
+    ts = (ROOT / "frontend/src/core/fakebooks.ts").read_text()
+    m = re.search(r"export function resolveSegments\(.*?\n\}", ts, re.S)
+    assert m, "resolveSegments moved in core/fakebooks.ts — update this test"
+    # strip the TS type annotations so node can run the real function body
+    body = m.group(0).replace("export function", "function")
+    body = re.sub(r":\s*(PageSegment\[\]|PageSegment \| null|number \| null|number)",
+                  "", body)
+    out = run_node(
+        f"{body}\n"
+        f"const segs = {json.dumps(PARITY_SEGMENTS)};\n"
+        f"const pages = {json.dumps(PARITY_PAGES)};\n"
+        "console.log(JSON.stringify(pages.map((p) => resolveSegments(segs, p))));"
+    )
+    js = json.loads(out)
+    py = [fakebooks.resolve_segments([tuple(s) for s in PARITY_SEGMENTS], p)
+          for p in PARITY_PAGES]
+    assert js == py
+
+
+# --------------------------------------------------------------------------- #
 # Chart title normalisation — build_charts.py vs build_seed.mjs
 # --------------------------------------------------------------------------- #
 TITLES = [

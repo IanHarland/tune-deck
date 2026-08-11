@@ -5,6 +5,9 @@ __pycache__/
 *.pyc
 .DS_Store
 tunedeck.db
+# Raw OCR from scripts/build_pagemaps.py — a build-time cache, megabytes of it,
+# and nothing at runtime reads it (data/pagemaps.json is the shipped output).
+data/.pagemap_ocr.json
 frontend/node_modules/
 frontend/dist/
 jazz_standard_picker_handoff.md

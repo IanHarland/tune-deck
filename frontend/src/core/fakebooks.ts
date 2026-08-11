@@ -3,17 +3,28 @@
 // as plain fetch so a future native app can reuse it (swapping cookie for token).
 import { API_BASE } from "./api";
 
-export interface FakebookInfo {
-  slug: string;
+// [printed_from, printed_to, offset] — a run of printed pages the scan really
+// contains, at a constant PDF_page = printed + offset. A scan is not always a
+// clean run: pages go missing and get double-fed, so a book can need several.
+export type PageSegment = [number, number, number];
+
+export interface FakebookEdition {
   // page-section -> offset (PDF_page = number + offset). "" is the main run of
   // pages; a letter key is a separately-numbered section, e.g. "A" for Real Book
   // Vol. 1's appendix (p.A1 = Alfie).
   offsets: Record<string, number>;
+  // The main run's real page map, when we have one (see app/fakebooks.py). It
+  // overrides offsets[""]; empty means fall back to the flat offset.
+  segments: PageSegment[];
+}
+
+export interface FakebookInfo extends FakebookEdition {
+  slug: string;
   available: boolean; // is the PDF actually uploaded
   // Transposed printings of this same book that are on disk, keyed "Bb"/"Eb".
   // Only present where the printing is page-aligned with the concert edition,
   // so the concert chart index still points at the right tune.
-  editions: Record<string, { offsets: Record<string, number> }>;
+  editions: Record<string, FakebookEdition>;
 }
 
 export interface FakebookMeta {
@@ -53,12 +64,36 @@ export function pageToken(page: string | number): string | null {
   return p ? `${p.section}${p.number}` : null;
 }
 
-// Can this book actually open this page? Needs the PDF present and a known
-// offset for the page's section — a ref into a section we can't locate would
-// otherwise look tappable and do nothing.
-export function canOpenPage(info: FakebookInfo | undefined, page: string | number): boolean {
+// PDF page for a printed page, or null if this scan hasn't got it. MUST match
+// resolve_segments() in app/fakebooks.py (and resolve() in build_pagemaps.py):
+// where a scan double-fed a page, the longer run wins.
+export function resolveSegments(segments: PageSegment[], printed: number): number | null {
+  let best: PageSegment | null = null;
+  for (const s of segments) {
+    if (s[0] <= printed && printed <= s[1] && (!best || s[1] - s[0] > best[1] - best[0])) {
+      best = s;
+    }
+  }
+  return best ? printed + best[2] : null;
+}
+
+// Does this edition hold this page? A page map, when present, is the authority
+// for the main run: some scans are missing printed pages outright, and a row
+// that looks tappable but 404s is worse than one that's plainly inert.
+function editionHasPage(ed: FakebookEdition | undefined, page: string | number): boolean {
   const p = parsePageRef(page);
-  return !!(info?.available && p && p.section in info.offsets);
+  if (!ed || !p) return false;
+  if (p.section === "" && ed.segments?.length) {
+    return resolveSegments(ed.segments, p.number) !== null;
+  }
+  return p.section in ed.offsets;
+}
+
+// Can this book actually open this page? Needs the PDF present and a page we can
+// locate — a ref into a section we can't place, or onto a page the scan is
+// missing, would otherwise look tappable and do nothing.
+export function canOpenPage(info: FakebookInfo | undefined, page: string | number): boolean {
+  return !!info?.available && editionHasPage(info, page);
 }
 
 // Which printing this ref will actually open for a player on `instrument`.
@@ -74,8 +109,8 @@ export function editionFor(
 ): string {
   if (!info || !instrument || instrument === "C") return "";
   const ed = info.editions?.[instrument];
-  const p = parsePageRef(page);
-  return ed && p && p.section in ed.offsets ? instrument : "";
+  // …or it has one whose scan is missing this particular page.
+  return ed && editionHasPage(ed, page) ? instrument : "";
 }
 
 // One-tune PDF (the chart's page(s), offset + multi-page span applied server-side).

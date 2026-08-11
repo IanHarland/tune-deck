@@ -72,7 +72,11 @@ const chartKey = (slug: string, page: string, edition = "") =>
 // maps name -> slug), so it can't collide with a real chartKey.
 const pendingKey = (book: string, page: string | number) => `pending:${book}:${page}`;
 
-const META_CACHE = "tunedeck.fbmeta";
+// Versioned: a cached meta from before `segments` existed has no way to know a
+// page is missing from the scan, so it would show exactly the rows this feature
+// exists to hide as tappable for one cold wake. Bump on any shape change that
+// affects what canOpenPage answers.
+const META_CACHE = "tunedeck.fbmeta.v2";
 
 // Last known meta, used ONLY to decide whether a chart row LOOKS tappable
 // before the live meta lands. Never used to open anything: `authed` reflects a

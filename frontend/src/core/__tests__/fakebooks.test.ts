@@ -10,16 +10,26 @@ import {
   fakebookTuneUrl,
   pageToken,
   parsePageRef,
+  resolveSegments,
   type FakebookInfo,
 } from "../fakebooks";
 
 const book = (over: Partial<FakebookInfo> = {}): FakebookInfo => ({
   slug: "the-real-book-vol-1",
   offsets: { "": 13 },
+  segments: [],
   available: true,
   editions: {},
   ...over,
 });
+
+// The New Real Book Vol. 1 scan as it really is: printed 3–4 absent, 28–29
+// scanned twice, and three different offsets as a result.
+const NRB1: [number, number, number][] = [
+  [1, 2, 15],
+  [5, 29, 13],
+  [28, 438, 15],
+];
 
 describe("parsePageRef", () => {
   it.each([
@@ -32,9 +42,12 @@ describe("parsePageRef", () => {
     expect(parsePageRef(input as string | number)).toEqual(expected);
   });
 
-  it.each(["", "xyz", "12345", "A", "1A", "-1", "1.5"])("rejects %s", (input) => {
-    expect(parsePageRef(input)).toBeNull();
-  });
+  it.each(["", "xyz", "12345", "A", "1A", "-1", "1.5"])(
+    "rejects %s",
+    (input) => {
+      expect(parsePageRef(input)).toBeNull();
+    },
+  );
 });
 
 describe("pageToken", () => {
@@ -67,10 +80,54 @@ describe("canOpenPage", () => {
   it("is false for an unparseable page", () => {
     expect(canOpenPage(book(), "not-a-page")).toBe(false);
   });
+
+  it("greys out a printed page the scan doesn't contain", () => {
+    // All The Things You Are is printed on p.4 of the New Real Book Vol. 1, and
+    // p.4 is simply not in the scan. Better an inert row than one that 404s —
+    // and far better than the flat offset, which opened Airegin.
+    const b = book({ segments: NRB1 });
+    expect(canOpenPage(b, "4")).toBe(false);
+    expect(canOpenPage(b, "3")).toBe(false);
+    expect(canOpenPage(b, "2")).toBe(true);
+    expect(canOpenPage(b, "5")).toBe(true);
+  });
+
+  it("still uses offsets for a lettered section when a map exists", () => {
+    // The A-appendix prints no page numbers, so no page map can cover it.
+    const b = book({ offsets: { "": 13, A: 497 }, segments: NRB1 });
+    expect(canOpenPage(b, "A1")).toBe(true);
+  });
+});
+
+describe("resolveSegments", () => {
+  it("applies the segment's own offset", () => {
+    expect(resolveSegments(NRB1, 2)).toBe(17);
+    expect(resolveSegments(NRB1, 5)).toBe(18);
+    expect(resolveSegments(NRB1, 100)).toBe(115);
+  });
+
+  it("is null for a page the scan is missing", () => {
+    expect(resolveSegments(NRB1, 3)).toBeNull();
+    expect(resolveSegments(NRB1, 4)).toBeNull();
+    expect(resolveSegments(NRB1, 439)).toBeNull();
+  });
+
+  it("breaks a double-fed page toward the longer run", () => {
+    // Must match resolve_segments() in app/fakebooks.py, or the row opens a
+    // different physical page than the one the UI decided was openable.
+    expect(resolveSegments(NRB1, 28)).toBe(43);
+    expect(resolveSegments(NRB1, 29)).toBe(44);
+  });
+
+  it("is null when there are no segments at all", () => {
+    expect(resolveSegments([], 100)).toBeNull();
+  });
 });
 
 describe("editionFor", () => {
-  const withBb = book({ editions: { Bb: { offsets: { "": 9 } } } });
+  const withBb = book({
+    editions: { Bb: { offsets: { "": 9 }, segments: [] } },
+  });
 
   it("is concert for a C player", () => {
     expect(editionFor(withBb, "100", "C")).toBe("");
@@ -91,7 +148,7 @@ describe("editionFor", () => {
     // transposed printings carry no `sections`.
     const b = book({
       offsets: { "": 13, A: 497 },
-      editions: { Bb: { offsets: { "": 9 } } },
+      editions: { Bb: { offsets: { "": 9 }, segments: [] } },
     });
     expect(editionFor(b, "100", "Bb")).toBe("Bb");
     expect(editionFor(b, "A1", "Bb")).toBe("");
@@ -135,7 +192,12 @@ describe("fakebookTuneUrl", () => {
 
 describe("the reported B♭ failure", () => {
   // Fee-Fi-Fo-Fum, Real Book Vol. 1 p436 in Bb — the ref that 502'd.
-  const b = book({ editions: { Bb: { offsets: { "": 9 } }, Eb: { offsets: { "": 10 } } } });
+  const b = book({
+    editions: {
+      Bb: { offsets: { "": 9 }, segments: [] },
+      Eb: { offsets: { "": 10 }, segments: [] },
+    },
+  });
 
   it("is openable, badged Bb, and points at the Bb PDF", () => {
     expect(canOpenPage(b, "436")).toBe(true);
