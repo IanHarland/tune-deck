@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Instrument } from "../core/keys";
+import { isChartOnly } from "../core/tunePicker";
 import { FEEL_LABELS, type ChartRef as ChartRefT, type Feel, type Tune } from "../core/types";
 import ChartRef from "./ChartRef";
 import { useFakebook } from "./FakebookProvider";
@@ -54,7 +55,7 @@ interface Hit {
   key: string;
   title: string;
   composer: string | null;
-  feel: Feel;
+  feel: Feel | null;
   charts: ChartRefT[];
   tune: Tune;
 }
@@ -108,8 +109,14 @@ export default function SearchPanel({
       else if (comp.includes(nq)) rank = 3;
       if (rank >= 0) scored.push({ t, rank });
     }
+    // Equal-quality matches put the library first: a chart-only tune is one you
+    // don't have in iReal, so it's the less likely thing to be reaching for —
+    // and there are ~1,600 of them, enough to crowd real tunes off MAX_RESULTS.
     scored.sort(
-      (a, b) => a.rank - b.rank || deArticle(a.t.title).localeCompare(deArticle(b.t.title)),
+      (a, b) =>
+        a.rank - b.rank ||
+        Number(isChartOnly(a.t)) - Number(isChartOnly(b.t)) ||
+        deArticle(a.t.title).localeCompare(deArticle(b.t.title)),
     );
 
     // collapse duplicate charts of the same tune into one row, merging fake books
@@ -228,8 +235,10 @@ function SearchResult({ hit, onVote }: { hit: Hit; onVote: VoteFn }) {
     <li className="search-result">
       <div className="search-result__head">
         <span className="search-result__title">{hit.title}</span>
+        {/* A chart-only tune has no feel and no composer, so the meta line would
+            otherwise be blank. Say why rather than leaving a gap. */}
         <span className="search-result__meta">
-          {FEEL_LABELS[hit.feel]}
+          {hit.feel ? FEEL_LABELS[hit.feel] : "Chart only"}
           {hit.composer ? ` · ${hit.composer}` : ""}
         </span>
       </div>

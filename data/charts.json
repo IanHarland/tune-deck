@@ -3557,6 +3557,10 @@
 ],
 "corcovado": [
 {
+"book": "Jazz Fakebook",
+"page": "309"
+},
+{
 "book": "The Real Book, Vol. 1",
 "page": "94"
 }
@@ -14459,8 +14463,16 @@
 "page": "178"
 },
 {
+"book": "The New Real Book, Vol. 1",
+"page": "241"
+},
+{
 "book": "The Real Book, Vol. 1",
 "page": "359"
+},
+{
+"book": "The Real Book, Vol. 2",
+"page": "263"
 }
 ],
 "redclay": [
@@ -19996,6 +20008,10 @@
 }
 ],
 "woodynyou": [
+{
+"book": "Library of Musicians' Jazz",
+"page": "1"
+},
 {
 "book": "The Colorado Cookbook",
 "page": "271"

@@ -224,7 +224,7 @@ def test_shipped_seed_is_valid():
     rows = json.loads(db_mod.SEED_PATH.read_text())
     assert len(rows) > 1000
     for r in rows[:200]:
-        assert r["title"] and r["feel"]
+        assert r["title"]
         assert 0 <= r["obscurity_score"] <= 100
         assert 0 <= r["difficulty_score"] <= 100
 
@@ -268,4 +268,28 @@ def test_a_natural_key_collision_merges_instead_of_crashing(seeded):
 def test_shipped_seed_feels_are_the_known_enum():
     rows = json.loads(db_mod.SEED_PATH.read_text())
     allowed = {"ballad", "medium_swing", "up", "latin", "waltz"}
-    assert {r["feel"] for r in rows} <= allowed
+    assert {r["feel"] for r in rows if r["feel"] is not None} <= allowed
+
+
+# A null feel is exactly what keeps a tune out of the deck (core/tunePicker.ts
+# deckTunes drops `chart_only`, and feelMatches can't match a null). If the two
+# ever drift apart — a chart-only tune with a guessed feel, or a library tune
+# that lost its own — the deck silently starts dealing cards nobody classified,
+# or silently stops dealing ones it should.
+def test_shipped_seed_ties_a_null_feel_to_the_chart_only_tag():
+    rows = json.loads(db_mod.SEED_PATH.read_text())
+    for r in rows:
+        assert (r["feel"] is None) == ("chart_only" in r.get("tags", [])), r["title"]
+
+
+def test_shipped_seed_chart_only_tunes_carry_a_chart_and_nothing_else():
+    """Their entire reason to exist is the chart reference; the master index has
+    no composer, key, or iReal link to give them."""
+    rows = json.loads(db_mod.SEED_PATH.read_text())
+    chart_only = [r for r in rows if "chart_only" in r.get("tags", [])]
+    assert len(chart_only) > 1000
+    for r in chart_only:
+        assert r["charts"], r["title"]
+        assert r["composer"] is None and r["original_key"] is None
+        assert r["ireal_url"] is None
+        assert r["additional_feels"] == []

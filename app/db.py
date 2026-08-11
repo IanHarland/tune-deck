@@ -60,6 +60,11 @@ _ADDITIVE_COLUMNS = {
     },
 }
 
+# Columns that started life NOT NULL and no longer are. Same spirit as
+# _ADDITIVE_COLUMNS: state the end result, let startup converge on it.
+#   tunes.feel — chart-only tunes (from the fake-book master index) have no feel.
+_RELAXED_COLUMNS = {"tunes": ["feel"]}
+
 
 def init_db() -> None:
     """Create tables, run additive migrations, load the seed. Run on startup."""
@@ -95,6 +100,44 @@ def _run_migrations() -> None:
                 stmt = ddl[dialect] if isinstance(ddl, dict) else ddl
                 conn.execute(text(stmt))
                 print(f"[db] migrated: added {table}.{col}")
+    _drop_not_null(inspect(engine), tables, dialect)
+
+
+def _drop_not_null(inspector, tables: set[str], dialect: str) -> None:
+    """Relax the NOT NULL on _RELAXED_COLUMNS. Idempotent: a column that's
+    already nullable is skipped, so reruns do nothing.
+
+    Postgres does this in one statement. SQLite (local dev only) can't ALTER a
+    column at all, so the table is rebuilt the way SQLite's own docs prescribe —
+    rename aside, copy across, drop the original. Indexes are dropped first
+    because their names are database-global and the new table wants them back.
+    """
+    for table, cols in _RELAXED_COLUMNS.items():
+        if table not in tables:
+            continue
+        info = {c["name"]: c for c in inspector.get_columns(table)}
+        todo = [c for c in cols if c in info and not info[c]["nullable"]]
+        if not todo:
+            continue
+        with engine.begin() as conn:
+            if dialect == "postgresql":
+                for col in todo:
+                    conn.execute(text(
+                        f'ALTER TABLE "{table}" ALTER COLUMN "{col}" DROP NOT NULL'))
+            else:
+                model = Base.metadata.tables[table]
+                shared = [c.name for c in model.columns if c.name in info]
+                cols_sql = ", ".join(f'"{c}"' for c in shared)
+                for idx in inspector.get_indexes(table):
+                    if idx.get("name"):
+                        conn.execute(text(f'DROP INDEX IF EXISTS "{idx["name"]}"'))
+                conn.execute(text(f'ALTER TABLE "{table}" RENAME TO "{table}__old"'))
+                model.create(bind=conn)
+                conn.execute(text(
+                    f'INSERT INTO "{table}" ({cols_sql}) '
+                    f'SELECT {cols_sql} FROM "{table}__old"'))
+                conn.execute(text(f'DROP TABLE "{table}__old"'))
+        print(f"[db] migrated: {table}.{'/'.join(todo)} now nullable")
 
 
 def _prune_exercises(session: Session) -> None:

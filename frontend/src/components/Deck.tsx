@@ -279,7 +279,10 @@ function TuneFace({
   onDifficulty: (v: number) => void;
   onPillTap: () => void;
 }) {
-  const feels = [tune.feel, ...tune.additional_feels];
+  // tune.feel is null only on chart-only tunes, which deckTunes never deals —
+  // but a null here would render as a stray "undefined", so drop it rather than
+  // rely on that staying true.
+  const feels = [tune.feel, ...tune.additional_feels].filter((f) => f != null);
   // headline key = the just-randomized key (this view) or the tune's original.
   // keys are stored in concert pitch; transpose for the chosen instrument, then
   // (if noMinor) show minor keys as their relative major.

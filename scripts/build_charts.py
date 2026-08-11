@@ -1,9 +1,23 @@
-"""build_charts.py — parse MASTERNX.PDF (the master fake-book index) into
-data/charts.json: a map of normalized tune title -> list of {book, page}.
+"""build_charts.py — parse MASTERNX.PDF (the master fake-book index) into two files.
 
-These are reference-only (which book + printed page a chart is on). No chart
-content is stored or shipped — just "this tune is in Real Book 1 on p.13". The
-seed builder (build_seed.mjs) merges this onto each tune.
+data/charts.json
+    normalized tune title -> list of {book, page}. Reference-only (which book +
+    printed page a chart is on). No chart content is stored or shipped — just
+    "this tune is in Real Book 1 on p.13". build_seed.mjs merges this onto each
+    tune it finds in the iReal library.
+
+data/index_titles.json
+    every DISTINCT tune the index knows about, as {title, keys, charts}. The
+    index covers far more repertoire than the owner's iReal library does —
+    Syeeda's Song Flute is in Real Book Vol. 2 but was in no playlist, so the app
+    couldn't find it at all. build_seed.mjs turns the leftovers into "chart-only"
+    tunes: title + chart, no feel/key/composer, search-only (see CLAUDE.md).
+
+    Grouping matters here in a way it doesn't for charts.json. There, a title
+    with a parenthetical registers its ref under both the kept and the dropped
+    spelling, and a lookup from either finds it. Here each group becomes a ROW,
+    so "Algo Bueno" and "Algo Bueno (Woody 'N You)" have to end up as one tune,
+    not two. Titles sharing any key variant are therefore unioned.
 
 Usage: python scripts/build_charts.py [path-to-MASTERNX.PDF]
 Requires: pip install pypdf
@@ -22,6 +36,7 @@ DEFAULT_INDEX = os.path.expanduser(
     "~/Documents/Practice Stuff/real books/MASTERNX.PDF"
 )
 OUT = os.path.join(os.path.dirname(__file__), "..", "data", "charts.json")
+OUT_TITLES = os.path.join(os.path.dirname(__file__), "..", "data", "index_titles.json")
 
 # index book code -> ACTUAL published book title (verified against the canonical
 # Fake Book Master Index, archive.org/details/MASTERNX).
@@ -57,7 +72,20 @@ KNOWN = sorted(BOOK_NAMES, key=len, reverse=True)  # longest-first for suffix ma
 # but equally valid spelling ("Green Dolphin Street" / "On Green Dolphin
 # Street"). Either way the ref never matched. Registered under BOTH spellings,
 # so nothing that already matched can regress.
+# A parenthetical is normally a subtitle, and norm_keys() covers that by emitting
+# both the kept and the dropped spelling. These two are the other thing it can
+# be — the tune's OTHER NAME — which neither spelling reaches, so the ref lands
+# on nothing and the index title reappears as a duplicate chart-only tune beside
+# the real one. Aliased by hand; an audit of every parenthetical in the index
+# found only these.
 TITLE_ALIASES = {
+    "Algo Bueno (Woody'n You)": "Woody'n You",
+    "Algo Bueno": "Woody'n You",
+    "Quiet Nights Of Quiet Stars (Corcovado)": "Corcovado",
+    # Joe Henderson's tune under its Portuguese title — the library files it as
+    # "Recordame". Verified on New Real Book Vol. 1 p241, which prints
+    # "No Me Esqueca / Joe Henderson".
+    "No Me Esqueca": "Recorda Me",
     "All Or Nothing At Al": "All Or Nothing At All",
     "April Skids": "April Skies",
     "Bark for Barsdale": "Bark For Barksdale",
@@ -212,6 +240,86 @@ def norm_keys(t: str) -> list[str]:
     return out
 
 
+# --------------------------------------------------------------------------- #
+# Distinct-tune grouping, for the chart-only rows
+# --------------------------------------------------------------------------- #
+
+_PAREN_ARTICLE = re.compile(r"^(.*?)[,\s]*\((the|a|an)\)\s*$", re.IGNORECASE)
+_COMMA_ARTICLE = re.compile(r"^(.*?),\s*(the|a|an)\s*$", re.IGNORECASE)
+
+
+def deinvert(title: str) -> str:
+    """"Aerie (The)" -> "The Aerie". The index files titles for alphabetising;
+    a card should read the way a musician says it."""
+    for pattern in (_PAREN_ARTICLE, _COMMA_ARTICLE):
+        m = pattern.match(title)
+        if m:
+            return f"{m.group(2).capitalize()} {m.group(1).strip()}"
+    return title
+
+
+def title_rank(title: str) -> tuple:
+    """Higher is a better display spelling. The index is inconsistent about case
+    ("Ah-Leu-Cha" vs "Ah-leu-cha") and about how much of a title it keeps
+    ("Algo Bueno" vs "Algo Bueno (Woody 'N You)"); prefer mixed case over
+    shouting or lowercase, then the fuller spelling."""
+    letters = [c for c in title if c.isalpha()]
+    mixed = any(c.isupper() for c in letters) and any(c.islower() for c in letters)
+    return (mixed, len(title))
+
+
+class _Union:
+    """Union-find over normalized keys, so every spelling of a tune is one row."""
+
+    def __init__(self) -> None:
+        self.parent: dict[str, str] = {}
+
+    def find(self, x: str) -> str:
+        self.parent.setdefault(x, x)
+        while self.parent[x] != x:
+            self.parent[x] = self.parent[self.parent[x]]
+            x = self.parent[x]
+        return x
+
+    def union(self, a: str, b: str) -> None:
+        ra, rb = self.find(a), self.find(b)
+        if ra != rb:
+            self.parent[rb] = ra
+
+
+def group_titles(rows: list[tuple[list[str], str, dict]]) -> list[dict]:
+    """rows are (key variants, display title, chart ref) -> one entry per tune.
+
+    Keys must include the ALIAS spellings, not just the index's. An alias exists
+    because the index is wrong ("Night In Tunesia(A)"), and its typo key matches
+    nothing in the library — group on that alone and A Night In Tunisia comes out
+    the far side as a brand new chart-only tune sitting next to the real one.
+    """
+    uf = _Union()
+    for keys, _display, _ref in rows:
+        for k in keys[1:]:
+            uf.union(keys[0], k)
+
+    groups: dict[str, dict] = {}
+    for keys, display, ref in rows:
+        if not keys:
+            continue
+        g = groups.setdefault(uf.find(keys[0]),
+                              {"titles": set(), "keys": set(), "charts": []})
+        g["titles"].add(display)
+        g["keys"].update(keys)
+        if ref not in g["charts"]:
+            g["charts"].append(ref)
+
+    out = []
+    for g in groups.values():
+        best = max(g["titles"], key=title_rank)
+        charts = sorted(g["charts"], key=lambda r: (r["book"], r["page"]))
+        out.append({"title": deinvert(best), "keys": sorted(g["keys"]), "charts": charts})
+    out.sort(key=lambda e: e["title"].lower())
+    return out
+
+
 def parse_line(line: str):
     """Return (title, book_code, page) or None. Handles glued tokens like
     'Swing)NewReal2' that the PDF text extraction occasionally produces."""
@@ -243,6 +351,7 @@ def main() -> None:
     charts: dict[str, list[dict]] = {}
     seen: set[tuple[str, str, str]] = set()
     seen_entries: set[tuple[str, str, str]] = set()  # index rows as printed
+    title_rows: list[tuple[str, str, dict]] = []     # for index_titles.json
     skipped = 0
     fixed_pages = dropped = aliased = 0
     for pg in reader.pages:
@@ -269,6 +378,10 @@ def main() -> None:
             if alias:
                 aliased += 1
             keys = norm_keys(title) + (norm_keys(alias) if alias else [])
+            # An alias is the corrected spelling, so it's what a card should show
+            # ("What 15 This Thing Called Love" is an OCR'd "Is").
+            title_rows.append((list(dict.fromkeys(keys)), alias or title,
+                               {"book": BOOK_NAMES[book], "page": page}))
             for key in dict.fromkeys(keys):
                 if (key, book, page) in seen:
                     continue
@@ -285,9 +398,15 @@ def main() -> None:
     with open(out_path, "w") as f:
         json.dump(charts, f, indent=0, sort_keys=True)
 
+    titles_path = os.path.normpath(OUT_TITLES)
+    entries = group_titles(title_rows)
+    with open(titles_path, "w") as f:
+        json.dump(entries, f, indent=0)
+
     total = sum(len(v) for v in charts.values())
     print(f"Parsed {total} chart refs for {len(charts)} titles "
           f"(skipped {skipped} non-entry lines).")
+    print(f"Grouped into {len(entries)} distinct tunes -> {titles_path}")
     print(f"Index corrections applied: {aliased} title aliases, "
           f"{fixed_pages} page fixes, {dropped} refs dropped.")
     indexed_titles = {t for t, _b, _p in seen_entries}

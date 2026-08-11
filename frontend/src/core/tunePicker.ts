@@ -8,7 +8,7 @@
 // extremes are reachable by sliding to 0 or 100, and the middle favors middling
 // tunes.
 
-import type { Filters, Mode, Tune } from "./types";
+import { CHART_ONLY_TAG, type Filters, type Mode, type Tune } from "./types";
 
 // Width of the preference bell curve (in score points). Intentionally wide /
 // fuzzy: the slider is a lean, not a laser. At SPREAD=25, aiming at 50 still
@@ -29,7 +29,7 @@ const PLAY_FLOOR = 0.15; // minimum freshness weight
 export function feelMatches(tune: Tune, feels: Filters["feels"]): boolean {
   return (
     feels.length === 0 ||
-    feels.includes(tune.feel) ||
+    (tune.feel != null && feels.includes(tune.feel)) ||
     tune.additional_feels.some((f) => feels.includes(f))
   );
 }
@@ -38,12 +38,26 @@ export function isHenny(tune: Tune): boolean {
   return (tune.composer ?? "").trim().toLowerCase() === "joe henderson";
 }
 
+/** Chart-only: known to the fake-book master index but not to the iReal library,
+ * so it has a title and a page and nothing else — no feel, key, or composer.
+ * Search finds these and opens their chart; the deck never deals them. */
+export function isChartOnly(tune: Tune): boolean {
+  return tune.tags.includes(CHART_ONLY_TAG);
+}
+
 /** The deck: tunes passing the hard filters (feel + the Henny exclusion).
- * Drives the on-screen count. */
+ * Drives the on-screen count.
+ *
+ * Chart-only tunes are excluded outright. They roughly double the tune count,
+ * and having no feel they can satisfy no feel filter — so admitting them would
+ * mean either ignoring the deck's one hard filter or filling the deck with cards
+ * that can never honour it. Their value is being findable, not being dealt. */
 export function deckTunes(tunes: Tune[], filters: Filters): Tune[] {
   return tunes.filter(
     (t) =>
-      feelMatches(t, filters.feels) && !(filters.excludeHenny && isHenny(t)),
+      !isChartOnly(t) &&
+      feelMatches(t, filters.feels) &&
+      !(filters.excludeHenny && isHenny(t)),
   );
 }
 

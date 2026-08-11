@@ -163,6 +163,30 @@ const M = (title, composer, original_key, feel, obscurity_score, difficulty_scor
 export const MANUAL_TUNES = [
   M("Firm Roots", "Cedar Walton", "Eb", "medium_swing", 45, 60),
 
+  // Canon tunes the iReal library simply doesn't have. They arrived as
+  // chart-only rows from the fake-book master index (search-only, no feel), but
+  // these are tunes that get CALLED, so they belong in the deck.
+  //
+  // Key and feel were read off the charts themselves rather than recalled —
+  // rendered from the books, key signature counted, tempo marking taken as
+  // printed. The scores mirror what their canon tier already assigned them.
+  // Beware when checking these: several of these books put two tunes on a page,
+  // so the chart is often in the BOTTOM half (Blue Seven under Blues By Five on
+  // Real Book Vol. 2 p33) — reading only the top of the page will tell you the
+  // ref is wrong when it is fine.
+  M("Blue Seven", "Sonny Rollins", "Bb", "medium_swing", 34, 50),
+  M("Blue Train", "John Coltrane", "Eb", "medium_swing", 16, 50),
+  M("Comin' Home Baby", "Ben Tucker", "G-", "medium_swing", 34, 50),
+  M("Cool Blues", "Charlie Parker", "Bb", "up", 16, 26),
+  M("Doodlin'", "Horace Silver", "Db", "medium_swing", 34, 50),
+  M("Filthy McNasty", "Horace Silver", "Bb", "medium_swing", 34, 50),
+  M("Lester Leaps In", "Lester Young", "Bb", "up", 16, 26),
+  // Horace Silver's, not Ornette's — both charts the index points at are his.
+  M("Lonely Woman", "Horace Silver", "Eb-", "ballad", 34, 50),
+  M("Night Train", "Duke Ellington", "Bb", "medium_swing", 34, 50,
+    { alternate_titles: ["Happy Go Lucky Local"] }),
+  M("One For Daddy-O", "Nat Adderley", "Bb-", "medium_swing", 34, 50),
+
   // bebop heads
   M("Ah-Leu-Cha", "Charlie Parker", "C", "up", 60, 75),
   M("Klactoveedsedstene", "Charlie Parker", null, "up", 72, 75),

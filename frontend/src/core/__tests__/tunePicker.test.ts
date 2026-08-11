@@ -12,6 +12,7 @@ import {
   deckTunes,
   feelMatches,
   freshnessWeight,
+  isChartOnly,
   isHenny,
   pickRandomTune,
   tuneWeight,
@@ -73,6 +74,21 @@ describe("feelMatches", () => {
     const t = tune({ feel: "up", additional_feels: ["medium_swing"] });
     expect(feelMatches(t, ["medium_swing"])).toBe(true);
   });
+
+  it("never matches a selected feel when the tune has none", () => {
+    // Chart-only tunes (from the fake-book index) have no feel at all.
+    const t = tune({ feel: null });
+    expect(feelMatches(t, ["ballad"])).toBe(false);
+    expect(feelMatches(t, [])).toBe(true); // "any feel" still means any
+  });
+});
+
+describe("isChartOnly", () => {
+  it("keys off the tag, not the missing feel", () => {
+    expect(isChartOnly(tune({ tags: ["chart_only"] }))).toBe(true);
+    expect(isChartOnly(tune({ tags: ["beginner"] }))).toBe(false);
+    expect(isChartOnly(tune({ tags: [] }))).toBe(false);
+  });
 });
 
 describe("isHenny", () => {
@@ -94,6 +110,30 @@ describe("deckTunes", () => {
     const pool = [tune({ composer: "Joe Henderson" }), tune({ composer: "Wayne Shorter" })];
     expect(deckTunes(pool, filters({ excludeHenny: true }))).toHaveLength(1);
     expect(deckTunes(pool, filters({ excludeHenny: false }))).toHaveLength(2);
+  });
+
+  // ~1,610 of the ~3,290 rows are chart-only. They are search fodder, not cards:
+  // with no feel they can satisfy no feel filter, so if they ever reached the
+  // deck they'd either break the one hard filter or halve the odds of drawing a
+  // tune you can actually play.
+  it("never deals a chart-only tune, whatever the filters say", () => {
+    const pool = [
+      tune({ feel: null, tags: ["chart_only"] }),
+      tune({ feel: "ballad" }),
+    ];
+    expect(deckTunes(pool, filters())).toHaveLength(1);
+    expect(deckTunes(pool, filters({ feels: [] }))).toHaveLength(1);
+    expect(deckTunes(pool, filters({ feels: ["ballad"] }))).toHaveLength(1);
+  });
+
+  it("excludes a chart-only tune even if one somehow carries a feel", () => {
+    const pool = [tune({ feel: "ballad", tags: ["chart_only"] })];
+    expect(deckTunes(pool, filters({ feels: ["ballad"] }))).toHaveLength(0);
+  });
+
+  it("leaves pickRandomTune nothing to draw from a chart-only-only pool", () => {
+    const pool = [tune({ feel: null, tags: ["chart_only"] })];
+    expect(pickRandomTune(pool, filters())).toBeNull();
   });
 });
 

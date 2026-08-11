@@ -46,8 +46,13 @@ frontend/            # Vite + React + TS SPA
   src/components/    # React components (deck, cards, filters, sliders)
 scripts/             # data pipeline + one-offs
   build_seed.mjs     # parse iReal backup -> data/tunes.json
+  build_charts.py    # parse MASTERNX -> data/charts.json + data/index_titles.json
+  build_pagemaps.py  # OCR each scan's own folios -> data/pagemaps.json (dev-only)
 data/
   tunes.json         # generated seed (committed)
+  charts.json        # normalized title -> [{book, page}] (committed)
+  index_titles.json  # every tune the index knows, for the chart-only rows
+  pagemaps.json      # printed->PDF page map per scan (committed)
 Dockerfile           # multi-stage: build Vite -> serve via Flask/gunicorn
 fly.toml
 requirements.txt
@@ -95,8 +100,10 @@ the iReal library (e.g. Firm Roots, for Smalls mode).
 normalized title → `[{book, page}]`. Book codes map to **actual titles** (read
 off each PDF's cover) in `BOOK_NAMES`. Reference-only (book + printed page) — no
 chart content stored/shipped. `build_seed.mjs` merges them onto each tune as
-`charts`. ~998 of 1,670 tunes have a chart. Chart refs are **openable** via a
-private, password-gated PDF reader — see "Fake-book reader" below.
+`charts`. ~1,000 of the 1,680 deck tunes have a chart, and the index's remaining
+~1,610 tunes become chart-only rows of their own (below). Chart refs are
+**openable** via a private, password-gated PDF reader — see "Fake-book reader"
+below.
 
 Matching tune titles to the index is spelling-tolerant and symmetric across
 `build_charts.py` (`norm_keys`) and `build_seed.mjs` (`chartKeys`): fold
@@ -104,6 +111,58 @@ diacritics, `&`→`and`, `St.`→`Saint`, article-aware, and emit BOTH a
 kept-parenthetical and dropped-parenthetical key (so "Nancy (With The Laughing
 Face)" matches the index's inline spelling, and subtitles the index omits still
 match). Keep the two implementations identical (a cross-check test exists).
+
+A parenthetical is normally a subtitle, which the two-key scheme covers. Twice
+it's the tune's OTHER NAME instead ("Algo Bueno (Woody'n You)", "Quiet Nights Of
+Quiet Stars (Corcovado)") — neither key reaches that, so those are hand-aliased
+in `TITLE_ALIASES`. An audit of every parenthetical in the index found only
+those two; re-run it if the index is ever re-parsed.
+
+### Chart-only tunes (search-only)
+The index knows ~2,620 tunes; the iReal library knows ~1,670, and the overlap is
+about a thousand. Syeeda's Song Flute is printed in Real Book Vol. 2 but was in
+no playlist, so the app behaved as if it didn't exist. `build_charts.py`
+therefore also writes `data/index_titles.json` (every distinct tune the index
+knows, as `{title, keys, charts}`), and `build_seed.mjs` turns the ~1,610 the
+library doesn't have into rows tagged **`chart_only`**: a title and a chart
+reference, `feel: null`, no key/composer/iReal link, because the index has none
+of that.
+
+**They are search-only.** `core/tunePicker.ts` `deckTunes` drops `chart_only`
+outright, so the deck stays at 1,680 (the iReal library plus
+`canon.MANUAL_TUNES`). Feel is the deck's one hard filter and these have no feel
+to filter on, so admitting them would mean either ignoring that filter or halving
+the odds of drawing a tune you can actually play. Search
+ranks them below library tunes at equal match quality (there are enough of them
+to crowd real tunes off `MAX_RESULTS`), and shows "Chart only" where the
+feel · composer line would be.
+
+Grouping is what makes this work. `charts.json` registers a ref under BOTH key
+spellings and any lookup finds it; `index_titles.json` makes each group a ROW,
+so spellings must be unioned or the same tune ships twice. Titles sharing any
+key variant are union-found together, and **the alias spellings count** — an
+alias exists because the index is wrong ("Night In Tunesia(A)"), and its typo
+key matches nothing in the library, so grouping on the raw title alone produced
+36 duplicate canon tunes sitting beside the real ones.
+
+`feel` is nullable in the DB for this (`_RELAXED_COLUMNS` in `db.py` — Postgres
+gets a `DROP NOT NULL`, SQLite gets the prescribed table rebuild). A test pins
+`feel is None` ⟺ `chart_only`: if those ever drift the deck silently starts
+dealing cards nobody classified.
+
+Eleven canon tunes first came through as chart-only because they're genuinely
+absent from the iReal library. All eleven are now handled, and no canon tune is
+chart-only any more (a test would be reasonable if this recurs):
+- **Ten are in `canon.MANUAL_TUNES`** — Blue Seven, Blue Train, Comin' Home Baby,
+  Cool Blues, Doodlin', Filthy McNasty, Lester Leaps In, Lonely Woman, Night
+  Train, One For Daddy-O — so they're dealt like any other card. Their key and
+  feel were READ OFF THE CHARTS (rendered from the books, key signature counted,
+  tempo marking taken as printed), not recalled. Blue Train is E♭ (3 flats — at
+  low resolution it looks like 4); the "Lonely Woman" both index refs point at is
+  Horace Silver's, not Ornette's.
+- **"No Me Esqueca" was not a missing tune at all** — it's Joe Henderson's
+  "Recorda Me" under its Portuguese title, so it's a `TITLE_ALIAS` onto the
+  library's "Recordame", which gained two chart refs in the process.
 
 **The master index is dirty, and its errors are invisible in the app** — a
 mis-typed title silently costs a tune its chart, a mis-typed page silently opens
@@ -170,14 +229,97 @@ own (`app/fakebooks.py`, `/api/fakebook/*` in `web.py`, frontend
   `pdf_page_for` (server) and `parsePageRef` / `canOpenPage` (`core/fakebooks.ts`)
   handle both; keep them in step. Each section gets its own offset (A → 497, i.e.
   PDF 498–510) and its own `span_for` neighbour list.
-- A page the book can't satisfy — unknown section, or past the end of the scan —
-  **404s rather than clamping**. Clamping is how a bad index page number turns
-  into quietly handing over the wrong chart.
+- A page the book can't satisfy — unknown section, a page the scan is missing, or
+  one past the end of it — **404s rather than clamping**. Clamping is how a bad
+  index page number turns into quietly handing over the wrong chart.
+- **A single `offset` per book is not enough, because the scans are not clean.**
+  They drop pages and double-feed them, and where that happens the offset jumps.
+  The New Real Book Vol. 1 scan has no printed pages 3–4 at all and holds 28–29
+  twice, so its offset runs 15 → 13 → 15; the flat 13 meant "All The Things You
+  Are" (printed 4) opened Airegin (printed 2). This is the worst bug the feature
+  can have — you get a chart, it just isn't yours.
+  - `data/pagemaps.json` is the authority: PDF file stem → `segments` of
+    `[printed_from, printed_to, offset]`. A printed page in no segment isn't in
+    the scan, so it 404s and the UI never makes the row tappable.
+  - Built by `scripts/build_pagemaps.py`, which OCRs the folio printed on every
+    page (macOS Vision, via `pip install pymupdf pyobjc-framework-Vision` — dev
+    only, deliberately not in requirements.txt). It reads the full head and foot
+    of each page, not the corners: these books don't agree on where the folio
+    goes (the Colorado Cookbook centres "Page 57" at the foot; the B♭ Real Book
+    Vol. 1's is handwritten ~14% down). Cropping to corners found nothing at all
+    in three books.
+  - **Reading wide means reading prose, and prose can imitate a folio.** The New
+    Real Book Vol. 1's "General Rules" page is 18 numbered paragraphs, and items
+    1., 2., 3. across consecutive front-matter pages form exactly the run of
+    consecutive numbers the model is looking for — enough to drag the body's
+    start two pages early and put All The Things You Are back on Airegin's page.
+    So `select_folios()` keeps only readings printed where THIS book prints its
+    folio: take the offset the whole book agrees on, see where those readings
+    physically sit, accept only that neighbourhood. Learned per book, never
+    configured. A list item cannot fake holding still in the same corner for 400
+    pages. Positions are cached with the readings, so this is re-tunable without
+    re-OCRing.
+  - **Never trust a single reading.** Vision reads an isolated "6" as "9" often
+    enough to matter. Offsets are chosen by a Viterbi pass that rewards agreement
+    and charges a toll for changing offset, so an isolated misread always loses
+    and a genuine two-page run survives. Runs are then TRIMMED to pages whose own
+    folio confirmed the offset, which is what stops an unnumbered stretch (the
+    A-appendix, plates) from claiming printed numbers the book never had.
+  - **A misread can be consistent, so consistency isn't proof.** Vision reads a
+    handwritten 7 as a 1 the same way every time: printed 271–273 all came back
+    as 211–213, a tidy self-consistent run at its own offset, and the same thing
+    happened in four books. `drop_impossible_overlaps()` catches it on geometry
+    instead of on the readings — pages sitting physically between printed 270 and
+    274 cannot be page 211, whatever they appear to say. A scanner double-feed
+    overlaps by a sheet or two (`MAX_DOUBLE_FEED`), never by sixty. Without this
+    the map marked ~35 real pages missing and claimed printed 211 lived at two
+    different physical pages. It also catches Real Book Vol. 1's appendix, whose
+    pages print a bare 1–13 and belong to section A, not the main run.
+  - **Interior gaps are stitched; outer edges are earned.** Two runs sharing an
+    offset describe the same printed→PDF line, so the pages between them can only
+    be the printed pages between them — `stitch()` merges them and the unread
+    folios are filled in for free. That reasoning has no counterpart at the ends
+    of a book, where there's no far side to agree with, so `extend_edges()`
+    reclaims the opening/closing pages (books often print no folio on page 1) by
+    rendering each candidate page and checking the title against the index. Only
+    verified pages are kept; bounded by the pages the index actually cites, which
+    is a second reason it can't wander into the appendix.
+  - The build **verifies itself**: it resolves a sample of pages through the new
+    map, OCRs the title off the scan, and checks it's the tune the master index
+    promised. It also reports coverage against the pages the index cites — a map
+    covering a third of a book is worse than none, since every ref outside it
+    goes dark. Read those two lines before committing a map. Expect a lower title
+    match rate on the handwritten books (Jazz LTD, the B♭ Real Books) — Vision is
+    poor at calligraphy, so a miss there is usually the OCR, not the map,
+    especially when the book's derived offset matches its calibrated one.
+  - **Many of these books put TWO tunes on a page**, the second starting halfway
+    down (Blue Seven under Blues By Five on Real Book Vol. 2 p33; Doodlin' under
+    the tail of the previous tune on Jazz Fakebook p105). Anything that reads a
+    page to identify a tune must read the WHOLE page. Checking only the header
+    made the verifier call every second-on-page tune a mismatch, which is most of
+    why the older books first appeared to score badly — and it briefly convinced
+    me the master index was double-booking pages, when the index was right.
+  - Lettered sections keep using `sections` offsets: the A1–A13 appendix prints
+    no folios, so no OCR can map it.
+  - **Result, 2026-08-11.** All 16 scans mapped; the derived offset reproduces
+    the hand-calibrated `BOOKS` value for every one of them, which is the best
+    evidence the pipeline is sound. **New Real Book Vol. 1 is the only genuinely
+    damaged scan** — printed 3–4 absent, 28–29 twice, hence its three segments;
+    every other book is one clean run. Just 3 of the 3,057 chart refs we ship
+    can't be reached: NRB1's 3–4 (really not in the scan; both tunes are in three
+    other books) and Jazz LTD p393. All three fail closed — an inert row, never a
+    wrong chart.
+  - `resolve_segments` (server) / `resolveSegments` (`core/fakebooks.ts`) /
+    `resolve` (builder) must stay identical — where a page was scanned twice the
+    LONGER run wins. A parity test covers the first two.
 - `BOOKS` in `app/fakebooks.py` maps display name → file + printed→PDF page
-  `offset` (`PDF_page = printed + offset`) + optional per-section `sections`;
-  calibrate per book (scans have no page labels). Override offsets WITHOUT a
-  500 MB rebuild via the `FAKEBOOK_OFFSETS` secret (fast restart): JSON
+  `offset` (`PDF_page = printed + offset`) + optional per-section `sections`.
+  The `offset` is now only the fallback for what the page map doesn't cover (a
+  book whose map failed to build, and the lettered sections). Override offsets
+  WITHOUT a 500 MB rebuild via the `FAKEBOOK_OFFSETS` secret (fast restart): JSON
   `{slug: offset}` or, for a book with sections, `{slug: {"": 13, "A": 497}}`.
+  **An override outranks the page map** for that book — it's the only lever that
+  works in production, so a bad map has to stay fixable.
   `slug()` matches build_covers.py / `coverSlug`. (`GET /api/fakebook/<slug>.pdf`,
   the Range-capable full-book route, still exists server-side but is no longer used
   by the UI.)

@@ -54,7 +54,10 @@ class Tune(Base):
     original_key = Column(Text, nullable=True)
     last_played_key = Column(Text, nullable=True)
 
-    feel = Column(String, nullable=False)
+    # Nullable for chart-only tunes: the fake-book master index knows a title and
+    # a page, never a feel, and a guessed one would put an unvetted card in the
+    # deck. Null is what keeps them search-only (see core/tunePicker.deckTunes).
+    feel = Column(String, nullable=True)
     additional_feels = Column(JSON, nullable=False, default=list)
 
     ireal_style = Column(Text, nullable=True)

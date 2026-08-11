@@ -17,6 +17,12 @@ export interface ChartRef {
   page: string;
 }
 
+// Tag marking a tune that came from the fake-book master index rather than the
+// iReal library: a title and a chart reference, with no feel, key, composer or
+// deep link. They exist so search can find a tune and open its chart; they are
+// never dealt (see tunePicker.deckTunes).
+export const CHART_ONLY_TAG = "chart_only";
+
 export interface Tune {
   id: string;
   title: string;
@@ -24,7 +30,10 @@ export interface Tune {
   composer: string | null;
   original_key: string | null;
   last_played_key: string | null;
-  feel: Feel;
+  // null on chart-only tunes — the master index gives a title and a page and
+  // nothing else, and a guessed feel would be a card in the deck filed under a
+  // feel nobody checked. See CHART_ONLY_TAG.
+  feel: Feel | null;
   additional_feels: Feel[];
   ireal_style: string | null;
   ireal_url: string | null;

@@ -288,6 +288,61 @@ for (const extra of canon.MANUAL_TUNES) {
   });
 }
 
+// ---------------------------------------------------------------------------
+// Chart-only tunes: everything the master index knows about that the iReal
+// library doesn't.
+//
+// The index covers ~2,620 tunes; the owner's library covers ~1,670, and the
+// overlap is only about a thousand. Syeeda's Song Flute is printed in Real Book
+// Vol. 2 but was in no playlist, so the app behaved as though it didn't exist.
+// A title plus a chart reference is enough to be useful, so the leftovers become
+// rows too — with no feel, key, composer or iReal link, because the index has
+// none of that.
+//
+// They are SEARCH-ONLY: core/tunePicker.ts drops anything tagged `chart_only`
+// from the deck. Feel is the deck's one hard filter and these have no feel to
+// filter on, so letting them in would mean either ignoring the filter or
+// doubling the deck with cards that can't honour it. Search is where they earn
+// their keep — you look up a tune by name and open its chart.
+// ---------------------------------------------------------------------------
+let indexTitles = [];
+try {
+  indexTitles = JSON.parse(fs.readFileSync(
+    path.join(process.cwd(), 'data', 'index_titles.json'), 'utf8'));
+} catch {
+  console.warn('No data/index_titles.json — run scripts/build_charts.py for chart-only tunes.');
+}
+
+// Every key spelling already spoken for by a library tune. Matched on chartKeys
+// (not `norm`) because that's the vocabulary index_titles.json is written in.
+const claimed = new Set();
+for (const t of out) for (const k of chartKeys(t.title)) claimed.add(k);
+
+let chartOnly = 0;
+for (const entry of indexTitles) {
+  if (entry.keys.some((k) => claimed.has(k))) continue;
+  for (const k of entry.keys) claimed.add(k);   // don't emit the same tune twice
+  out.push({
+    title: entry.title,
+    alternate_titles: [],
+    composer: null,
+    original_key: null,
+    // No feel: the index doesn't say, and guessing one would put a card in the
+    // deck under a feel nobody verified. Null is the honest value, and the
+    // reason these stay out of the deck.
+    feel: null,
+    additional_feels: [],
+    ireal_style: null,
+    ireal_url: null,
+    charts: entry.charts,
+    time_signature: null,
+    tags: ['chart_only'],
+    obscurity_score: obscurityFor(norm(entry.title), entry.charts.length, 0),
+    difficulty_score: difficultyFor(norm(entry.title)),
+  });
+  chartOnly++;
+}
+
 out.sort((a, b) => a.title.localeCompare(b.title));
 fs.mkdirSync(path.dirname(OUT), { recursive: true });
 fs.writeFileSync(OUT, JSON.stringify(out, null, 2));
@@ -296,8 +351,10 @@ fs.writeFileSync(OUT, JSON.stringify(out, null, 2));
 // Report
 // ---------------------------------------------------------------------------
 const byFeel = {};
-for (const t of out) byFeel[t.feel] = (byFeel[t.feel] || 0) + 1;
+for (const t of out) byFeel[t.feel ?? 'chart-only'] = (byFeel[t.feel ?? 'chart-only'] || 0) + 1;
 console.log(`Parsed ${tunes.size} unique tunes; kept ${out.length}, dropped ${dropped} (non-jazz), ${droppedExercises} (iReal exercises).`);
+console.log(`Chart-only tunes added from the master index: ${chartOnly} ` +
+  `(search-only: no feel, so they never enter the deck).`);
 console.log('Feel distribution:', byFeel);
 const canonCount = out.filter((t) => t.obscurity_score < 45).length;
 console.log(`Canon (obscurity <45): ${canonCount}; ` +
