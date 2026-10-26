@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { castVote, getTunes, recordPick, undoVote } from "./core/api";
-import { deckTunes, pickRandomTune } from "./core/tunePicker";
+import { deckTunes, isChartOnly, pickRandomTune } from "./core/tunePicker";
 import type { Filters, Mode, Tune } from "./core/types";
 import Deck, { type WeighIn } from "./components/Deck";
 import { FakebookProvider } from "./components/FakebookProvider";
@@ -136,6 +136,21 @@ export default function App() {
     loadTunes();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Deep link: /?tune=<id> (Shed's "Open in Tune Deck") deals that tune once
+  // the pool loads, then drops the param so a reload is an ordinary deck.
+  // Chart-only tunes are ignored: the card is never dealt one (no feel, no key).
+  useEffect(() => {
+    if (!tunes) return;
+    const id = new URLSearchParams(location.search).get("tune");
+    if (!id) return;
+    const t = tunes.find((x) => x.id === id);
+    if (t && !isChartOnly(t)) {
+      setSessionKey(null);
+      setCurrent(t);
+    }
+    window.history.replaceState(null, "", location.pathname + location.hash);
+  }, [tunes]);
 
   // remember the slider settings (values + on/off) per device for next visit
   useEffect(() => {
