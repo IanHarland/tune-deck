@@ -68,16 +68,28 @@ export default function FiltersPanel({ filters, onChange, matchCount }: Props) {
         accent="var(--violet)"
       />
 
-      <button
-        type="button"
-        className={`henny-toggle ${filters.excludeHenny ? "henny-on" : ""}`}
-        onClick={() =>
-          onChange({ ...filters, excludeHenny: !filters.excludeHenny })
-        }
-        title="Exclude every Joe Henderson tune"
-      >
-        {filters.excludeHenny ? "🚫 No Henny" : "Henny allowed"}
-      </button>
+      <div className="deck-toggles">
+        <button
+          type="button"
+          className={`henny-toggle ${filters.excludeHenny ? "henny-on" : ""}`}
+          onClick={() =>
+            onChange({ ...filters, excludeHenny: !filters.excludeHenny })
+          }
+          title="Exclude every Joe Henderson tune"
+        >
+          {filters.excludeHenny ? "🚫 No Henny" : "Henny allowed"}
+        </button>
+        <button
+          type="button"
+          className={`henny-toggle ${filters.onlyCharted ? "henny-on" : ""}`}
+          onClick={() =>
+            onChange({ ...filters, onlyCharted: !filters.onlyCharted })
+          }
+          title="Only deal tunes that have a fake-book chart"
+        >
+          {filters.onlyCharted ? "📖 Charts only" : "Any tune"}
+        </button>
+      </div>
 
       <p className="match-count">
         {matchCount} tune{matchCount === 1 ? "" : "s"} in the deck

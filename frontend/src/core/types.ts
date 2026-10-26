@@ -66,6 +66,7 @@ export interface Filters {
   difficultyOn: boolean; // does difficulty bias the draw?
   hipnessOn: boolean; // does hipness bias the draw?
   excludeHenny: boolean; // hard-exclude all Joe Henderson ("Henny") tunes
+  onlyCharted: boolean; // hard-exclude tunes with no fake-book chart ref
 }
 
 // Picking modes. "normal" honors the filters; the rest are novelty/utility modes.

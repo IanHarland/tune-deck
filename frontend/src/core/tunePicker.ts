@@ -45,7 +45,13 @@ export function isChartOnly(tune: Tune): boolean {
   return tune.tags.includes(CHART_ONLY_TAG);
 }
 
-/** The deck: tunes passing the hard filters (feel + the Henny exclusion).
+/** Has at least one fake-book chart reference (book + printed page). */
+export function hasChart(tune: Tune): boolean {
+  return tune.charts.length > 0;
+}
+
+/** The deck: tunes passing the hard filters (feel, the Henny exclusion, and
+ * charted-only).
  * Drives the on-screen count.
  *
  * Chart-only tunes are excluded outright. They roughly double the tune count,
@@ -57,7 +63,8 @@ export function deckTunes(tunes: Tune[], filters: Filters): Tune[] {
     (t) =>
       !isChartOnly(t) &&
       feelMatches(t, filters.feels) &&
-      !(filters.excludeHenny && isHenny(t)),
+      !(filters.excludeHenny && isHenny(t)) &&
+      !(filters.onlyCharted && !hasChart(t)),
   );
 }
 

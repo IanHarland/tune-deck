@@ -229,9 +229,15 @@ body::after {
   letter-spacing: 1px;
   color: rgba(246, 241, 227, 0.45);
 }
+.deck-toggles {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin: 12px 0 2px;
+}
 .henny-toggle {
   display: block;
-  margin: 12px auto 2px;
   padding: 5px 14px;
   border-radius: 999px;
   font-size: 12px;

@@ -56,6 +56,7 @@ const filters = (over: Partial<Filters> = {}): Filters => ({
   difficultyOn: false,
   hipnessOn: false,
   excludeHenny: false,
+  onlyCharted: false,
   ...over,
 });
 
@@ -110,6 +111,15 @@ describe("deckTunes", () => {
     const pool = [tune({ composer: "Joe Henderson" }), tune({ composer: "Wayne Shorter" })];
     expect(deckTunes(pool, filters({ excludeHenny: true }))).toHaveLength(1);
     expect(deckTunes(pool, filters({ excludeHenny: false }))).toHaveLength(2);
+  });
+
+  it("applies the charted-only filter", () => {
+    const pool = [
+      tune({ charts: [{ book: "The Real Book, Vol. 2", page: "131" }] }),
+      tune({ charts: [] }),
+    ];
+    expect(deckTunes(pool, filters({ onlyCharted: true }))).toHaveLength(1);
+    expect(deckTunes(pool, filters({ onlyCharted: false }))).toHaveLength(2);
   });
 
   // ~1,610 of the ~3,290 rows are chart-only. They are search fodder, not cards:

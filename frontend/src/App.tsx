@@ -20,7 +20,7 @@ const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
 const INTRO_KEY = "tunedeck.seenIntro";
 
 // Persisted per-device slider prefs: the three weigh-in sliders + their on/off
-// state. The hard feel filter and excludeHenny are left fresh each session, so
+// state. The hard feel filter, excludeHenny and onlyCharted are left fresh each session, so
 // they're deliberately not saved.
 const FILTERS_KEY = "tunedeck.filters";
 
@@ -33,6 +33,7 @@ const DEFAULT_FILTERS: Filters = {
   difficultyOn: true,
   hipnessOn: false, // opt-in: ratings are sparse at first
   excludeHenny: false,
+  onlyCharted: false,
 };
 
 function loadFilters(): Filters {
@@ -180,7 +181,7 @@ export default function App() {
   // deck size depends only on the HARD feel filter, not the soft sliders
   const matchCount = useMemo(
     () => (tunes ? deckTunes(tunes, filters).length : 0),
-    [tunes, filters.feels, filters.excludeHenny],
+    [tunes, filters.feels, filters.excludeHenny, filters.onlyCharted],
   );
 
   const findTune = (title: string): Tune | null =>
