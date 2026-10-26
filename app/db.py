@@ -21,9 +21,12 @@ from .models import Base, Tune
 _DEFAULT_SQLITE = f"sqlite:///{Path(__file__).resolve().parent.parent / 'tunedeck.db'}"
 DATABASE_URL = os.environ.get("DATABASE_URL", _DEFAULT_SQLITE)
 
-# Fly/Heroku-style "postgres://" -> SQLAlchemy's "postgresql://"
-if DATABASE_URL.startswith("postgres://"):
-    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+# Fly/Heroku-style "postgres://" -> SQLAlchemy's "postgresql://". A URL naming
+# the psycopg 3 driver gets the same treatment: only psycopg2 is installed, and
+# such a URL took production down on boot (2026-10-26).
+for _scheme in ("postgres://", "postgresql+psycopg://"):
+    if DATABASE_URL.startswith(_scheme):
+        DATABASE_URL = DATABASE_URL.replace(_scheme, "postgresql://", 1)
 
 _connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
 engine = create_engine(DATABASE_URL, pool_pre_ping=True, connect_args=_connect_args)
