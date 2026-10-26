@@ -2536,7 +2536,19 @@
 ]
 },
 {
-"title": "Be Bop",
+"title": "Be My Love",
+"keys": [
+"bemylove"
+],
+"charts": [
+{
+"book": "The Real Book, Vol. 3",
+"page": "18"
+}
+]
+},
+{
+"title": "Be-Bop",
 "keys": [
 "bebop"
 ],
@@ -2548,18 +2560,6 @@
 {
 "book": "The Real Book, Vol. 2",
 "page": "21"
-}
-]
-},
-{
-"title": "Be My Love",
-"keys": [
-"bemylove"
-],
-"charts": [
-{
-"book": "The Real Book, Vol. 3",
-"page": "18"
 }
 ]
 },
@@ -5331,7 +5331,7 @@
 ]
 },
 {
-"title": "Casa De Luz",
+"title": "Casa de Luz",
 "keys": [
 "casadeluz"
 ],
@@ -6753,7 +6753,7 @@
 ]
 },
 {
-"title": "Criss Cross",
+"title": "Criss/Cross",
 "keys": [
 "crisscross"
 ],
@@ -7305,18 +7305,6 @@
 ]
 },
 {
-"title": "Decision",
-"keys": [
-"decision"
-],
-"charts": [
-{
-"book": "The Real Book, Vol. 2",
-"page": "40"
-}
-]
-},
-{
 "title": "Dee Song",
 "keys": [
 "deesong"
@@ -7794,7 +7782,7 @@
 ]
 },
 {
-"title": "Do You Know What It Means To Miss New Orleans?",
+"title": "Do You Know What It Means (To Miss New Orleans",
 "keys": [
 "doyouknowwhatitmeanstomissneworleans"
 ],
@@ -8784,7 +8772,7 @@
 ]
 },
 {
-"title": "Ellipsis (Helias)",
+"title": "Ellipsis (Rivers)",
 "keys": [
 "ellipsis",
 "ellipsishelias",
@@ -11630,7 +11618,7 @@
 ]
 },
 {
-"title": "Groovin! High",
+"title": "Groovin' High",
 "keys": [
 "groovinhigh"
 ],
@@ -11781,7 +11769,7 @@
 "charts": [
 {
 "book": "The Real Book, Vol. 2",
-"page": "13"
+"page": "131"
 }
 ]
 },
@@ -11888,7 +11876,7 @@
 },
 {
 "book": "The Real Book, Vol. 2",
-"page": "33"
+"page": "133"
 }
 ]
 },
@@ -11944,7 +11932,7 @@
 "charts": [
 {
 "book": "The Real Book, Vol. 2",
-"page": "36"
+"page": "136"
 }
 ]
 },
@@ -13983,7 +13971,7 @@
 ]
 },
 {
-"title": "If I Were A Bell",
+"title": "If I were A Bell",
 "keys": [
 "ifiwereabell"
 ],
@@ -14882,7 +14870,7 @@
 "charts": [
 {
 "book": "The Real Book, Vol. 2",
-"page": "112"
+"page": "172"
 }
 ]
 },
@@ -15923,7 +15911,7 @@
 ]
 },
 {
-"title": "just In Time",
+"title": "Just In Time",
 "keys": [
 "justintime"
 ],
@@ -17758,7 +17746,7 @@
 "charts": [
 {
 "book": "The Real Book, Vol. 3",
-"page": "79"
+"page": "179"
 }
 ]
 },
@@ -24448,7 +24436,7 @@
 ]
 },
 {
-"title": "Recorda-Me",
+"title": "Recorda Me",
 "keys": [
 "nomeesqueca",
 "recordame"
@@ -24899,7 +24887,7 @@
 ]
 },
 {
-"title": "Robbin's Nest",
+"title": "Robbins' Nest",
 "keys": [
 "robbinsnest"
 ],
@@ -28134,7 +28122,7 @@
 "charts": [
 {
 "book": "The New Real Book, Vol. 1",
-"page": "41"
+"page": "341"
 }
 ]
 },
@@ -28380,7 +28368,7 @@
 "charts": [
 {
 "book": "The New Real Book, Vol. 1",
-"page": "245"
+"page": "345"
 }
 ]
 },
@@ -31646,7 +31634,7 @@
 ]
 },
 {
-"title": "Tickle Toe",
+"title": "Tickle-Toe",
 "keys": [
 "tickletoe"
 ],
@@ -32388,7 +32376,7 @@
 ]
 },
 {
-"title": "Tune-Up",
+"title": "Tune Up",
 "keys": [
 "tuneup"
 ],
@@ -33637,7 +33625,7 @@
 ]
 },
 {
-"title": "Well You Needn't (Miles Version)",
+"title": "Well You Needn't (Monks Version)",
 "keys": [
 "wellyouneednt",
 "wellyouneedntmilesversion",

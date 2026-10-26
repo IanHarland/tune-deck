@@ -171,6 +171,10 @@ TITLE_ALIASES = {
 #   Real Book Vol. 2: one run through "P" where the typist dropped the leading
 #   "2" — Perdido really is on 288, and 88 is Joanne Brackeen's "Evening In
 #   Concert". (People Will Say We're In Love is a plain 272-for-292 slip.)
+#   Real Book Vol. 2 also lost the leading "1" from three tunes in its "H" run
+#   (Hackensack 131 is not Avalon's 13), read a handwritten 7 as a 1 for It
+#   Could Happen To You (172), and Vol. 3 lost one from Lotus On Irish Streams
+#   (179). New Real Book Vol. 1 lost the leading "3" from two "S" tunes.
 #   Real Book Vol. 1: the two appendix entries are swapped against the pages as
 #   the book actually numbers them.
 PAGE_FIXES = {
@@ -185,15 +189,26 @@ PAGE_FIXES = {
     ("Petits Machins", "RealBk2", "94"): "294",
     ("Pick Yourself Up", "RealBk2", "95"): "295",
     ("Phase Dance", "RealBk2", "96"): "296",
+    ("Hackensack", "RealBk2", "13"): "131",
+    ("Happy Little Sunbeam", "RealBk2", "33"): "133",
+    ("Harlequin", "RealBk2", "36"): "136",
+    ("It could Happen To You", "RealBk2", "112"): "172",
+    ("Lotus On Irish Streams", "RealBk3", "79"): "179",
+    ("Sticky Wicket", "NewReal1", "41"): "341",
+    ("Street Life", "NewReal1", "245"): "345",
     ("Perfect Love Jamala", "Realbk1", "A9"): "A10",
     ("Plain Jane", "Realbk1", "A10"): "A9",
 }
 
-# Refs to a page that isn't in the book at all. The Colorado Cookbook's tunes
+# Refs to a page that isn't in the book at all, or to a tune the book doesn't
+# have where the index says. The Colorado Cookbook's tunes
 # stop at printed 279 (its index-by-style pages follow) and "Jeep's Blues" isn't
 # in it anywhere — where the entry came from is anyone's guess.
 DROPPED_REFS = {
     ("Jeeps Blues", "Colorado", "315"),
+    # Real Book Vol. 2 p40 is "Bouncing With Bud", and "Decision" is nowhere in
+    # the book's D section (pp70-81).
+    ("Decision", "RealBk2", "40"),
 }
 
 

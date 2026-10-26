@@ -10555,7 +10555,7 @@
     "difficulty_score": 50
   },
   {
-    "title": "Casa De Luz",
+    "title": "Casa de Luz",
     "alternate_titles": [],
     "composer": null,
     "original_key": null,
@@ -14535,15 +14535,10 @@
     "additional_feels": [],
     "ireal_style": "Medium Swing",
     "ireal_url": "irealb://Decision=Rollins%20Sonny==Medium%20Swing=F%2D==1r34LbKcu7lcKQy%2D6XyQZL9b7F%20%2C7hC%7CQy6X%2DFZL9b7C%20%2C7hG%7CBb%2D7XF44T%5B%2DFZL97%20F7bhG%7CQyX6%2DFZL9b7%20C7hG%7CQyX7%2DbBZL97%20C7bhCZL%206XyQ%7CGh7%20C7b9%20Z%20==0=0===Decision",
-    "charts": [
-      {
-        "book": "The Real Book, Vol. 2",
-        "page": "40"
-      }
-    ],
+    "charts": [],
     "time_signature": "4/4",
     "tags": [],
-    "obscurity_score": 88,
+    "obscurity_score": 97,
     "difficulty_score": 50
   },
   {
@@ -15456,7 +15451,7 @@
     "difficulty_score": 50
   },
   {
-    "title": "Do You Know What It Means To Miss New Orleans?",
+    "title": "Do You Know What It Means (To Miss New Orleans",
     "alternate_titles": [],
     "composer": null,
     "original_key": null,
@@ -17458,7 +17453,7 @@
     "difficulty_score": 50
   },
   {
-    "title": "Ellipsis (Helias)",
+    "title": "Ellipsis (Rivers)",
     "alternate_titles": [],
     "composer": null,
     "original_key": null,
@@ -23363,7 +23358,7 @@
     "charts": [
       {
         "book": "The Real Book, Vol. 2",
-        "page": "13"
+        "page": "131"
       }
     ],
     "time_signature": "4/4",
@@ -23537,7 +23532,7 @@
       },
       {
         "book": "The Real Book, Vol. 2",
-        "page": "33"
+        "page": "133"
       }
     ],
     "time_signature": "4/4",
@@ -23630,7 +23625,7 @@
     "charts": [
       {
         "book": "The Real Book, Vol. 2",
-        "page": "36"
+        "page": "136"
       }
     ],
     "time_signature": "4/4",
@@ -29488,7 +29483,7 @@
     "charts": [
       {
         "book": "The Real Book, Vol. 2",
-        "page": "112"
+        "page": "172"
       }
     ],
     "time_signature": "4/4",
@@ -35347,7 +35342,7 @@
     "charts": [
       {
         "book": "The Real Book, Vol. 3",
-        "page": "79"
+        "page": "179"
       }
     ],
     "time_signature": null,
@@ -55482,7 +55477,7 @@
     "charts": [
       {
         "book": "The New Real Book, Vol. 1",
-        "page": "41"
+        "page": "341"
       }
     ],
     "time_signature": null,
@@ -55931,7 +55926,7 @@
     "charts": [
       {
         "book": "The New Real Book, Vol. 1",
-        "page": "245"
+        "page": "345"
       }
     ],
     "time_signature": null,
