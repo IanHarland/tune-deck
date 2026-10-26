@@ -1,6 +1,6 @@
 flask>=3.0.0
 flask-compress>=1.14
-sqlalchemy>=2.0.0
+sqlalchemy>=2.0.0,<2.1  # 2.1 changes the default postgres driver; see app/db.py
 psycopg2-binary>=2.9.0
 gunicorn>=21.2.0
 python-dotenv>=1.0.0
